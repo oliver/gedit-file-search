@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.1 on Tue Apr 15 22:06:17 2008 -->
+<!--Generated with glade3 3.4.1 on Tue Apr 15 22:13:16 2008 -->
 <glade-interface>
   <widget class="GtkDialog" id="dialog1">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -32,7 +32,7 @@
             </child>
             <child>
               <widget class="GtkComboBoxEntry" id="comboboxentry1">
-                <property name="width_request">300</property>
+                <property name="width_request">424</property>
                 <property name="height_request">31</property>
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -123,8 +123,8 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">open files</property>
                 <property name="response_id">0</property>
-                <property name="active">True</property>
                 <property name="draw_indicator">True</property>
+                <property name="group">radiobutton1</property>
               </widget>
               <packing>
                 <property name="x">145</property>
@@ -143,24 +143,25 @@
                 <property name="draw_indicator">True</property>
               </widget>
               <packing>
-                <property name="x">50</property>
-                <property name="y">194</property>
+                <property name="x">53</property>
+                <property name="y">185</property>
               </packing>
             </child>
             <child>
               <widget class="GtkCheckButton" id="checkbutton2">
-                <property name="width_request">239</property>
+                <property name="width_request">147</property>
                 <property name="height_request">33</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">with subfolders</property>
                 <property name="response_id">0</property>
+                <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </widget>
               <packing>
-                <property name="x">225</property>
-                <property name="y">124</property>
+                <property name="x">226</property>
+                <property name="y">125</property>
               </packing>
             </child>
             <child>
@@ -176,7 +177,7 @@
               </widget>
               <packing>
                 <property name="x">51</property>
-                <property name="y">226</property>
+                <property name="y">249</property>
               </packing>
             </child>
             <child>
@@ -190,7 +191,7 @@
               </widget>
               <packing>
                 <property name="x">101</property>
-                <property name="y">258</property>
+                <property name="y">285</property>
               </packing>
             </child>
             <child>
@@ -202,11 +203,61 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">exclude VCS folders</property>
                 <property name="response_id">0</property>
+                <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </widget>
               <packing>
                 <property name="x">371</property>
                 <property name="y">128</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkCheckButton" id="checkbutton5">
+                <property name="width_request">246</property>
+                <property name="height_request">23</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Only project files</property>
+                <property name="response_id">0</property>
+                <property name="draw_indicator">True</property>
+              </widget>
+              <packing>
+                <property name="x">51</property>
+                <property name="y">324</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkCheckButton" id="checkbutton6">
+                <property name="width_request">258</property>
+                <property name="height_request">25</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Exclude hidden files and folders</property>
+                <property name="response_id">0</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+              </widget>
+              <packing>
+                <property name="x">52</property>
+                <property name="y">354</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkCheckButton" id="checkbutton7">
+                <property name="width_request">173</property>
+                <property name="height_request">25</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Regular Expression</property>
+                <property name="response_id">0</property>
+                <property name="draw_indicator">True</property>
+              </widget>
+              <packing>
+                <property name="x">54</property>
+                <property name="y">216</property>
               </packing>
             </child>
           </widget>
