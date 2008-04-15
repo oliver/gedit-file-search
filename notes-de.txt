@@ -1,0 +1,46 @@
+Gedit braucht eine Suchfunktion zum Suchen in mehreren Dateien (bzw. in 
+einem Ordner).
+
+- Implementierung als Plugin (mit Python)?
+- kombiniert die besten Eigenschaften der Suchfunktionen von Kate und 
+KDevelop:
+
+- Suchdialog ist ein eigener Dialog (wie bei KDev)
+- Suchergebnisse werden in der Fußleiste angezeigt
+- jede Suche macht einen neuen Tab im Ergebnisfenster auf (wie bei KDev)
+
+Eigentlich soll das ziemlich genauso aussehen wie bei KDev3.5...
+
+Erweiterungen:
+- gefundene Zeilen sollen (wenn möglich) mit Syntax Highlighting 
+angezeigt werden
+- es soll möglich sein, die Suchoptionen einer abgeschlossenen Suche zu 
+verwenden, zu verändern, und damit dann eine neue Suche zu starten
+- man soll wählen können zwischen "Suche in allen Dateien", "Suche in 
+geöffneten Dateien", und "Suche in aktueller Datei"
+- falls es mal eine Projektverwaltung gibt in Gedit, soll auch "Suche in 
+Projektdateien" machbar sein
+- evtl. Integration dieser Suchfunktion in den Standard-Suchdialog?
+- die Dateityp-Auswahl soll besser sein als bei Kdev3.5 oder Kate; evtl. 
+mit Checkboxen "Python", "C++", "alle Quelltextdateien"...; das könnte 
+evtl. auch integriert werden mit der Projektverwaltung
+- es wär praktisch, wenn man im Editor auf ein Wort Rechtsklicken könnte 
+und dort dann "find this word" im Kontextmenü wäre (so wie bei Kdev3.5)
+- es wär praktisch, wenn man die Ergebnisse für jede einzelne Datei 
+ein/ausblenden könnte (hat Sniff nicht sowas ähnliches?)
+- die Suche sollte im Hintergrund ablaufen, während man im Vordergrund 
+weiterarbeiten kann
+- copy/paste von strings aus den Ergebnissen sollte irgendwie möglich 
+sein
+- versteckte Ordner sollten standardmäßig nicht durchsucht werden
+- per Checkbox soll man auswählen können, daß man alle Dateien sehen 
+möchte, die den Suchbegriff _nicht_ enthalten
+
+TODO:
+- existierende Such-Plugins für Gedit testen
+- existierende Suchfunktionen ansehen:
+  - Kate
+  - KDevelop
+  - Sniff
+  - UltraEdit?
+
