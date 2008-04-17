@@ -1,4 +1,5 @@
 
+import os
 import gedit
 import gtk
 
@@ -49,6 +50,13 @@ class FileSearchWindowHelper:
 
     def on_search_files_activate(self, action):
         print "(find in files)"
+
+        gladeFile = os.path.join(os.path.dirname(__file__), "gedit-file-search.glade")
+        self.tree = gtk.glade.XML(gladeFile)
+
+        self.tree.signal_autoconnect(self)
+        window = self.tree.get_widget('searchDialog')
+        window.show()
 
 
 class FileSearchPlugin(gedit.Plugin):
