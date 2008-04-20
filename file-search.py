@@ -19,6 +19,7 @@ class FileSearchWindowHelper:
         print "Plugin created for", window
         self._window = window
         self._plugin = plugin
+        self._dialog = None
 
         self._insert_menu()
 
@@ -55,10 +56,19 @@ class FileSearchWindowHelper:
         self.tree = gtk.glade.XML(gladeFile)
 
         self.tree.signal_autoconnect(self)
-        window = self.tree.get_widget('searchDialog')
-        window.set_transient_for(self._window)
-        window.run()
+        self._dialog = self.tree.get_widget('searchDialog')
+        self._dialog.set_transient_for(self._window)
+        result = self._dialog.run()
+        print "result: %s" % result
+        if result == gtk.RESPONSE_OK:
+            print "(starting search)"
+        else:
+            print "(cancelled)"
+        self._dialog.destroy()
 
+    def on_btnCancel_clicked (self, button):
+        print "(cancel)"
+        self._dialog.response(gtk.RESPONSE_CANCEL)
 
 class FileSearchPlugin(gedit.Plugin):
     def __init__(self):
