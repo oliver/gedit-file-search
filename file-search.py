@@ -56,7 +56,8 @@ class FileSearchWindowHelper:
 
         self.tree.signal_autoconnect(self)
         window = self.tree.get_widget('searchDialog')
-        window.show()
+        window.set_transient_for(self._window)
+        window.run()
 
 
 class FileSearchPlugin(gedit.Plugin):
