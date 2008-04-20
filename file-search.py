@@ -40,7 +40,7 @@ class FileSearchWindowHelper:
         # Create a new action group
         self._action_group = gtk.ActionGroup("FileSearchPluginActions")
         self._action_group.add_actions([("FileSearch", "gtk-find", _("Find in files ..."),
-                                         None, _("Search in multiple files"),
+                                         "", _("Search in multiple files"),
                                          self.on_search_files_activate)])
 
         # Insert the action group
