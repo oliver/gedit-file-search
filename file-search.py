@@ -2,6 +2,8 @@
 import os
 import gedit
 import gtk
+import gobject
+import fcntl
 
 ui_str = """<ui>
   <menubar name="MenuBar">
@@ -13,6 +15,46 @@ ui_str = """<ui>
   </menubar>
 </ui>
 """
+
+
+class SearchProcess:
+    def __init__ (self, queryText, directory):
+        self.resultText = ""
+
+        cmd = "find '%s' -print 2> /dev/null | xargs grep -H -I -n -s -e '%s'" % (directory, queryText)
+        #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
+        #cmd = "sleep 2"
+        #cmd = "echo 'abc'"
+        print "executing command: %s" % cmd
+        self.pipe = os.popen(cmd, 'r')
+
+        # make pipe non-blocking:
+        fl = fcntl.fcntl(self.pipe, fcntl.F_GETFL)
+        fcntl.fcntl(self.pipe, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+
+        print "(add watch)"
+        gobject.io_add_watch(self.pipe, gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
+            self.onPipeReadable)
+
+    def onPipeReadable (self, fd, cond):
+        print "condition: %s" % cond
+        if (cond & gobject.IO_IN):
+            readText = self.pipe.read(1000)
+            print "(read %d bytes)" % len(readText)
+            self.resultText = self.resultText + readText
+            return True
+        else:
+            print "(closing pipe)"
+            result = self.pipe.close()
+            if result == None:
+                print "(search finished successfully)"
+                print "result text: %s" % self.resultText
+            else:
+                print "(search finished with exit code %d; exited: %s, exit status: %d)" % (result,
+                    str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
+            return False
+
+
 
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
