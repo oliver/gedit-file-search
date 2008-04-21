@@ -19,7 +19,7 @@ ui_str = """<ui>
 
 class SearchProcess:
     def __init__ (self, queryText, directory):
-        self.resultText = ""
+        self.parser = GrepParser()
 
         cmd = "find '%s' -print 2> /dev/null | xargs grep -H -I -n -s -e '%s'" % (directory, queryText)
         #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
@@ -41,20 +41,40 @@ class SearchProcess:
         if (cond & gobject.IO_IN):
             readText = self.pipe.read(1000)
             print "(read %d bytes)" % len(readText)
-            self.resultText = self.resultText + readText
+            self.parser.parseFragment(readText)
             return True
         else:
+            self.parser.finish()
             print "(closing pipe)"
             result = self.pipe.close()
             if result == None:
                 print "(search finished successfully)"
-                print "result text: %s" % self.resultText
             else:
                 print "(search finished with exit code %d; exited: %s, exit status: %d)" % (result,
                     str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
             return False
 
 
+class GrepParser:
+    def __init__ (self):
+        self.buf = ""
+
+    def parseFragment (self, text):
+        self.buf = self.buf + text
+
+        while '\n' in self.buf:
+            pos = self.buf.index('\n')
+            line = self.buf[:pos]
+            self.buf = self.buf[pos + 1:]
+            self.emitLine(line)
+
+    def emitLine (self, line):
+        print "line: %s" % line
+
+    def finish (self):
+        self.parseFragment("")
+        if self.buf != "":
+            self.emitLine(self.buf)
 
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
@@ -93,6 +113,14 @@ class FileSearchWindowHelper:
 
     def on_search_files_activate(self, action):
         print "(find in files)"
+        #container = self._add_result_panel()
+        #it = self._add_result_file(container, 'abc/myfile.txt')
+        #self._add_result_line(container, it, 42, 'theline')
+        #return
+
+        sp = SearchProcess('abc', '/home/oliver/kdevel/gedit-search')
+        #sp = SearchProcess('abc', '/var/log/')
+        return
 
         gladeFile = os.path.join(os.path.dirname(__file__), "gedit-file-search.glade")
         self.tree = gtk.glade.XML(gladeFile)
