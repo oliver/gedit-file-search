@@ -18,8 +18,8 @@ ui_str = """<ui>
 
 
 class SearchProcess:
-    def __init__ (self, queryText, directory):
-        self.parser = GrepParser()
+    def __init__ (self, queryText, directory, resultHandler):
+        self.parser = GrepParser(resultHandler)
 
         cmd = "find '%s' -print 2> /dev/null | xargs grep -H -I -n -s -Z -e '%s'" % (directory, queryText)
         #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
@@ -56,8 +56,9 @@ class SearchProcess:
 
 
 class GrepParser:
-    def __init__ (self):
+    def __init__ (self, resultHandler):
         self.buf = ""
+        self.resultHandler = resultHandler
 
     def parseFragment (self, text):
         self.buf = self.buf + text
@@ -82,11 +83,27 @@ class GrepParser:
             print "(ignoring invalid line)"
         else:
             print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
+            self.resultHandler.handleResult(filename, lineno, linetext)
 
     def finish (self):
         self.parseFragment("")
         if self.buf != "":
             self.parseLine(self.buf)
+
+class ResultHandler:
+    def __init__ (self, resultGUI, resultPanel):
+        self.resultGUI = resultGUI
+        self.resultPanel = resultPanel
+        self.files = {}
+
+    def handleResult (self, file, lineno, linetext):
+        if not(self.files.has_key(file)):
+            it = self.resultGUI._add_result_file(self.resultPanel, file)
+            self.files[file] = it
+        else:
+            it = self.files[file]
+        self.resultGUI._add_result_line(self.resultPanel, it, lineno, linetext)
+
 
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
@@ -125,12 +142,14 @@ class FileSearchWindowHelper:
 
     def on_search_files_activate(self, action):
         print "(find in files)"
-        #container = self._add_result_panel()
+        container = self._add_result_panel()
         #it = self._add_result_file(container, 'abc/myfile.txt')
         #self._add_result_line(container, it, 42, 'theline')
         #return
 
-        sp = SearchProcess('abc', '/home/oliver/kdevel/gedit-search')
+        rh = ResultHandler(self, container)
+
+        sp = SearchProcess('abc', '/home/oliver/kdevel/gedit-search', rh)
         #sp = SearchProcess('abc', '/var/log/')
         return
 
