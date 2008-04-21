@@ -55,7 +55,6 @@ class FileSearchWindowHelper:
         gladeFile = os.path.join(os.path.dirname(__file__), "gedit-file-search.glade")
         self.tree = gtk.glade.XML(gladeFile)
 
-        self.tree.signal_autoconnect(self)
         self._dialog = self.tree.get_widget('searchDialog')
         self._dialog.set_transient_for(self._window)
         result = self._dialog.run()
