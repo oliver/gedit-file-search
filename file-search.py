@@ -59,11 +59,26 @@ class FileSearchWindowHelper:
         self._dialog.set_transient_for(self._window)
         result = self._dialog.run()
         print "result: %s" % result
-        if result == 1:
-            print "(starting search)"
-        else:
-            print "(cancelled)"
         self._dialog.destroy()
+
+        if result != 1:
+            print "(cancelled)"
+            return
+
+        print "(starting search)"
+        self._add_result_panel()
+
+    def _add_result_panel (self):
+        print "(add result panel)"
+
+        gladeFile = os.path.join(os.path.dirname(__file__), "gedit-file-search.glade")
+        self.tree = gtk.glade.XML(gladeFile, 'hbxFileSearchResult')
+        resultContainer = self.tree.get_widget('hbxFileSearchResult')
+
+        panel = self._window.get_bottom_panel()
+        panel.add_item(resultContainer, "File Search", "gtk-find")
+        panel.activate_item(resultContainer)
+
 
 class FileSearchPlugin(gedit.Plugin):
     def __init__(self):
