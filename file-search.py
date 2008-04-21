@@ -80,6 +80,29 @@ class FileSearchWindowHelper:
         panel.activate_item(resultContainer)
 
 
+        treestore = gtk.TreeStore(str)
+        tv = self.tree.get_widget('tvFileSearchResult')
+        tv.set_model(treestore)
+
+        tc = gtk.TreeViewColumn("File", gtk.CellRendererText(), markup=0)
+        tv.append_column(tc)
+
+        resultContainer.resultStore = treestore
+        resultContainer.treeView = tv
+        return resultContainer
+
+    def _add_result_file (self, resultPanel, filename):
+        line = "<span foreground=\"#000000\" size=\"smaller\">%s</span>" % filename
+        it = resultPanel.resultStore.append(None, [line])
+        resultPanel.treeView.expand_all()
+        return it
+
+    def _add_result_line (self, resultPanel, it, lineno, linetext):
+        line = "<b>%d:</b> <span foreground=\"blue\">%s</span>" % (lineno, linetext)
+        resultPanel.resultStore.append(it, [line])
+        resultPanel.treeView.expand_all()
+
+
 class FileSearchPlugin(gedit.Plugin):
     def __init__(self):
         gedit.Plugin.__init__(self)
