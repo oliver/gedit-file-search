@@ -21,7 +21,7 @@ class SearchProcess:
     def __init__ (self, queryText, directory):
         self.parser = GrepParser()
 
-        cmd = "find '%s' -print 2> /dev/null | xargs grep -H -I -n -s -e '%s'" % (directory, queryText)
+        cmd = "find '%s' -print 2> /dev/null | xargs grep -H -I -n -s -Z -e '%s'" % (directory, queryText)
         #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
         #cmd = "sleep 2"
         #cmd = "echo 'abc'"
@@ -66,15 +66,27 @@ class GrepParser:
             pos = self.buf.index('\n')
             line = self.buf[:pos]
             self.buf = self.buf[pos + 1:]
-            self.emitLine(line)
+            self.parseLine(line)
 
-    def emitLine (self, line):
-        print "line: %s" % line
+    def parseLine (self, line):
+        filename = None
+        lineno = None
+        linetext = ""
+        if '\0' in line:
+            [filename, end] = line.split('\0', 1)
+            if ':' in end:
+                [lineno, linetext] = end.split(':', 1)
+                lineno = int(lineno)
+
+        if lineno == None:
+            print "(ignoring invalid line)"
+        else:
+            print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
 
     def finish (self):
         self.parseFragment("")
         if self.buf != "":
-            self.emitLine(self.buf)
+            self.parseLine(self.buf)
 
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
