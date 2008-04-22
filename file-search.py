@@ -144,11 +144,22 @@ class FileSearchWindowHelper:
         # Merge the UI
         self._ui_id = manager.add_ui_from_string(ui_str)
 
+    def on_cboSearchTextEntry_changed (self, textEntry):
+        """
+        Is called when the search text entry is modified;
+        disables the Search button whenever no search text is entered.
+        """
+        if textEntry.get_text() == "":
+            self.tree.get_widget('btnSearch').set_sensitive(False)
+        else:
+            self.tree.get_widget('btnSearch').set_sensitive(True)
+
     def on_search_files_activate(self, action):
         print "(find in files)"
 
         gladeFile = os.path.join(os.path.dirname(__file__), "gedit-file-search.glade")
         self.tree = gtk.glade.XML(gladeFile)
+        self.tree.signal_autoconnect(self)
 
         self._dialog = self.tree.get_widget('searchDialog')
         self._dialog.set_transient_for(self._window)

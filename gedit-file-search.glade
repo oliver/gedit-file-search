@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.1 on Tue Apr 22 21:40:17 2008 -->
+<!--Generated with glade3 3.4.1 on Tue Apr 22 23:39:23 2008 -->
 <glade-interface>
   <widget class="GtkDialog" id="searchDialog">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -41,6 +41,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <signal name="changed" handler="on_cboSearchTextEntry_changed"/>
                   </widget>
                 </child>
               </widget>
@@ -282,8 +283,9 @@
               </widget>
             </child>
             <child>
-              <widget class="GtkButton" id="button2">
+              <widget class="GtkButton" id="btnSearch">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
