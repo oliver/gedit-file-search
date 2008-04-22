@@ -199,11 +199,18 @@ class FileSearchWindowHelper:
         return it
 
     def _add_result_line (self, resultPanel, it, lineno, linetext):
-        linetext = gobject.markup_escape_text(linetext)
+        linetext = escapeMarkup(linetext)
         line = "<b>%d:</b> <span foreground=\"blue\">%s</span>" % (lineno, linetext)
         resultPanel.resultStore.append(it, [line])
         resultPanel.treeView.expand_all()
 
+
+def escapeMarkup (origText):
+    text = origText
+    text = text.replace('&', '&amp;')
+    text = text.replace('<', '&lt;')
+    text = text.replace('>', '&gt;')
+    return text
 
 class FileSearchPlugin(gedit.Plugin):
     def __init__(self):
