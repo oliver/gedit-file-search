@@ -82,6 +82,10 @@ class GrepParser:
         if lineno == None:
             print "(ignoring invalid line)"
         else:
+            # Assume that grep output is in UTF8 encoding, and convert it to
+            # a Unicode string. Also, sanitize non-UTF8 characters.
+            # TODO: what's the actual encoding of grep's output?
+            linetext = unicode(linetext, 'utf8', 'replace')
             print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
             self.resultHandler.handleResult(filename, lineno, linetext)
 
