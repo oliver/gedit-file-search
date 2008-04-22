@@ -1,0 +1,5 @@
+some text
+text with abc in it <and> with invalid markup >:-)
+here are some unicode chars like ä, ö, and ü, and ß... The € (EUR) sign 
+is pretty evil as well. With Unicode, even symbols like ✪ are available!
+the end
