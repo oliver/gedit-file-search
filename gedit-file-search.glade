@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.1 on Tue Apr 22 00:09:06 2008 -->
+<!--Generated with glade3 3.4.1 on Tue Apr 22 21:40:17 2008 -->
 <glade-interface>
   <widget class="GtkDialog" id="searchDialog">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -31,13 +31,13 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkComboBoxEntry" id="comboboxentry1">
+              <widget class="GtkComboBoxEntry" id="cboSearchTextList">
                 <property name="width_request">424</property>
                 <property name="height_request">31</property>
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <child internal-child="entry">
-                  <widget class="GtkEntry" id="comboboxentry-entry1">
+                  <widget class="GtkEntry" id="cboSearchTextEntry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -50,13 +50,13 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkComboBoxEntry" id="comboboxentry2">
+              <widget class="GtkComboBoxEntry" id="cboSearchDirectoryList">
                 <property name="width_request">414</property>
                 <property name="height_request">34</property>
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <child internal-child="entry">
-                  <widget class="GtkEntry" id="comboboxentry-entry2">
+                  <widget class="GtkEntry" id="cboSearchDirectoryEntry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>

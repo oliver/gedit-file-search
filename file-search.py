@@ -146,32 +146,36 @@ class FileSearchWindowHelper:
 
     def on_search_files_activate(self, action):
         print "(find in files)"
-        container = self._add_result_panel()
-        #it = self._add_result_file(container, 'abc/myfile.txt')
-        #self._add_result_line(container, it, 42, 'theline')
-        #return
-
-        rh = ResultHandler(self, container)
-
-        sp = SearchProcess('abc', '/home/oliver/kdevel/gedit-search', rh)
-        #sp = SearchProcess('abc', '/var/log/')
-        return
 
         gladeFile = os.path.join(os.path.dirname(__file__), "gedit-file-search.glade")
         self.tree = gtk.glade.XML(gladeFile)
 
         self._dialog = self.tree.get_widget('searchDialog')
         self._dialog.set_transient_for(self._window)
+        self.tree.get_widget('cboSearchDirectoryEntry').set_text('.')
         result = self._dialog.run()
         print "result: %s" % result
-        self._dialog.destroy()
 
         if result != 1:
             print "(cancelled)"
+            self._dialog.destroy()
             return
 
         print "(starting search)"
-        self._add_result_panel()
+        searchText = self.tree.get_widget('cboSearchTextEntry').get_text()
+        searchDir = self.tree.get_widget('cboSearchDirectoryEntry').get_text()
+        self._dialog.destroy()
+
+        print "searching for '%s' in '%s'" % (searchText, searchDir)
+        if searchText == "":
+            print "internal error: search text is empty!"
+            return
+        if not(os.path.exists(searchDir)):
+            print "error: directory '%s' doesn't exist!"
+            return
+        container = self._add_result_panel()
+        rh = ResultHandler(self, container)
+        sp = SearchProcess(searchText, searchDir, rh)
 
     def _add_result_panel (self):
         print "(add result panel)"
