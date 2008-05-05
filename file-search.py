@@ -163,7 +163,15 @@ class FileSearchWindowHelper:
 
         self._dialog = self.tree.get_widget('searchDialog')
         self._dialog.set_transient_for(self._window)
-        self.tree.get_widget('cboSearchDirectoryEntry').set_text('.')
+
+        # set initial values for search dialog widgets
+        searchDir = os.getcwdu()
+        if self._window.get_active_tab():
+            currFileDir = self._window.get_active_tab().get_document().get_uri()
+            if currFileDir != None and currFileDir.startswith("file:///"):
+                searchDir = os.path.dirname(currFileDir[7:])
+        self.tree.get_widget('cboSearchDirectoryEntry').set_text(searchDir)
+
         result = self._dialog.run()
         print "result: %s" % result
 
