@@ -109,12 +109,39 @@ class ResultHandler:
         self.resultGUI._add_result_line(self.resultPanel, it, lineno, linetext)
 
 
+class RecentDirs:
+    "Encapsulates a gtk.ListStore that stores a list of recent directories"
+    def __init__ (self, maxEntries = 10):
+        self.store = gtk.ListStore(str)
+        self.maxEntries = maxEntries
+
+    def add (self, dirname):
+        "Add a directory that was just used."
+
+        for row in self.store:
+            if row[0] == dirname:
+                it = self.store.get_iter(row.path)
+                self.store.remove(it)
+
+        self.store.prepend([dirname])
+
+    def isEmpty (self):
+        return (len(self.store) == 0)
+
+    def topEntry (self):
+        if self.isEmpty():
+            return None
+        else:
+            return self.store[0][0]
+
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
         print "Plugin created for", window
         self._window = window
         self._plugin = plugin
         self._dialog = None
+
+        self._lastDirs = RecentDirs()
 
         self._insert_menu()
 
@@ -164,14 +191,28 @@ class FileSearchWindowHelper:
         self._dialog = self.tree.get_widget('searchDialog')
         self._dialog.set_transient_for(self._window)
 
+        #
         # set initial values for search dialog widgets
+        #
+
+        # find a nice default value for the search directory:
         searchDir = os.getcwdu()
         if self._window.get_active_tab():
             currFileDir = self._window.get_active_tab().get_document().get_uri()
             if currFileDir != None and currFileDir.startswith("file:///"):
                 searchDir = os.path.dirname(currFileDir[7:])
-        self.tree.get_widget('cboSearchDirectoryEntry').set_text(searchDir)
 
+        cboLastDirs = self.tree.get_widget('cboSearchDirectoryList')
+        cboLastDirs.set_model(self._lastDirs.store)
+        cboLastDirs.set_text_column(0)
+
+        # make sure that the selected default dir is really on top of the list:
+        if self._lastDirs.isEmpty() or self._lastDirs.topEntry() != searchDir:
+            self._lastDirs.add(searchDir)
+        cboLastDirs.set_active(0)
+        # TODO: the algorithm to select a good default search dir could probably be improved...
+
+        # display and run the search dialog
         result = self._dialog.run()
         print "result: %s" % result
 
@@ -192,6 +233,9 @@ class FileSearchWindowHelper:
         if not(os.path.exists(searchDir)):
             print "error: directory '%s' doesn't exist!" % searchDir
             return
+
+        self._lastDirs.add(searchDir)
+
         container = self._add_result_panel()
         rh = ResultHandler(self, container)
         sp = SearchProcess(searchText, searchDir, rh)
