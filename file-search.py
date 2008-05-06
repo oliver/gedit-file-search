@@ -190,7 +190,7 @@ class FileSearchWindowHelper:
             print "internal error: search text is empty!"
             return
         if not(os.path.exists(searchDir)):
-            print "error: directory '%s' doesn't exist!"
+            print "error: directory '%s' doesn't exist!" % searchDir
             return
         container = self._add_result_panel()
         rh = ResultHandler(self, container)
