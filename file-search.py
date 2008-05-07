@@ -238,7 +238,7 @@ class FileSearcher:
         self._window = window
         self.files = {}
 
-        self.resultPanel = self._add_result_panel()
+        self._add_result_panel()
         sp = SearchProcess(searchText, searchDir, self)
 
     def handleResult (self, file, lineno, linetext):
@@ -262,28 +262,24 @@ class FileSearcher:
         panel.activate_item(resultContainer)
 
 
-        treestore = gtk.TreeStore(str)
-        tv = self.tree.get_widget('tvFileSearchResult')
-        tv.set_model(treestore)
+        self.treeStore = gtk.TreeStore(str)
+        self.treeView = self.tree.get_widget('tvFileSearchResult')
+        self.treeView.set_model(self.treeStore)
 
         tc = gtk.TreeViewColumn("File", gtk.CellRendererText(), markup=0)
-        tv.append_column(tc)
-
-        resultContainer.resultStore = treestore
-        resultContainer.treeView = tv
-        return resultContainer
+        self.treeView.append_column(tc)
 
     def _add_result_file (self, filename):
         line = "<span foreground=\"#000000\" size=\"smaller\">%s</span>" % filename
-        it = self.resultPanel.resultStore.append(None, [line])
-        self.resultPanel.treeView.expand_all()
+        it = self.treeStore.append(None, [line])
+        self.treeView.expand_all()
         return it
 
     def _add_result_line (self, it, lineno, linetext):
         linetext = escapeMarkup(linetext)
         line = "<b>%d:</b> <span foreground=\"blue\">%s</span>" % (lineno, linetext)
-        self.resultPanel.resultStore.append(it, [line])
-        self.resultPanel.treeView.expand_all()
+        self.treeStore.append(it, [line])
+        self.treeView.expand_all()
 
 
 def escapeMarkup (origText):
