@@ -94,20 +94,6 @@ class GrepParser:
         if self.buf != "":
             self.parseLine(self.buf)
 
-class ResultHandler:
-    def __init__ (self, resultGUI, resultPanel):
-        self.resultGUI = resultGUI
-        self.resultPanel = resultPanel
-        self.files = {}
-
-    def handleResult (self, file, lineno, linetext):
-        if not(self.files.has_key(file)):
-            it = self.resultGUI._add_result_file(self.resultPanel, file)
-            self.files[file] = it
-        else:
-            it = self.files[file]
-        self.resultGUI._add_result_line(self.resultPanel, it, lineno, linetext)
-
 
 class RecentDirs:
     "Encapsulates a gtk.ListStore that stores a list of recent directories"
@@ -250,10 +236,19 @@ class FileSearcher:
     """
     def __init__ (self, window, searchText, searchDir):
         self._window = window
+        self.files = {}
 
-        container = self._add_result_panel()
-        rh = ResultHandler(self, container)
-        sp = SearchProcess(searchText, searchDir, rh)
+        self.resultPanel = self._add_result_panel()
+        sp = SearchProcess(searchText, searchDir, self)
+
+    def handleResult (self, file, lineno, linetext):
+        if not(self.files.has_key(file)):
+            it = self._add_result_file(file)
+            self.files[file] = it
+        else:
+            it = self.files[file]
+        self._add_result_line(it, lineno, linetext)
+
 
     def _add_result_panel (self):
         print "(add result panel)"
@@ -278,17 +273,17 @@ class FileSearcher:
         resultContainer.treeView = tv
         return resultContainer
 
-    def _add_result_file (self, resultPanel, filename):
+    def _add_result_file (self, filename):
         line = "<span foreground=\"#000000\" size=\"smaller\">%s</span>" % filename
-        it = resultPanel.resultStore.append(None, [line])
-        resultPanel.treeView.expand_all()
+        it = self.resultPanel.resultStore.append(None, [line])
+        self.resultPanel.treeView.expand_all()
         return it
 
-    def _add_result_line (self, resultPanel, it, lineno, linetext):
+    def _add_result_line (self, it, lineno, linetext):
         linetext = escapeMarkup(linetext)
         line = "<b>%d:</b> <span foreground=\"blue\">%s</span>" % (lineno, linetext)
-        resultPanel.resultStore.append(it, [line])
-        resultPanel.treeView.expand_all()
+        self.resultPanel.resultStore.append(it, [line])
+        self.resultPanel.treeView.expand_all()
 
 
 def escapeMarkup (origText):
