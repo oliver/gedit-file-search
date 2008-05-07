@@ -134,6 +134,7 @@ class RecentDirs:
         else:
             return self.store[0][0]
 
+
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
         print "Plugin created for", window
@@ -235,6 +236,20 @@ class FileSearchWindowHelper:
             return
 
         self._lastDirs.add(searchDir)
+
+        searcher = FileSearcher(self._window, searchText, searchDir)
+
+class FileSearcher:
+    """
+    Gets a search query (and related info) and then handles everything related
+    to that single file search:
+    - creating a result window
+    - starting grep (through SearchProcess)
+    - displaying matches
+    A FileSearcher object lives until its result panel is closed.
+    """
+    def __init__ (self, window, searchText, searchDir):
+        self._window = window
 
         container = self._add_result_panel()
         rh = ResultHandler(self, container)
