@@ -313,6 +313,12 @@ class FileSearcher:
             self._window.create_tab_from_uri(uri=uri, encoding=gedit.encoding_get_current(),
                 line_pos=lineno, create=False, jump_to=True)
 
+    def on_btnClose_clicked (self, button):
+        panel = self._window.get_bottom_panel()
+        resultContainer = self.tree.get_widget('hbxFileSearchResult')
+        resultContainer.set_data("filesearcher", None)
+        panel.remove_item(resultContainer)
+
 
 def escapeMarkup (origText):
     text = origText
