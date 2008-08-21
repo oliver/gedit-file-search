@@ -255,6 +255,7 @@ class FileSearcher:
 
         gladeFile = os.path.join(os.path.dirname(__file__), "gedit-file-search.glade")
         self.tree = gtk.glade.XML(gladeFile, 'hbxFileSearchResult')
+        self.tree.signal_autoconnect(self)
         resultContainer = self.tree.get_widget('hbxFileSearchResult')
 
         panel = self._window.get_bottom_panel()
@@ -262,7 +263,7 @@ class FileSearcher:
         panel.activate_item(resultContainer)
 
 
-        self.treeStore = gtk.TreeStore(str)
+        self.treeStore = gtk.TreeStore(str, str, int)
         self.treeView = self.tree.get_widget('tvFileSearchResult')
         self.treeView.set_model(self.treeStore)
 
@@ -271,15 +272,44 @@ class FileSearcher:
 
     def _add_result_file (self, filename):
         line = "<span foreground=\"#000000\" size=\"smaller\">%s</span>" % filename
-        it = self.treeStore.append(None, [line])
+        it = self.treeStore.append(None, [line, filename, 0])
         self.treeView.expand_all()
         return it
 
     def _add_result_line (self, it, lineno, linetext):
         linetext = escapeMarkup(linetext)
         line = "<b>%d:</b> <span foreground=\"blue\">%s</span>" % (lineno, linetext)
-        self.treeStore.append(it, [line])
+        self.treeStore.append(it, [line, None, lineno])
         self.treeView.expand_all()
+
+    def on_row_activated (self, widget, path, col):
+        selectedIter = self.treeStore.get_iter(path)
+        parentIter = self.treeStore.iter_parent(selectedIter)
+        lineno = 0
+        if parentIter == None:
+            file = self.treeStore.get_value(selectedIter, 1)
+        else:
+            file = self.treeStore.get_value(parentIter, 1)
+            lineno = self.treeStore.get_value(selectedIter, 2)
+
+        uri="file://%s" % file
+
+        # jump to document if already open, or open new tab:
+        allDocs = self._window.get_documents()
+        found = False
+        for doc in allDocs:
+            if doc.get_uri() == uri:
+                tab = gedit.tab_get_from_document(doc)
+                self._window.set_active_tab(tab)
+                if lineno > 0:
+                    doc.goto_line(lineno - 1)
+                    tab.get_view().scroll_to_cursor()
+                found = True
+                break
+
+        if not(found):
+            self._window.create_tab_from_uri(uri=uri, encoding=gedit.encoding_get_current(),
+                line_pos=lineno, create=False, jump_to=True)
 
 
 def escapeMarkup (origText):
