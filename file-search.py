@@ -258,6 +258,8 @@ class FileSearcher:
         self.tree.signal_autoconnect(self)
         resultContainer = self.tree.get_widget('hbxFileSearchResult')
 
+        resultContainer.set_data("filesearcher", self)
+
         panel = self._window.get_bottom_panel()
         panel.add_item(resultContainer, "File Search", "gtk-find")
         panel.activate_item(resultContainer)
