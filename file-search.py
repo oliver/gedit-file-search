@@ -25,33 +25,35 @@ class SearchProcess:
         #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
         #cmd = "sleep 2"
         #cmd = "echo 'abc'"
-        print "executing command: %s" % cmd
+        #print "executing command: %s" % cmd
         self.pipe = os.popen(cmd, 'r')
 
         # make pipe non-blocking:
         fl = fcntl.fcntl(self.pipe, fcntl.F_GETFL)
         fcntl.fcntl(self.pipe, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
-        print "(add watch)"
+        #print "(add watch)"
         gobject.io_add_watch(self.pipe, gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
             self.onPipeReadable)
 
     def onPipeReadable (self, fd, cond):
-        print "condition: %s" % cond
+        #print "condition: %s" % cond
         if (cond & gobject.IO_IN):
             readText = self.pipe.read(1000)
-            print "(read %d bytes)" % len(readText)
+            #print "(read %d bytes)" % len(readText)
             self.parser.parseFragment(readText)
             return True
         else:
             self.parser.finish()
-            print "(closing pipe)"
+            #print "(closing pipe)"
             result = self.pipe.close()
             if result == None:
-                print "(search finished successfully)"
+                #print "(search finished successfully)"
+                pass
             else:
-                print "(search finished with exit code %d; exited: %s, exit status: %d)" % (result,
-                    str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
+                #print "(search finished with exit code %d; exited: %s, exit status: %d)" % (result,
+                #str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
+                pass
             return False
 
 
@@ -80,13 +82,14 @@ class GrepParser:
                 lineno = int(lineno)
 
         if lineno == None:
-            print "(ignoring invalid line)"
+            #print "(ignoring invalid line)"
+            pass
         else:
             # Assume that grep output is in UTF8 encoding, and convert it to
             # a Unicode string. Also, sanitize non-UTF8 characters.
             # TODO: what's the actual encoding of grep's output?
             linetext = unicode(linetext, 'utf8', 'replace')
-            print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
+            #print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
             self.resultHandler.handleResult(filename, lineno, linetext)
 
     def finish (self):
