@@ -4,6 +4,7 @@ import gedit
 import gtk
 import gobject
 import fcntl
+import popen2
 
 ui_str = """<ui>
   <menubar name="MenuBar">
@@ -26,7 +27,8 @@ class SearchProcess:
         #cmd = "sleep 2"
         #cmd = "echo 'abc'"
         #print "executing command: %s" % cmd
-        self.pipe = os.popen(cmd, 'r')
+        self.popenObj = popen2.Popen3(cmd)
+        self.pipe = self.popenObj.fromchild
 
         # make pipe non-blocking:
         fl = fcntl.fcntl(self.pipe, fcntl.F_GETFL)
@@ -54,6 +56,7 @@ class SearchProcess:
                 #print "(search finished with exit code %d; exited: %s, exit status: %d)" % (result,
                 #str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
                 pass
+            self.popenObj.wait()
             return False
 
 
