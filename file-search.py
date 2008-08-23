@@ -323,6 +323,11 @@ class FileSearcher:
         resultContainer = self.tree.get_widget('hbxFileSearchResult')
         resultContainer.set_data("filesearcher", None)
         panel.remove_item(resultContainer)
+        self.treeStore = None
+        self.treeView = None
+        self._window = None
+        self.files = {}
+        self.tree = None
 
 
 def escapeMarkup (origText):
