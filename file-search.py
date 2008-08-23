@@ -241,6 +241,8 @@ class FileSearcher:
         self._window = window
         self.files = {}
 
+        self.encoding = gedit.encoding_get_current()
+
         self._add_result_panel()
         sp = SearchProcess(searchText, searchDir, self)
 
@@ -313,7 +315,7 @@ class FileSearcher:
                 break
 
         if not(found):
-            self._window.create_tab_from_uri(uri=uri, encoding=gedit.encoding_get_current(),
+            self._window.create_tab_from_uri(uri=uri, encoding=self.encoding,
                 line_pos=lineno, create=False, jump_to=True)
 
     def on_btnClose_clicked (self, button):
