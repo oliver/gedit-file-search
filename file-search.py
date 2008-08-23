@@ -113,6 +113,17 @@ class SearchProcess:
             self.popenObj.wait()
             return False
 
+    def cancel (self):
+        print "(cancelling search command)"
+        mainPid = self.popenObj.pid
+        pi = ProcessInfo()
+        allProcs = [mainPid]
+        allProcs.extend(pi.getAllChildren(mainPid))
+        print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
+        for pid in allProcs:
+            print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
+            os.kill(pid, 15)
+
 
 class GrepParser:
     def __init__ (self, resultHandler):
@@ -305,7 +316,7 @@ class FileSearcher:
 
         self._add_result_panel()
         self.updateSummary()
-        sp = SearchProcess(searchText, searchDir, self)
+        self.searchProcess = SearchProcess(searchText, searchDir, self)
 
     def handleResult (self, file, lineno, linetext):
         if not(self.files.has_key(file)):
@@ -411,7 +422,7 @@ class FileSearcher:
             pass
         else:
             # cancel search
-            pass
+            self.searchProcess.cancel()
 
 
 def escapeMarkup (origText):
