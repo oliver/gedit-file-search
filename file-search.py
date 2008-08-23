@@ -240,10 +240,12 @@ class FileSearcher:
     def __init__ (self, window, searchText, searchDir):
         self._window = window
         self.files = {}
+        self.numMatches = 0
 
         self.encoding = gedit.encoding_get_current()
 
         self._add_result_panel()
+        self.updateSummary()
         sp = SearchProcess(searchText, searchDir, self)
 
     def handleResult (self, file, lineno, linetext):
@@ -253,6 +255,12 @@ class FileSearcher:
         else:
             it = self.files[file]
         self._add_result_line(it, lineno, linetext)
+        self.numMatches += 1
+        self.updateSummary()
+
+    def updateSummary (self):
+        summary = "<b>%d</b> matches\nin %d files" % (self.numMatches, len(self.files))
+        self.tree.get_widget("lblNumMatches").set_label(summary)
 
 
     def _add_result_panel (self):
