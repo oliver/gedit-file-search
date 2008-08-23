@@ -311,6 +311,7 @@ class FileSearcher:
         self.files = {}
         self.numMatches = 0
         self.hasFinished = False
+        self.wasCancelled = False
 
         self.encoding = gedit.encoding_get_current()
 
@@ -333,6 +334,10 @@ class FileSearcher:
         self.hasFinished = True
         editBtn = self.tree.get_widget("btnModifyFileSearch")
         editBtn.set_label("gtk-edit")
+
+        if self.wasCancelled:
+            line = "<i><span foreground=\"red\">(search was cancelled)</span></i>"
+            self.treeStore.append(None, [line, '', 0])
 
     def updateSummary (self):
         summary = "<b>%d</b> matches\nin %d files" % (self.numMatches, len(self.files))
@@ -386,6 +391,9 @@ class FileSearcher:
             file = self.treeStore.get_value(parentIter, 1)
             lineno = self.treeStore.get_value(selectedIter, 2)
 
+        if not(file):
+            return
+
         uri="file://%s" % file
 
         # jump to document if already open, or open new tab:
@@ -423,6 +431,7 @@ class FileSearcher:
         else:
             # cancel search
             self.searchProcess.cancel()
+            self.wasCancelled = True
 
 
 def escapeMarkup (origText):
