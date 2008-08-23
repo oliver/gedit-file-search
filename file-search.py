@@ -96,6 +96,7 @@ class GrepParser:
         self.parseFragment("")
         if self.buf != "":
             self.parseLine(self.buf)
+        self.resultHandler.handleFinished()
 
 
 class RecentDirs:
@@ -241,6 +242,7 @@ class FileSearcher:
         self._window = window
         self.files = {}
         self.numMatches = 0
+        self.hasFinished = False
 
         self.encoding = gedit.encoding_get_current()
 
@@ -257,6 +259,12 @@ class FileSearcher:
         self._add_result_line(it, lineno, linetext)
         self.numMatches += 1
         self.updateSummary()
+
+    def handleFinished (self):
+        print "(finished)"
+        self.hasFinished = True
+        editBtn = self.tree.get_widget("btnModifyFileSearch")
+        editBtn.set_label("gtk-edit")
 
     def updateSummary (self):
         summary = "<b>%d</b> matches\nin %d files" % (self.numMatches, len(self.files))
@@ -276,6 +284,9 @@ class FileSearcher:
         panel = self._window.get_bottom_panel()
         panel.add_item(resultContainer, "File Search", "gtk-find")
         panel.activate_item(resultContainer)
+
+        editBtn = self.tree.get_widget("btnModifyFileSearch")
+        editBtn.set_label("gtk-cancel")
 
 
         self.treeStore = gtk.TreeStore(str, str, int)
@@ -336,6 +347,14 @@ class FileSearcher:
         self._window = None
         self.files = {}
         self.tree = None
+
+    def on_btnModify_clicked (self, button):
+        if self.hasFinished:
+            # edit search params
+            pass
+        else:
+            # cancel search
+            pass
 
 
 def escapeMarkup (origText):
