@@ -284,7 +284,7 @@ class FileSearchWindowHelper:
     def on_search_files_activate(self, action):
         print "(find in files)"
 
-        gladeFile = os.path.join(os.path.dirname(__file__), "gedit-file-search.glade")
+        gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
         self.tree = gtk.glade.XML(gladeFile)
         self.tree.signal_autoconnect(self)
 
@@ -391,7 +391,7 @@ class FileSearcher:
     def _add_result_panel (self):
         print "(add result panel)"
 
-        gladeFile = os.path.join(os.path.dirname(__file__), "gedit-file-search.glade")
+        gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
         self.tree = gtk.glade.XML(gladeFile, 'hbxFileSearchResult')
         self.tree.signal_autoconnect(self)
         resultContainer = self.tree.get_widget('hbxFileSearchResult')
