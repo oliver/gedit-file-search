@@ -1,0 +1,27 @@
+TODO
+=====
+- display somehow that search is still running
+  - maybe animated icon for result tab?
+  - or cylon-style progress bar?
+- cleanup search dialog layout (convert to correct GTK layout)
+- check encoding of grep output (ie. make sure the lines in result panel are in correct encoding)
+- run tests:
+  - search through / (or /usr or /usr/share) to find weird corner cases
+  - I think there's a bug somewhere when searching through /usr/share on my system (xargs displays warnings)
+  - there are also some cases where a result line displays more than one text line...
+- implement Edit button in result panel
+- fix counting of found matches (it currently counts found _lines_, but a line can contain multiple matches...)
+- highlight found text in result panel (like, with yellow background for the actually matching text)
+- for every result panel, somehow display search parameters (search text, directory)
+  - maybe as tooltip for result tab?
+  - or as first line in result list?
+- maybe use single-click on result line to open file (instead of double click?)
+- implement all the options in search dialog
+- make it possible to submit search dialog with Enter key
+- maybe improve search directory chooser in search dialog?
+  - use some existing widget to choose directory?
+- remember options (last search terms, last search directories, search options)
+  - remember all this also over Gedit restart
+- when opening search dialog, deduce initially-display search dir in a better way
+  - it should do "the right thing" yet the user must be able to understand the decision-making way
+- check that activating/deactivating plugin works correctly and leaves no cruft behind
