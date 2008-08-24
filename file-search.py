@@ -336,7 +336,6 @@ class FileSearcher:
         self.pluginHelper.registerSearcher(self)
         self.files = {}
         self.numMatches = 0
-        self.hasFinished = False
         self.wasCancelled = False
 
         self.encoding = gedit.encoding_get_current()
@@ -357,7 +356,6 @@ class FileSearcher:
 
     def handleFinished (self):
         print "(finished)"
-        self.hasFinished = True
         self.searchProcess = None
         editBtn = self.tree.get_widget("btnModifyFileSearch")
         editBtn.set_label("gtk-edit")
@@ -460,7 +458,7 @@ class FileSearcher:
         self.pluginHelper.unregisterSearcher(self)
 
     def on_btnModify_clicked (self, button):
-        if self.hasFinished:
+        if not(self.searchProcess):
             # edit search params
             pass
         else:
