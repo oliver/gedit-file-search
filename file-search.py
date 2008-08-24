@@ -208,6 +208,7 @@ class FileSearchWindowHelper:
         self._window = window
         self._plugin = plugin
         self._dialog = None
+        self.searchers = [] # list of existing SearchProcess instances
 
         self._lastDirs = RecentDirs()
 
@@ -222,6 +223,12 @@ class FileSearchWindowHelper:
         # Called whenever the window has been updated (active tab
         # changed, etc.)
         print "Plugin update for", self._window
+
+    def registerSearcher (self, searcher):
+        self.searchers.append(searcher)
+
+    def unregisterSearcher (self, searcher):
+        self.searchers.remove(searcher)
 
     def _insert_menu(self):
         # Get the GtkUIManager
@@ -315,8 +322,10 @@ class FileSearcher:
     - displaying matches
     A FileSearcher object lives until its result panel is closed.
     """
-    def __init__ (self, window, searchText, searchDir):
+    def __init__ (self, window, pluginHelper, searchText, searchDir):
         self._window = window
+        self.pluginHelper = pluginHelper
+        self.pluginHelper.registerSearcher(self)
         self.files = {}
         self.numMatches = 0
         self.hasFinished = False
@@ -435,6 +444,7 @@ class FileSearcher:
         self._window = None
         self.files = {}
         self.tree = None
+        self.pluginHelper.unregisterSearcher(self)
 
     def on_btnModify_clicked (self, button):
         if self.hasFinished:
