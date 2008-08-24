@@ -93,7 +93,7 @@ class SearchProcess:
     def __init__ (self, queryText, directory, resultHandler):
         self.parser = GrepParser(resultHandler)
 
-        cmd = "find '%s' -print 2> /dev/null | xargs grep -H -I -n -s -Z -e '%s'" % (directory, queryText)
+        cmd = "find '%s' -print0 2> /dev/null | xargs -0 grep -H -I -n -s -Z -e '%s'" % (directory, queryText)
         #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
         #cmd = "sleep 2"
         #cmd = "echo 'abc'"
