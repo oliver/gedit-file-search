@@ -311,7 +311,7 @@ class FileSearchWindowHelper:
 
         self._lastDirs.add(searchDir)
 
-        searcher = FileSearcher(self._window, searchText, searchDir)
+        searcher = FileSearcher(self._window, self, searchText, searchDir)
 
 class FileSearcher:
     """
