@@ -339,8 +339,6 @@ class FileSearcher:
         self.numMatches = 0
         self.wasCancelled = False
 
-        self.encoding = gedit.encoding_get_current()
-
         self._add_result_panel()
         self.updateSummary()
         self.searchProcess = SearchProcess(searchText, searchDir, self)
