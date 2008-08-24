@@ -97,10 +97,12 @@ class SearchProcess:
         if (cond & gobject.IO_IN):
             readText = self.pipe.read(1000)
             #print "(read %d bytes)" % len(readText)
-            self.parser.parseFragment(readText)
+            if self.parser:
+                self.parser.parseFragment(readText)
             return True
         else:
-            self.parser.finish()
+            if self.parser:
+                self.parser.finish()
             #print "(closing pipe)"
             result = self.pipe.close()
             if result == None:
@@ -123,6 +125,13 @@ class SearchProcess:
         for pid in allProcs:
             print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
             os.kill(pid, 15)
+
+    def destroy (self):
+        """
+        Force search process to stop as soon as possible, and ignore any further results.
+        """
+        self.cancel()
+        self.parser = None
 
 
 class GrepParser:
@@ -414,6 +423,9 @@ class FileSearcher:
                 line_pos=lineno, create=False, jump_to=True)
 
     def on_btnClose_clicked (self, button):
+        self.searchProcess.destroy()
+        self.searchProcess = None
+
         panel = self._window.get_bottom_panel()
         resultContainer = self.tree.get_widget('hbxFileSearchResult')
         resultContainer.set_data("filesearcher", None)
