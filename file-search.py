@@ -421,23 +421,7 @@ class FileSearcher:
             return
 
         uri="file://%s" % file
-
-        # jump to document if already open, or open new tab:
-        allDocs = self._window.get_documents()
-        found = False
-        for doc in allDocs:
-            if doc.get_uri() == uri:
-                tab = gedit.tab_get_from_document(doc)
-                self._window.set_active_tab(tab)
-                if lineno > 0:
-                    doc.goto_line(lineno - 1)
-                    tab.get_view().scroll_to_cursor()
-                found = True
-                break
-
-        if not(found):
-            self._window.create_tab_from_uri(uri=uri, encoding=self.encoding,
-                line_pos=lineno, create=False, jump_to=True)
+        gedit.commands.load_uri(window=self._window, uri=uri, line_pos=lineno)
 
     def on_btnClose_clicked (self, button):
         self.destroy()
