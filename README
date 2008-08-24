@@ -1,6 +1,3 @@
-Multi-File Search Plugin for Gedit
-===================================
-
-Goal: a search function in Gedit which can search multiple files at 
-once.
-
+File Search Plugin for Gedit
+=============================
+This is a search plugin for Gedit to search a text in multiple files at once. It is currently in very early stage; it should basically work, but many features are still missing.
