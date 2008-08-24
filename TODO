@@ -26,7 +26,6 @@ TODO
   - it should do "the right thing" yet the user must be able to understand the decision-making way
 - check that activating/deactivating plugin works correctly and leaves no cruft behind
 - check focus behavior of result list
-- display some note if the search couldn't be found at all
 - add keyboard shortcut for opening search dialog
 - fix list of recent directories: suppress duplicate entries like "/tmp" and "/tmp/"
 - publish initial version

@@ -362,6 +362,9 @@ class FileSearcher:
         if self.wasCancelled:
             line = "<i><span foreground=\"red\">(search was cancelled)</span></i>"
             self.treeStore.append(None, [line, '', 0])
+        elif self.numMatches == 0:
+            line = "<i>(no matching files found)</i>"
+            self.treeStore.append(None, [line, '', 0])
 
     def updateSummary (self):
         summary = "<b>%d</b> matches\nin %d files" % (self.numMatches, len(self.files))
