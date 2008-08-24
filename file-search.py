@@ -214,8 +214,16 @@ class FileSearchWindowHelper:
 
         self._insert_menu()
 
+        self._window.connect_object("destroy", FileSearchWindowHelper.destroy, self)
+
     def deactivate(self):
         print "Plugin stopped for", self._window
+        self.destroy()
+
+    def destroy (self):
+        print "have to destroy %d existing searchers" % len(self.searchers)
+        for s in self.searchers:
+            s.destroy()
         self._window = None
         self._plugin = None
 
@@ -350,6 +358,7 @@ class FileSearcher:
     def handleFinished (self):
         print "(finished)"
         self.hasFinished = True
+        self.searchProcess = None
         editBtn = self.tree.get_widget("btnModifyFileSearch")
         editBtn.set_label("gtk-edit")
 
@@ -432,8 +441,12 @@ class FileSearcher:
                 line_pos=lineno, create=False, jump_to=True)
 
     def on_btnClose_clicked (self, button):
-        self.searchProcess.destroy()
-        self.searchProcess = None
+        self.destroy()
+
+    def destroy (self):
+        if self.searchProcess:
+            self.searchProcess.destroy()
+            self.searchProcess = None
 
         panel = self._window.get_bottom_panel()
         resultContainer = self.tree.get_widget('hbxFileSearchResult')
