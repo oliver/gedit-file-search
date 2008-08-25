@@ -387,19 +387,19 @@ class FileSearcher:
         self.numMatches = 0
         self.wasCancelled = False
 
-        self._add_result_panel()
-        self.updateSummary()
+        self._createResultPanel()
+        self._updateSummary()
         self.searchProcess = SearchProcess(searchText, searchDir, self)
 
     def handleResult (self, file, lineno, linetext):
         if not(self.files.has_key(file)):
-            it = self._add_result_file(file)
+            it = self._addResultFile(file)
             self.files[file] = it
         else:
             it = self.files[file]
-        self._add_result_line(it, lineno, linetext)
+        self._addResultLine(it, lineno, linetext)
         self.numMatches += 1
-        self.updateSummary()
+        self._updateSummary()
 
     def handleFinished (self):
         print "(finished)"
@@ -414,12 +414,12 @@ class FileSearcher:
             line = "<i>(no matching files found)</i>"
             self.treeStore.append(None, [line, '', 0])
 
-    def updateSummary (self):
+    def _updateSummary (self):
         summary = "<b>%d</b> matches\nin %d files" % (self.numMatches, len(self.files))
         self.tree.get_widget("lblNumMatches").set_label(summary)
 
 
-    def _add_result_panel (self):
+    def _createResultPanel (self):
         print "(add result panel)"
 
         gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
@@ -444,13 +444,13 @@ class FileSearcher:
         tc = gtk.TreeViewColumn("File", gtk.CellRendererText(), markup=0)
         self.treeView.append_column(tc)
 
-    def _add_result_file (self, filename):
+    def _addResultFile (self, filename):
         line = "<span foreground=\"#000000\" size=\"smaller\">%s</span>" % filename
         it = self.treeStore.append(None, [line, filename, 0])
         self.treeView.expand_all()
         return it
 
-    def _add_result_line (self, it, lineno, linetext):
+    def _addResultLine (self, it, lineno, linetext):
         linetext = escapeMarkup(linetext)
         line = "<b>%d:</b> <span foreground=\"blue\">%s</span>" % (lineno, linetext)
         self.treeStore.append(it, [line, None, lineno])
