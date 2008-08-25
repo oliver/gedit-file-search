@@ -16,6 +16,22 @@
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
+#
+# Main classes:
+# - FileSearchWindowHelper (is instantiated by FileSearchPlugin for every window, and holds the search dialog)
+# - FileSearcher (is instantiated by FileSearchWindowHelper for every search, and holds the result tab)
+# - FileSearchPlugin (the actual plugin, which implements the Gedit plugin interface)
+#
+# Search functionality classes:
+# - SearchProcess (starts the external find/grep commands for searching, and reads the output)
+# - GrepParser (accumulates output from grep command and parses it to extract files, line numbers, and lines)
+#
+# Helper classes:
+# - ProcessInfo (gets process tree info, for killing search processes)
+# - RecentDirs (holds list of recently-selected search directories, for search dialog)
+#
+
+
 import os
 import gedit
 import gtk
