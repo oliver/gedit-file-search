@@ -107,7 +107,9 @@ class ProcessInfo:
 
 
 class RecentDirs:
-    "Encapsulates a gtk.ListStore that stores a list of recent directories"
+    """
+    Encapsulates a gtk.ListStore that stores a list of recent directories
+    """
     def __init__ (self, maxEntries = 10):
         self.store = gtk.ListStore(str)
         self.maxEntries = maxEntries
@@ -133,6 +135,12 @@ class RecentDirs:
 
 
 class SearchProcess:
+    """
+    - starts the search command
+    - asynchronously waits for output from search command
+    - passes output to GrepParser
+    - kills search command if requested
+    """
     def __init__ (self, queryText, directory, resultHandler):
         self.parser = GrepParser(resultHandler)
 
@@ -195,6 +203,12 @@ class SearchProcess:
 
 
 class GrepParser:
+    """
+    - buffers output from grep command
+    - extracts full (nul-delimited) lines
+    - parses lines for file name, line number, and line text
+    - passes extracted info to resultHandler
+    """
     def __init__ (self, resultHandler):
         self.buf = ""
         self.resultHandler = resultHandler
@@ -493,11 +507,13 @@ class FileSearcher:
 
 
 def escapeMarkup (origText):
+    "Replaces Pango markup special characters with their escaped replacements"
     text = origText
     text = text.replace('&', '&amp;')
     text = text.replace('<', '&lt;')
     text = text.replace('>', '&gt;')
     return text
+
 
 class FileSearchPlugin(gedit.Plugin):
     def __init__(self):
