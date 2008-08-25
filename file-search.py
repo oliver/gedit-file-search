@@ -441,6 +441,11 @@ class FileSearcher:
 
         uri="file://%s" % urllib.quote(file)
         gedit.commands.load_uri(window=self._window, uri=uri, line_pos=lineno)
+        if lineno > 0: # this is necessary for Gedit 2.17.4 and older (see gbo #401219)
+            currDoc = self._window.get_active_document()
+            currDoc.goto_line(lineno - 1) # -1 required to work around gbo #503665
+            currView = gedit.tab_get_from_document(currDoc).get_view()
+            currView.scroll_to_cursor()
 
     def on_btnClose_clicked (self, button):
         self.destroy()
