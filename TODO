@@ -9,6 +9,8 @@ TODO
   - search through / (or /usr or /usr/share) to find weird corner cases
   - I think there's a bug somewhere when searching through /usr/share on my system (xargs displays warnings)
   - there are also some cases where a result line displays more than one text line...
+  - check that files in /testfiles cause no errors/warnings/wrong behavior:
+  - testfiles/utf8-extract-1.bin (triggers a Pango warning): is probably this Python bug: http://bugs.python.org/issue3672
 - implement Edit button in result panel
 - fix counting of found matches (it currently counts found _lines_, but a line can contain multiple matches...)
 - highlight found text in result panel (like, with yellow background for the actually matching text)
@@ -29,4 +31,11 @@ TODO
 - add keyboard shortcut for opening search dialog
 - fix list of recent directories: suppress duplicate entries like "/tmp" and "/tmp/"
 - publish initial version
-  - select some license
+- maybe limit line length in result list?
+- add option to ignore backup files (files ending with ~ etc):
+  - *.~
+  - .#* (emacs backup files? or from CVS?)
+- create test plan for testing the full functionality and all corner cases with a new release
+- Gedit 2.16 quirks:
+  - result list sometimes displays no more text (maybe caused by too long lines?)
+- test searching through directories with many files, many directories, or big files or files with very long lines
