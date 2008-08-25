@@ -106,6 +106,32 @@ class ProcessInfo:
         return res
 
 
+class RecentDirs:
+    "Encapsulates a gtk.ListStore that stores a list of recent directories"
+    def __init__ (self, maxEntries = 10):
+        self.store = gtk.ListStore(str)
+        self.maxEntries = maxEntries
+
+    def add (self, dirname):
+        "Add a directory that was just used."
+
+        for row in self.store:
+            if row[0] == dirname:
+                it = self.store.get_iter(row.path)
+                self.store.remove(it)
+
+        self.store.prepend([dirname])
+
+    def isEmpty (self):
+        return (len(self.store) == 0)
+
+    def topEntry (self):
+        if self.isEmpty():
+            return None
+        else:
+            return self.store[0][0]
+
+
 class SearchProcess:
     def __init__ (self, queryText, directory, resultHandler):
         self.parser = GrepParser(resultHandler)
@@ -208,32 +234,6 @@ class GrepParser:
         if self.buf != "":
             self.parseLine(self.buf)
         self.resultHandler.handleFinished()
-
-
-class RecentDirs:
-    "Encapsulates a gtk.ListStore that stores a list of recent directories"
-    def __init__ (self, maxEntries = 10):
-        self.store = gtk.ListStore(str)
-        self.maxEntries = maxEntries
-
-    def add (self, dirname):
-        "Add a directory that was just used."
-
-        for row in self.store:
-            if row[0] == dirname:
-                it = self.store.get_iter(row.path)
-                self.store.remove(it)
-
-        self.store.prepend([dirname])
-
-    def isEmpty (self):
-        return (len(self.store) == 0)
-
-    def topEntry (self):
-        if self.isEmpty():
-            return None
-        else:
-            return self.store[0][0]
 
 
 class FileSearchWindowHelper:
