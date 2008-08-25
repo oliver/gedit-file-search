@@ -23,6 +23,7 @@ import gobject
 import fcntl
 import popen2
 import re
+import urllib
 
 ui_str = """<ui>
   <menubar name="MenuBar">
@@ -438,7 +439,7 @@ class FileSearcher:
         if not(file):
             return
 
-        uri="file://%s" % file
+        uri="file://%s" % urllib.quote(file)
         gedit.commands.load_uri(window=self._window, uri=uri, line_pos=lineno)
 
     def on_btnClose_clicked (self, button):
