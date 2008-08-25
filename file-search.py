@@ -205,7 +205,7 @@ class SearchProcess:
 class GrepParser:
     """
     - buffers output from grep command
-    - extracts full (nul-delimited) lines
+    - extracts full lines
     - parses lines for file name, line number, and line text
     - passes extracted info to resultHandler
     """
