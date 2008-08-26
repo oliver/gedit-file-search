@@ -39,3 +39,13 @@ TODO
 - Gedit 2.16 quirks:
   - result list sometimes displays no more text (maybe caused by too long lines?)
 - test searching through directories with many files, many directories, or big files or files with very long lines
+- search dialog: maybe get list of files suffixes (*.C, *.py...) from Gedits internal syntax highlighting database?
+- there might be a bug (race) in cancelling: if a new grep is started after I got the child PIDs of sh and before I kill find, that new grep process is probably never killed (?!)
+- maybe do some damage control for bugs where grep is left alive: redirect grep stderr to /dev/null?
+- the expand_all() calls in _addResultFile/Line are bad for performance (esp. for > 10000 results) and should be optimized
+- check that searching through binary files doesn't break the search output etc.
+- cancelling should happen immediately (currently there might be a delay of some 100 msec - maybe text left in GrepParser etc.)
+- maybe implement some further (but probably not significant) performance improvements:
+  - call updateSummary() less often (like after the loop in parseFragment())
+  - similarly, lock (freeze) TreeStore when adding several rows at once
+  - the GrepParser could probably be sped up a bit
