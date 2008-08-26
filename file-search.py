@@ -163,7 +163,7 @@ class SearchProcess:
     def onPipeReadable (self, fd, cond):
         #print "condition: %s" % cond
         if (cond & gobject.IO_IN):
-            readText = self.pipe.read(1000)
+            readText = self.pipe.read(4000)
             #print "(read %d bytes)" % len(readText)
             if self.parser:
                 self.parser.parseFragment(readText)
