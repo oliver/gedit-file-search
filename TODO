@@ -26,6 +26,12 @@ TODO
   - remember all this also over Gedit restart
 - when opening search dialog, deduce initially-display search dir in a better way
   - it should do "the right thing" yet the user must be able to understand the decision-making way
+  - kdevelop seems to do it quite right (at least it doesn't get in my way)
+  - kate does it wrong (it uses the directory of currently-focused file, which sometimes surprises me as user)
+  - expected behavior in example cases:
+    - when starting search without ever having opened a file in that window since start: use current working dir (getcwd)
+    - after having used File Search already: use same directory as last time
+    - when starting gedit with a file on command line (like File Manager -> double click on text file): use directory of that file
 - check that activating/deactivating plugin works correctly and leaves no cruft behind
 - check focus behavior of result list
 - add keyboard shortcut for opening search dialog
@@ -47,3 +53,5 @@ TODO
   - call updateSummary() less often (like after the loop in parseFragment())
   - similarly, lock (freeze) TreeStore when adding several rows at once
   - the GrepParser could probably be sped up a bit
+- maybe implement "search for full words only" function to be consistent with normal Gedit search dialog?
+- display warnings/errors (like "invalid search directory" etc) to the user instead of printing to stdout...
