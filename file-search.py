@@ -392,12 +392,17 @@ class FileSearcher:
         self.searchProcess = SearchProcess(searchText, searchDir, self)
 
     def handleResult (self, file, lineno, linetext):
+        expandRow = False
         if not(self.files.has_key(file)):
             it = self._addResultFile(file)
             self.files[file] = it
+            expandRow = True
         else:
             it = self.files[file]
         self._addResultLine(it, lineno, linetext)
+        if expandRow:
+            path = self.treeStore.get_path(it)
+            self.treeView.expand_row(path, False)
         self.numMatches += 1
         self._updateSummary()
 
@@ -447,14 +452,12 @@ class FileSearcher:
     def _addResultFile (self, filename):
         line = "<span foreground=\"#000000\" size=\"smaller\">%s</span>" % filename
         it = self.treeStore.append(None, [line, filename, 0])
-        self.treeView.expand_all()
         return it
 
     def _addResultLine (self, it, lineno, linetext):
         linetext = escapeMarkup(linetext)
         line = "<b>%d:</b> <span foreground=\"blue\">%s</span>" % (lineno, linetext)
         self.treeStore.append(it, [line, None, lineno])
-        self.treeView.expand_all()
 
     def on_row_activated (self, widget, path, col):
         selectedIter = self.treeStore.get_iter(path)
