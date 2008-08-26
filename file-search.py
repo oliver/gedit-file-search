@@ -158,7 +158,7 @@ class SearchProcess:
 
         #print "(add watch)"
         gobject.io_add_watch(self.pipe, gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
-            self.onPipeReadable)
+            self.onPipeReadable, priority=gobject.PRIORITY_LOW)
 
     def onPipeReadable (self, fd, cond):
         #print "condition: %s" % cond
