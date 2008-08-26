@@ -270,7 +270,7 @@ class FileSearchWindowHelper:
 
     def destroy (self):
         print "have to destroy %d existing searchers" % len(self.searchers)
-        for s in self.searchers:
+        for s in self.searchers[:]:
             s.destroy()
         self._window = None
         self._plugin = None
