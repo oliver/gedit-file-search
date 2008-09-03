@@ -32,12 +32,15 @@ TODO
     - when starting search without ever having opened a file in that window since start: use current working dir (getcwd)
     - after having used File Search already: use same directory as last time
     - when starting gedit with a file on command line (like File Manager -> double click on text file): use directory of that file
+  - note: if currently-focused file couldn't be loaded correctly, then don't use it's dir as search dir (because the dir might not exist...)
 - check that activating/deactivating plugin works correctly and leaves no cruft behind
 - check focus behavior of result list
 - add keyboard shortcut for opening search dialog
 - fix list of recent directories: suppress duplicate entries like "/tmp" and "/tmp/"
 - publish initial version
 - maybe limit line length in result list?
+  - the result list widget fails to display very long lines (like 10000 chars) correctly anyway...
+  - also, on older Gedit (2.16) apparently the whole result list is broken if a very long line is added
 - add option to ignore backup files (files ending with ~ etc):
   - *.~
   - .#* (emacs backup files? or from CVS?)
@@ -48,6 +51,8 @@ TODO
 - search dialog: maybe get list of files suffixes (*.C, *.py...) from Gedits internal syntax highlighting database?
 - there might be a bug (race) in cancelling: if a new grep is started after I got the child PIDs of sh and before I kill find, that new grep process is probably never killed (?!)
 - check that searching through binary files doesn't break the search output etc.
+  - note: currently, if grep detects some file as binary (maybe because it mixes two encodings?), the file is ignored...
+    - maybe there should be a way to inform the user about ignored files
 - cancelling should happen immediately (currently there might be a delay of some 100 msec - maybe text left in GrepParser etc.)
 - maybe implement some further (but probably not significant) performance improvements:
   - call updateSummary() less often (like after the loop in parseFragment())
@@ -55,3 +60,13 @@ TODO
   - the GrepParser could probably be sped up a bit
 - maybe implement "search for full words only" function to be consistent with normal Gedit search dialog?
 - display warnings/errors (like "invalid search directory" etc) to the user instead of printing to stdout...
+- add some shortcut (button, context menu...) to result panel for opening new search dialog
+- implement maxEntries argument in RecentDirs ctor
+- test on system with "weird" fonts (and english locale): if digits have different widths, the width of side bar in result panel might flicker...
+- maybe add a "Replace" button to result panel (above Edit) which replaces all found occurences (like Find & Replace)
+- in result list, there should probably be an easy way to get the file name for a line (if there are some hundred results in a file, it is apparently difficult to get to the file name row of these lines...)
+- check that searching in directories with special files (devices/pipes/sockets...) is no problem
+- maybe sort result files? By name?
+- idea: maybe indent results to match file position in directory tree?
+- check that files with tabs are no problem
+- in list of recent dirs, normalize paths (currently same path may appear twice, once with trailing slash and once without)
