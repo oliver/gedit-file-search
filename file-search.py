@@ -28,7 +28,7 @@
 #
 # Helper classes:
 # - ProcessInfo (gets process tree info, for killing search processes)
-# - RecentDirs (holds list of recently-selected search directories, for search dialog)
+# - RecentList (holds list of recently-selected search directories, for search dialog)
 #
 
 
@@ -109,9 +109,9 @@ class ProcessInfo:
         return res
 
 
-class RecentDirs:
+class RecentList:
     """
-    Encapsulates a gtk.ListStore that stores a list of recent directories
+    Encapsulates a gtk.ListStore that stores a generic list of "most recently used entries"
     """
     def __init__ (self, gclient, confKey, maxEntries = 10):
         self.gclient = gclient
@@ -119,29 +119,29 @@ class RecentDirs:
         self.store = gtk.ListStore(str)
         self.maxEntries = maxEntries
 
-        dirs = self.gclient.get_list(self.confKey, gconf.VALUE_STRING)
-        dirs.reverse()
-        for d in dirs:
-            if d and len(d) > 0:
-                self.add(d, False)
+        entries = self.gclient.get_list(self.confKey, gconf.VALUE_STRING)
+        entries.reverse()
+        for e in entries:
+            if e and len(e) > 0:
+                self.add(e, False)
 
         # TODO: also listen for gconf changes, and reload the list then
 
-    def add (self, dirname, doStore=True):
-        "Add a directory that was just used."
+    def add (self, entrytext, doStore=True):
+        "Add an entry that was just used."
 
         for row in self.store:
-            if row[0] == dirname:
+            if row[0] == entrytext:
                 it = self.store.get_iter(row.path)
                 self.store.remove(it)
 
-        self.store.prepend([dirname])
+        self.store.prepend([entrytext])
 
         if doStore:
-            dirs = []
-            for d in self.store:
-                dirs.append(d[0])
-            self.gclient.set_list(self.confKey, gconf.VALUE_STRING, dirs)
+            entries = []
+            for e in self.store:
+                entries.append(e[0])
+            self.gclient.set_list(self.confKey, gconf.VALUE_STRING, entries)
 
     def isEmpty (self):
         return (len(self.store) == 0)
