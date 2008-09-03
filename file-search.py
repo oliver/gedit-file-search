@@ -280,6 +280,7 @@ class FileSearchWindowHelper:
         self.gclient = gconf.client_get_default()
         self.gclient.add_dir(gconfBase, gconf.CLIENT_PRELOAD_NONE)
 
+        self._lastSearchTerms = RecentList(self.gclient, "recent_search_terms")
         self._lastDirs = RecentList(self.gclient, "recent_dirs")
 
         self._insert_menu()
@@ -365,6 +366,13 @@ class FileSearchWindowHelper:
 
         # TODO: the algorithm to select a good default search dir could probably be improved...
 
+        searchText = "" # TODO: set to some good default value (like selected text)
+        self.tree.get_widget('cboSearchTextEntry').set_text(searchText)
+
+        cboLastSearches = self.tree.get_widget('cboSearchTextList')
+        cboLastSearches.set_model(self._lastSearchTerms.store)
+        cboLastSearches.set_text_column(0)
+
         # display and run the search dialog
         result = self._dialog.run()
         print "result: %s" % result
@@ -388,6 +396,7 @@ class FileSearchWindowHelper:
             print "error: directory '%s' doesn't exist!" % searchDir
             return
 
+        self._lastSearchTerms.add(searchText)
         self._lastDirs.add(searchDir)
 
         searcher = FileSearcher(self._window, self, searchText, searchDir)
