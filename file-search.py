@@ -280,7 +280,7 @@ class FileSearchWindowHelper:
         self.gclient = gconf.client_get_default()
         self.gclient.add_dir(gconfBase, gconf.CLIENT_PRELOAD_NONE)
 
-        self._lastDirs = RecentDirs(self.gclient, "recent_dirs")
+        self._lastDirs = RecentList(self.gclient, "recent_dirs")
 
         self._insert_menu()
 
