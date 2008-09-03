@@ -333,14 +333,14 @@ class FileSearchWindowHelper:
             if currFileDir != None and currFileDir.startswith("file:///"):
                 searchDir = os.path.dirname(currFileDir[7:])
 
+        # ... and display that in the text field:
+        self.tree.get_widget('cboSearchDirectoryEntry').set_text(searchDir)
+
+        # Fill the drop-down part of the text field with recent dirs:
         cboLastDirs = self.tree.get_widget('cboSearchDirectoryList')
         cboLastDirs.set_model(self._lastDirs.store)
         cboLastDirs.set_text_column(0)
 
-        # make sure that the selected default dir is really on top of the list:
-        if self._lastDirs.isEmpty() or self._lastDirs.topEntry() != searchDir:
-            self._lastDirs.add(searchDir)
-        cboLastDirs.set_active(0)
         # TODO: the algorithm to select a good default search dir could probably be improved...
 
         # display and run the search dialog
