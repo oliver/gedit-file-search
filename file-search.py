@@ -40,6 +40,7 @@ import fcntl
 import popen2
 import re
 import urllib
+import gconf
 
 ui_str = """<ui>
   <menubar name="MenuBar">
@@ -51,6 +52,8 @@ ui_str = """<ui>
   </menubar>
 </ui>
 """
+
+gconfBase = '/apps/gedit-2/plugins/file-search'
 
 
 class ProcessInfo:
@@ -110,11 +113,21 @@ class RecentDirs:
     """
     Encapsulates a gtk.ListStore that stores a list of recent directories
     """
-    def __init__ (self, maxEntries = 10):
+    def __init__ (self, gclient, confKey, maxEntries = 10):
+        self.gclient = gclient
+        self.confKey = gconfBase + "/" + confKey
         self.store = gtk.ListStore(str)
         self.maxEntries = maxEntries
 
-    def add (self, dirname):
+        dirs = self.gclient.get_list(self.confKey, gconf.VALUE_STRING)
+        dirs.reverse()
+        for d in dirs:
+            if d and len(d) > 0:
+                self.add(d, False)
+
+        # TODO: also listen for gconf changes, and reload the list then
+
+    def add (self, dirname, doStore=True):
         "Add a directory that was just used."
 
         for row in self.store:
@@ -123,6 +136,12 @@ class RecentDirs:
                 self.store.remove(it)
 
         self.store.prepend([dirname])
+
+        if doStore:
+            dirs = []
+            for d in self.store:
+                dirs.append(d[0])
+            self.gclient.set_list(self.confKey, gconf.VALUE_STRING, dirs)
 
     def isEmpty (self):
         return (len(self.store) == 0)
@@ -258,7 +277,10 @@ class FileSearchWindowHelper:
         self._dialog = None
         self.searchers = [] # list of existing SearchProcess instances
 
-        self._lastDirs = RecentDirs()
+        self.gclient = gconf.client_get_default()
+        self.gclient.add_dir(gconfBase, gconf.CLIENT_PRELOAD_NONE)
+
+        self._lastDirs = RecentDirs(self.gclient, "recent_dirs")
 
         self._insert_menu()
 
