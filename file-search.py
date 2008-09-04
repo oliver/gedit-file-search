@@ -153,6 +153,14 @@ class RecentList:
             return self.store[0][0]
 
 
+class SearchQuery:
+    """
+    Contains all parameters for a single search action.
+    """
+    text = ''
+    directory = ''
+
+
 class SearchProcess:
     """
     - starts the search command
@@ -160,10 +168,10 @@ class SearchProcess:
     - passes output to GrepParser
     - kills search command if requested
     """
-    def __init__ (self, queryText, directory, resultHandler):
+    def __init__ (self, query, resultHandler):
         self.parser = GrepParser(resultHandler)
 
-        cmd = "find '%s' -print0 2> /dev/null | xargs -0 grep -H -I -n -s -Z -e '%s' 2> /dev/null" % (directory, queryText)
+        cmd = "find '%s' -print0 2> /dev/null | xargs -0 grep -H -I -n -s -Z -e '%s' 2> /dev/null" % (query.directory, query.text)
         #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
         #cmd = "sleep 2"
         #cmd = "echo 'abc'"
@@ -399,7 +407,11 @@ class FileSearchWindowHelper:
         self._lastSearchTerms.add(searchText)
         self._lastDirs.add(searchDir)
 
-        searcher = FileSearcher(self._window, self, searchText, searchDir)
+        query = SearchQuery()
+        query.text = searchText
+        query.directory = searchDir
+
+        searcher = FileSearcher(self._window, self, query)
 
 class FileSearcher:
     """
@@ -410,7 +422,7 @@ class FileSearcher:
     - displaying matches
     A FileSearcher object lives until its result panel is closed.
     """
-    def __init__ (self, window, pluginHelper, searchText, searchDir):
+    def __init__ (self, window, pluginHelper, query):
         self._window = window
         self.pluginHelper = pluginHelper
         self.pluginHelper.registerSearcher(self)
@@ -420,7 +432,7 @@ class FileSearcher:
 
         self._createResultPanel()
         self._updateSummary()
-        self.searchProcess = SearchProcess(searchText, searchDir, self)
+        self.searchProcess = SearchProcess(query, self)
 
     def handleResult (self, file, lineno, linetext):
         expandRow = False
