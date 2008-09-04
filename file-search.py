@@ -159,6 +159,7 @@ class SearchQuery:
     """
     text = ''
     directory = ''
+    excludeHidden = False
 
 
 class SearchProcess:
@@ -171,7 +172,12 @@ class SearchProcess:
     def __init__ (self, query, resultHandler):
         self.parser = GrepParser(resultHandler)
 
-        cmd = "find '%s' -print0 2> /dev/null | xargs -0 grep -H -I -n -s -Z -e '%s' 2> /dev/null" % (query.directory, query.text)
+        findCmd = "find '%s'" % query.directory
+        if query.excludeHidden:
+            findCmd += """ \( ! -path "*/.*" \)"""
+        findCmd += " -print0 2> /dev/null"
+
+        cmd = findCmd + " | xargs -0 grep -H -I -n -s -Z -e '%s' 2> /dev/null" % (query.text)
         #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
         #cmd = "sleep 2"
         #cmd = "echo 'abc'"
@@ -393,6 +399,12 @@ class FileSearchWindowHelper:
         print "(starting search)"
         searchText = self.tree.get_widget('cboSearchTextEntry').get_text()
         searchDir = self.tree.get_widget('cboSearchDirectoryEntry').get_text()
+
+        query = SearchQuery()
+        query.text = searchText
+        query.directory = searchDir
+        query.excludeHidden = self.tree.get_widget('cbExcludeHidden').get_active()
+
         self._dialog.destroy()
 
         print "searching for '%s' in '%s'" % (searchText, searchDir)
@@ -406,10 +418,6 @@ class FileSearchWindowHelper:
 
         self._lastSearchTerms.add(searchText)
         self._lastDirs.add(searchDir)
-
-        query = SearchQuery()
-        query.text = searchText
-        query.directory = searchDir
 
         searcher = FileSearcher(self._window, self, query)
 
