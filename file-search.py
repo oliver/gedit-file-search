@@ -163,6 +163,27 @@ class SearchQuery:
     excludeBackup = False
     excludeVCS = False
 
+    def loadDefaults (self, gclient):
+        try:
+            self.excludeHidden = gclient.get_without_default(gconfBase+"/exclude_hidden").get_bool()
+        except:
+            self.excludeHidden = True
+
+        try:
+            self.excludeBackup = gclient.get_without_default(gconfBase+"/exclude_backup").get_bool()
+        except:
+            self.excludeBackup = True
+
+        try:
+            self.excludeVCS = gclient.get_without_default(gconfBase+"/exclude_vcs").get_bool()
+        except:
+            self.excludeVCS = True
+
+    def storeDefaults (self, gclient):
+        gclient.set_bool(gconfBase+"/exclude_hidden", self.excludeHidden)
+        gclient.set_bool(gconfBase+"/exclude_backup", self.excludeBackup)
+        gclient.set_bool(gconfBase+"/exclude_vcs", self.excludeVCS)
+
 
 class SearchProcess:
     """
@@ -393,6 +414,13 @@ class FileSearchWindowHelper:
         cboLastSearches.set_model(self._lastSearchTerms.store)
         cboLastSearches.set_text_column(0)
 
+        # get default values for other controls from GConf:
+        query = SearchQuery()
+        query.loadDefaults(self.gclient)
+        self.tree.get_widget('cbExcludeHidden').set_active(query.excludeHidden)
+        self.tree.get_widget('cbExcludeBackups').set_active(query.excludeBackup)
+        self.tree.get_widget('cbExcludeVCS').set_active(query.excludeVCS)
+
         # display and run the search dialog
         result = self._dialog.run()
         print "result: %s" % result
@@ -406,7 +434,6 @@ class FileSearchWindowHelper:
         searchText = self.tree.get_widget('cboSearchTextEntry').get_text()
         searchDir = self.tree.get_widget('cboSearchDirectoryEntry').get_text()
 
-        query = SearchQuery()
         query.text = searchText
         query.directory = searchDir
         query.excludeHidden = self.tree.get_widget('cbExcludeHidden').get_active()
@@ -426,6 +453,7 @@ class FileSearchWindowHelper:
 
         self._lastSearchTerms.add(searchText)
         self._lastDirs.add(searchDir)
+        query.storeDefaults(self.gclient)
 
         searcher = FileSearcher(self._window, self, query)
 
