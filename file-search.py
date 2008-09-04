@@ -160,6 +160,7 @@ class SearchQuery:
     text = ''
     directory = ''
     excludeHidden = False
+    excludeBackup = False
 
 
 class SearchProcess:
@@ -175,6 +176,8 @@ class SearchProcess:
         findCmd = "find '%s'" % query.directory
         if query.excludeHidden:
             findCmd += """ \( ! -path "*/.*" \)"""
+        if query.excludeBackup:
+            findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
         findCmd += " -print0 2> /dev/null"
 
         cmd = findCmd + " | xargs -0 grep -H -I -n -s -Z -e '%s' 2> /dev/null" % (query.text)
@@ -404,6 +407,7 @@ class FileSearchWindowHelper:
         query.text = searchText
         query.directory = searchDir
         query.excludeHidden = self.tree.get_widget('cbExcludeHidden').get_active()
+        query.excludeBackup = self.tree.get_widget('cbExcludeBackups').get_active()
 
         self._dialog.destroy()
 
