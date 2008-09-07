@@ -537,7 +537,8 @@ class FileSearcher:
         self.treeView.append_column(tc)
 
     def _addResultFile (self, filename):
-        line = "<span foreground=\"#000000\" size=\"smaller\">%s</span>" % filename
+        (directory, file) = os.path.split(filename)
+        line = "%s/<b>%s</b>" % (directory, file)
         it = self.treeStore.append(None, [line, filename, 0])
         return it
 
