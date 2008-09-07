@@ -229,6 +229,15 @@ class SearchProcess:
                 self.parser.parseFragment(readText)
             return True
         else:
+            # read all remaining data from pipe
+            while True:
+                readText = self.pipe.read(4000)
+                #print "(read %d bytes before finish)" % len(readText)
+                if len(readText) <= 0:
+                    break
+                if self.parser:
+                    self.parser.parseFragment(readText)
+
             if self.parser:
                 self.parser.finish()
             #print "(closing pipe)"
