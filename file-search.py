@@ -262,6 +262,7 @@ class SearchProcess:
         for pid in allProcs:
             print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
             os.kill(pid, 15)
+        self.parser.cancel()
 
     def destroy (self):
         """
@@ -280,9 +281,16 @@ class GrepParser:
     """
     def __init__ (self, resultHandler):
         self.buf = ""
+        self.cancelled = False
         self.resultHandler = resultHandler
 
+    def cancel (self):
+        self.cancelled = True
+
     def parseFragment (self, text):
+        if self.cancelled:
+            return
+
         self.buf = self.buf + text
 
         while '\n' in self.buf:
@@ -292,6 +300,9 @@ class GrepParser:
             self.parseLine(line)
 
     def parseLine (self, line):
+        if self.cancelled:
+            return
+
         filename = None
         lineno = None
         linetext = ""
