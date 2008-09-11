@@ -490,6 +490,7 @@ class FileSearcher:
         self._window = window
         self.pluginHelper = pluginHelper
         self.pluginHelper.registerSearcher(self)
+        self.query = query
         self.files = {}
         self.numMatches = 0
         self.wasCancelled = False
@@ -542,7 +543,7 @@ class FileSearcher:
         resultContainer.set_data("filesearcher", self)
 
         panel = self._window.get_bottom_panel()
-        panel.add_item(resultContainer, "File Search", "gtk-find")
+        panel.add_item(resultContainer, self.query.text, "gtk-find")
         panel.activate_item(resultContainer)
 
         editBtn = self.tree.get_widget("btnModifyFileSearch")
