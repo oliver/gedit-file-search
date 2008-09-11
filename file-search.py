@@ -332,7 +332,7 @@ class GrepParser:
 
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
-        print "Plugin created for", window
+        print "file-search: plugin created for", window
         self._window = window
         self._plugin = plugin
         self._dialog = None
@@ -349,7 +349,7 @@ class FileSearchWindowHelper:
         self._window.connect_object("destroy", FileSearchWindowHelper.destroy, self)
 
     def deactivate(self):
-        print "Plugin stopped for", self._window
+        print "file-search: plugin stopped for", self._window
         self.destroy()
 
     def destroy (self):
@@ -362,7 +362,8 @@ class FileSearchWindowHelper:
     def update_ui(self):
         # Called whenever the window has been updated (active tab
         # changed, etc.)
-        print "Plugin update for", self._window
+        #print "file-search: plugin update for", self._window
+        pass
 
     def registerSearcher (self, searcher):
         self.searchers.append(searcher)
