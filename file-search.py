@@ -344,6 +344,8 @@ class FileSearchWindowHelper:
         self._lastSearchTerms = RecentList(self.gclient, "recent_search_terms")
         self._lastDirs = RecentList(self.gclient, "recent_dirs")
 
+        self._lastDir = None
+
         self._insert_menu()
 
         self._window.connect_object("destroy", FileSearchWindowHelper.destroy, self)
@@ -413,10 +415,19 @@ class FileSearchWindowHelper:
 
         # find a nice default value for the search directory:
         searchDir = os.getcwdu()
-        if self._window.get_active_tab():
-            currFileDir = self._window.get_active_tab().get_document().get_uri()
-            if currFileDir != None and currFileDir.startswith("file:///"):
-                searchDir = os.path.dirname(currFileDir[7:])
+        if self._lastDir != None:
+            # if possible, use same directory as in last search:
+            searchDir = self._lastDir
+        else:
+            # this is the first search since opening this Gedit window...
+            if self._window.get_active_tab():
+                # there's a file open => try to use directory of that file
+                currFileDir = self._window.get_active_tab().get_document().get_uri()
+                if currFileDir != None and currFileDir.startswith("file:///"):
+                    searchDir = os.path.dirname(currFileDir[7:])
+            else:
+                # there's no file open => fall back to Gedit's current working dir
+                pass
 
         # ... and display that in the text field:
         self.tree.get_widget('cboSearchDirectoryEntry').set_text(searchDir)
@@ -475,6 +486,7 @@ class FileSearchWindowHelper:
         self._lastSearchTerms.add(searchText)
         self._lastDirs.add(searchDir)
         query.storeDefaults(self.gclient)
+        self._lastDir = searchDir
 
         searcher = FileSearcher(self._window, self, query)
 
