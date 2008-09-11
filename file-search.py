@@ -549,6 +549,8 @@ class FileSearcher:
         editBtn = self.tree.get_widget("btnModifyFileSearch")
         editBtn.set_label("gtk-cancel")
 
+        panel.set_property("visible", True)
+
 
         self.treeStore = gtk.TreeStore(str, str, int)
         self.treeView = self.tree.get_widget('tvFileSearchResult')
