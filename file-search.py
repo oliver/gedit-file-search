@@ -201,7 +201,7 @@ class SearchProcess:
         if query.excludeBackup:
             findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
         if query.excludeVCS:
-            findCmd += """ \( ! -path "*/CVS/*" ! -name "*/.svn/*" \)"""
+            findCmd += """ \( ! -path "*/CVS/*" ! -path "*/.svn/*" \)"""
         findCmd += " -print0 2> /dev/null"
 
         cmd = findCmd + " | xargs -0 grep -H -I -n -s -Z -e '%s' 2> /dev/null" % (query.text)
