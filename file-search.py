@@ -546,7 +546,14 @@ class FileSearcher:
             self.treeStore.append(None, [line, '', 0])
 
     def _updateSummary (self):
-        summary = "<b>%d</b> matches\nin %d files" % (self.numMatches, len(self.files))
+        if self.numMatches == 1:
+            summary = "<b>1</b> match"
+        else:
+            summary = "<b>%d</b> matches" % self.numMatches
+        if len(self.files) == 1:
+            summary += "\nin 1 file"
+        else:
+            summary += "\nin %d files" % len(self.files)
         self.tree.get_widget("lblNumMatches").set_label(summary)
 
 
