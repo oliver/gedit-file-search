@@ -466,6 +466,8 @@ class FileSearchWindowHelper:
         searchText = self.tree.get_widget('cboSearchTextEntry').get_text()
         searchDir = self.tree.get_widget('cboSearchDirectoryEntry').get_text()
 
+        searchDir = os.path.expanduser(searchDir)
+
         query.text = searchText
         query.directory = searchDir
         query.excludeHidden = self.tree.get_widget('cbExcludeHidden').get_active()
