@@ -19,7 +19,6 @@ TODO
   - or as first line in result list?
 - maybe use single-click on result line to open file (instead of double click?)
 - implement all the options in search dialog
-- make it possible to submit search dialog with Enter key
 - maybe improve search directory chooser in search dialog?
   - use some existing widget to choose directory?
 - remember options (last search terms, last search directories, search options)
@@ -36,7 +35,7 @@ TODO
 - check that activating/deactivating plugin works correctly and leaves no cruft behind
 - check focus behavior of result list
 - add keyboard shortcut for opening search dialog
-- fix list of recent directories: suppress duplicate entries like "/tmp" and "/tmp/"
+- in list of recent dirs, normalize paths (currently same path may appear twice, once with trailing slash and once without, like "/tmp" and "/tmp/")
 - publish initial version
 - maybe limit line length in result list?
   - the result list widget fails to display very long lines (like 10000 chars) correctly anyway...
@@ -54,7 +53,6 @@ TODO
 - check that searching through binary files doesn't break the search output etc.
   - note: currently, if grep detects some file as binary (maybe because it mixes two encodings?), the file is ignored...
     - maybe there should be a way to inform the user about ignored files
-- cancelling should happen immediately (currently there might be a delay of some 100 msec - maybe text left in GrepParser etc.)
 - maybe implement some further (but probably not significant) performance improvements:
   - call updateSummary() less often (like after the loop in parseFragment())
   - similarly, lock (freeze) TreeStore when adding several rows at once
@@ -71,13 +69,11 @@ TODO
 - maybe sort result files? By name?
 - idea: maybe indent results to match file position in directory tree?
 - check that files with tabs are no problem
-- in list of recent dirs, normalize paths (currently same path may appear twice, once with trailing slash and once without)
 - improve reading from pipe: start with small read buffer (100 bytes?), and increase it until a maximum is reached (4000 bytes?)
   -> goal: give results quickly yet read efficiently
 - on rhel5, there are apparently bytes left to read in the pipe after we got the HUP signal (at least with buffer = 300 bytes)
   -> test this on other systems
   -> maybe, on close, try to read all remaining data from pipe until pipe is empty? Is that possible without blocking?
-- in result list, emphasize file names of matching files
 - test with file /usr/share/festival/voices/english/kal_diphone/group/kallpc8k.group (from festvox-kallpc8k package): on some systems, when searching for "abc", the following warning appears:
 sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: Error on line 1 char 64: Element 'markup' was closed, but the currently open element is 'span'
 - for dropdown list of recent search terms: maybe use same list as in normal Gedit search dialog?
@@ -85,6 +81,5 @@ sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: E
 - search dialog: replace Cancel button with Close (to be consistent with normal Gedit search dialog)
 - result panel: use correct singular forms for "N matches in M files" text
 - maybe make result list insensitive if no matches were found?
-- make sure bottom pane is displayed when search is started
 - maybe put .glade and .py files into separate subdirectory in ~/.gnome2/gedit/plugins/ ?
 - display better icon for plugin in Gedit -> Preferences -> Plugins
