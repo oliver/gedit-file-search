@@ -480,7 +480,6 @@ class FileSearchWindowHelper:
         if searchText == "":
             print "internal error: search text is empty!"
             return
-        searchDir = os.path.expanduser(searchDir)
         if not(os.path.exists(searchDir)):
             print "error: directory '%s' doesn't exist!" % searchDir
             return
