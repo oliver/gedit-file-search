@@ -429,6 +429,8 @@ class FileSearchWindowHelper:
                 # there's no file open => fall back to Gedit's current working dir
                 pass
 
+        searchDir = os.path.normpath(searchDir) + "/"
+
         # ... and display that in the text field:
         self.tree.get_widget('cboSearchDirectoryEntry').set_text(searchDir)
 
@@ -467,6 +469,7 @@ class FileSearchWindowHelper:
         searchDir = self.tree.get_widget('cboSearchDirectoryEntry').get_text()
 
         searchDir = os.path.expanduser(searchDir)
+        searchDir = os.path.normpath(searchDir) + "/"
 
         query.text = searchText
         query.directory = searchDir
