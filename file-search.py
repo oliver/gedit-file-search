@@ -160,6 +160,7 @@ class SearchQuery:
     text = ''
     directory = ''
     caseSensitive = True
+    isRegExp = False
     excludeHidden = True
     excludeBackup = True
     excludeVCS = True
@@ -169,6 +170,11 @@ class SearchQuery:
             self.caseSensitive = gclient.get_without_default(gconfBase+"/case_sensitive").get_bool()
         except:
             self.caseSensitive = True
+
+        try:
+            self.isRegExp = gclient.get_without_default(gconfBase+"/is_reg_exp").get_bool()
+        except:
+            self.isRegExp = False
 
         try:
             self.excludeHidden = gclient.get_without_default(gconfBase+"/exclude_hidden").get_bool()
@@ -187,6 +193,7 @@ class SearchQuery:
 
     def storeDefaults (self, gclient):
         gclient.set_bool(gconfBase+"/case_sensitive", self.caseSensitive)
+        gclient.set_bool(gconfBase+"/is_reg_exp", self.isRegExp)
         gclient.set_bool(gconfBase+"/exclude_hidden", self.excludeHidden)
         gclient.set_bool(gconfBase+"/exclude_backup", self.excludeBackup)
         gclient.set_bool(gconfBase+"/exclude_vcs", self.excludeVCS)
@@ -214,6 +221,8 @@ class SearchProcess:
         grepCmd = " grep -H -I -n -s -Z"
         if not(query.caseSensitive):
             grepCmd += " -i"
+        if not(query.isRegExp):
+            grepCmd += " -F"
         grepCmd += " -e '%s' 2> /dev/null" % (query.text)
 
         cmd = findCmd + " | xargs -0" + grepCmd
@@ -464,6 +473,7 @@ class FileSearchWindowHelper:
         query = SearchQuery()
         query.loadDefaults(self.gclient)
         self.tree.get_widget('cbCaseSensitive').set_active(query.caseSensitive)
+        self.tree.get_widget('cbRegExp').set_active(query.isRegExp)
         self.tree.get_widget('cbExcludeHidden').set_active(query.excludeHidden)
         self.tree.get_widget('cbExcludeBackups').set_active(query.excludeBackup)
         self.tree.get_widget('cbExcludeVCS').set_active(query.excludeVCS)
@@ -487,6 +497,7 @@ class FileSearchWindowHelper:
         query.text = searchText
         query.directory = searchDir
         query.caseSensitive = self.tree.get_widget('cbCaseSensitive').get_active()
+        query.isRegExp = self.tree.get_widget('cbRegExp').get_active()
         query.excludeHidden = self.tree.get_widget('cbExcludeHidden').get_active()
         query.excludeBackup = self.tree.get_widget('cbExcludeBackups').get_active()
         query.excludeVCS = self.tree.get_widget('cbExcludeVCS').get_active()

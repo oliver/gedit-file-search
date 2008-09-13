@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sat Sep 13 00:46:43 2008 -->
+<!--Generated with glade3 3.4.5 on Sat Sep 13 14:02:56 2008 -->
 <glade-interface>
   <widget class="GtkDialog" id="searchDialog">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -250,7 +250,7 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkCheckButton" id="checkbutton7">
+              <widget class="GtkCheckButton" id="cbRegExp">
                 <property name="width_request">173</property>
                 <property name="height_request">25</property>
                 <property name="visible">True</property>
