@@ -161,6 +161,7 @@ class SearchQuery:
     directory = ''
     caseSensitive = True
     isRegExp = False
+    includeSubfolders = True
     excludeHidden = True
     excludeBackup = True
     excludeVCS = True
@@ -175,6 +176,11 @@ class SearchQuery:
             self.isRegExp = gclient.get_without_default(gconfBase+"/is_reg_exp").get_bool()
         except:
             self.isRegExp = False
+
+        try:
+            self.includeSubfolders = gclient.get_without_default(gconfBase+"/include_subfolders").get_bool()
+        except:
+            self.includeSubfolders = True
 
         try:
             self.excludeHidden = gclient.get_without_default(gconfBase+"/exclude_hidden").get_bool()
@@ -194,6 +200,7 @@ class SearchQuery:
     def storeDefaults (self, gclient):
         gclient.set_bool(gconfBase+"/case_sensitive", self.caseSensitive)
         gclient.set_bool(gconfBase+"/is_reg_exp", self.isRegExp)
+        gclient.set_bool(gconfBase+"/include_subfolders", self.includeSubfolders)
         gclient.set_bool(gconfBase+"/exclude_hidden", self.excludeHidden)
         gclient.set_bool(gconfBase+"/exclude_backup", self.excludeBackup)
         gclient.set_bool(gconfBase+"/exclude_vcs", self.excludeVCS)
@@ -210,6 +217,8 @@ class SearchProcess:
         self.parser = GrepParser(resultHandler)
 
         findCmd = "find '%s'" % query.directory
+        if not(query.includeSubfolders):
+            findCmd += """ -maxdepth 1"""
         if query.excludeHidden:
             findCmd += """ \( ! -path "*/.*" \)"""
         if query.excludeBackup:
@@ -474,6 +483,7 @@ class FileSearchWindowHelper:
         query.loadDefaults(self.gclient)
         self.tree.get_widget('cbCaseSensitive').set_active(query.caseSensitive)
         self.tree.get_widget('cbRegExp').set_active(query.isRegExp)
+        self.tree.get_widget('cbIncludeSubfolders').set_active(query.includeSubfolders)
         self.tree.get_widget('cbExcludeHidden').set_active(query.excludeHidden)
         self.tree.get_widget('cbExcludeBackups').set_active(query.excludeBackup)
         self.tree.get_widget('cbExcludeVCS').set_active(query.excludeVCS)
@@ -498,6 +508,7 @@ class FileSearchWindowHelper:
         query.directory = searchDir
         query.caseSensitive = self.tree.get_widget('cbCaseSensitive').get_active()
         query.isRegExp = self.tree.get_widget('cbRegExp').get_active()
+        query.includeSubfolders = self.tree.get_widget('cbIncludeSubfolders').get_active()
         query.excludeHidden = self.tree.get_widget('cbExcludeHidden').get_active()
         query.excludeBackup = self.tree.get_widget('cbExcludeBackups').get_active()
         query.excludeVCS = self.tree.get_widget('cbExcludeVCS').get_active()
