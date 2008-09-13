@@ -159,11 +159,17 @@ class SearchQuery:
     """
     text = ''
     directory = ''
+    caseSensitive = True
     excludeHidden = False
     excludeBackup = False
     excludeVCS = False
 
     def loadDefaults (self, gclient):
+        try:
+            self.caseSensitive = gclient.get_without_default(gconfBase+"/case_sensitive").get_bool()
+        except:
+            self.caseSensitive = True
+
         try:
             self.excludeHidden = gclient.get_without_default(gconfBase+"/exclude_hidden").get_bool()
         except:
@@ -180,6 +186,7 @@ class SearchQuery:
             self.excludeVCS = True
 
     def storeDefaults (self, gclient):
+        gclient.set_bool(gconfBase+"/case_sensitive", self.caseSensitive)
         gclient.set_bool(gconfBase+"/exclude_hidden", self.excludeHidden)
         gclient.set_bool(gconfBase+"/exclude_backup", self.excludeBackup)
         gclient.set_bool(gconfBase+"/exclude_vcs", self.excludeVCS)
@@ -204,7 +211,12 @@ class SearchProcess:
             findCmd += """ \( ! -path "*/CVS/*" ! -path "*/.svn/*" ! -path "*/.git/*" \)"""
         findCmd += " -print0 2> /dev/null"
 
-        cmd = findCmd + " | xargs -0 grep -H -I -n -s -Z -e '%s' 2> /dev/null" % (query.text)
+        grepCmd = " grep -H -I -n -s -Z"
+        if not(query.caseSensitive):
+            grepCmd += " -i"
+        grepCmd += " -e '%s' 2> /dev/null" % (query.text)
+
+        cmd = findCmd + " | xargs -0" + grepCmd
         #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
         #cmd = "sleep 2"
         #cmd = "echo 'abc'"
@@ -451,6 +463,7 @@ class FileSearchWindowHelper:
         # get default values for other controls from GConf:
         query = SearchQuery()
         query.loadDefaults(self.gclient)
+        self.tree.get_widget('cbCaseSensitive').set_active(query.caseSensitive)
         self.tree.get_widget('cbExcludeHidden').set_active(query.excludeHidden)
         self.tree.get_widget('cbExcludeBackups').set_active(query.excludeBackup)
         self.tree.get_widget('cbExcludeVCS').set_active(query.excludeVCS)
@@ -473,6 +486,7 @@ class FileSearchWindowHelper:
 
         query.text = searchText
         query.directory = searchDir
+        query.caseSensitive = self.tree.get_widget('cbCaseSensitive').get_active()
         query.excludeHidden = self.tree.get_widget('cbExcludeHidden').get_active()
         query.excludeBackup = self.tree.get_widget('cbExcludeBackups').get_active()
         query.excludeVCS = self.tree.get_widget('cbExcludeVCS').get_active()
