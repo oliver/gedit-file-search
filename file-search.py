@@ -160,9 +160,9 @@ class SearchQuery:
     text = ''
     directory = ''
     caseSensitive = True
-    excludeHidden = False
-    excludeBackup = False
-    excludeVCS = False
+    excludeHidden = True
+    excludeBackup = True
+    excludeVCS = True
 
     def loadDefaults (self, gclient):
         try:
