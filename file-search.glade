@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sat Sep 13 14:02:56 2008 -->
+<!--Generated with glade3 3.4.5 on Sat Sep 13 15:12:36 2008 -->
 <glade-interface>
   <widget class="GtkDialog" id="searchDialog">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -89,8 +89,8 @@
             </child>
             <child>
               <widget class="GtkRadioButton" id="radiobutton1">
-                <property name="width_request">155</property>
-                <property name="height_request">25</property>
+                <property name="width_request">76</property>
+                <property name="height_request">24</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -119,7 +119,7 @@
             </child>
             <child>
               <widget class="GtkRadioButton" id="radiobutton2">
-                <property name="width_request">131</property>
+                <property name="width_request">103</property>
                 <property name="height_request">24</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -130,7 +130,7 @@
                 <property name="group">radiobutton1</property>
               </widget>
               <packing>
-                <property name="x">234</property>
+                <property name="x">217</property>
                 <property name="y">110</property>
               </packing>
             </child>
@@ -217,22 +217,6 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkCheckButton" id="checkbutton5">
-                <property name="width_request">246</property>
-                <property name="height_request">23</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label" translatable="yes">Only project files</property>
-                <property name="response_id">0</property>
-                <property name="draw_indicator">True</property>
-              </widget>
-              <packing>
-                <property name="x">51</property>
-                <property name="y">324</property>
-              </packing>
-            </child>
-            <child>
               <widget class="GtkCheckButton" id="cbExcludeHidden">
                 <property name="width_request">163</property>
                 <property name="height_request">25</property>
@@ -292,6 +276,40 @@
               <packing>
                 <property name="x">90</property>
                 <property name="y">220</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkRadioButton" id="radiobutton3">
+                <property name="width_request">108</property>
+                <property name="height_request">22</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="label" translatable="yes">current file</property>
+                <property name="response_id">0</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+                <property name="group">radiobutton1</property>
+              </widget>
+              <packing>
+                <property name="x">319</property>
+                <property name="y">111</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkRadioButton" id="radiobutton4">
+                <property name="width_request">115</property>
+                <property name="height_request">22</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="label" translatable="yes">project files</property>
+                <property name="response_id">0</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+                <property name="group">radiobutton1</property>
+              </widget>
+              <packing>
+                <property name="x">428</property>
+                <property name="y">112</property>
               </packing>
             </child>
           </widget>
