@@ -401,7 +401,6 @@ class FileSearchWindowHelper:
         pass
 
     def onTabAdded (self, tab):
-        print "new tab added (self: %s; tab: %s)" % (self, tab)
         tab.get_view().connect_object("button-press-event", FileSearchWindowHelper.onButtonPress, self, tab)
         tab.get_view().connect_object("popup-menu", FileSearchWindowHelper.onPopupMenu, self, tab)
         tab.get_view().connect_object("populate-popup", FileSearchWindowHelper.onPopulatePopup, self, tab)
@@ -416,8 +415,6 @@ class FileSearchWindowHelper:
         self._lastClickIter = tab.get_document().get_iter_at_mark(insertMark)
 
     def onPopulatePopup (self, menu, tab):
-        print "populate popup (menu: %s)" % menu
-
         # add separator:
         sepMi = gtk.MenuItem()
         sepMi.show()
@@ -453,9 +450,7 @@ class FileSearchWindowHelper:
         menu.prepend(mi)
 
     def onMenuItemActivate (self, searchText):
-        print "menu item activated; text: '%s'" % searchText
         self.openSearchDialog(searchText)
-        pass
 
     def registerSearcher (self, searcher):
         self.searchers.append(searcher)
