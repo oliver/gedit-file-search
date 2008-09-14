@@ -376,6 +376,8 @@ class FileSearchWindowHelper:
 
         self._lastDir = None
 
+        self._lastClickIter = None # TextIter at position of last right-click or last popup menu
+
         self._insert_menu()
 
         self._window.connect_object("destroy", FileSearchWindowHelper.destroy, self)
@@ -400,7 +402,18 @@ class FileSearchWindowHelper:
 
     def onTabAdded (self, tab):
         print "new tab added (self: %s; tab: %s)" % (self, tab)
+        tab.get_view().connect_object("button-press-event", FileSearchWindowHelper.onButtonPress, self, tab)
+        tab.get_view().connect_object("popup-menu", FileSearchWindowHelper.onPopupMenu, self, tab)
         tab.get_view().connect_object("populate-popup", FileSearchWindowHelper.onPopulatePopup, self, tab)
+
+    def onButtonPress (self, event, tab):
+        if event.button == 3:
+            (bufX, bufY) = tab.get_view().window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT, int(event.x), int(event.y))
+            self._lastClickIter = tab.get_view().get_iter_at_location(bufX, bufY)
+
+    def onPopupMenu (self, tab):
+        insertMark = tab.get_document().get_insert()
+        self._lastClickIter = tab.get_document().get_iter_at_mark(insertMark)
 
     def onPopulatePopup (self, menu, tab):
         print "populate popup (menu: %s)" % menu
@@ -418,6 +431,16 @@ class FileSearchWindowHelper:
             # Only use selected text if it doesn't span multiple lines:
             if selectionIters[0].get_line() == selectionIters[1].get_line():
                 selText = selectionIters[0].get_text(selectionIters[1])
+
+        # if no text is selected, use current word under cursor:
+        if not(selText) and self._lastClickIter:
+            startIter = self._lastClickIter.copy()
+            if not(startIter.starts_word()):
+                startIter.backward_word_start()
+            endIter = startIter.copy()
+            if endIter.inside_word():
+                endIter.forward_word_end()
+            selText = startIter.get_text(endIter)
 
         # add actual menu item:
         mi = gtk.MenuItem('Search files for "%s"' % selText, use_underline=False)
