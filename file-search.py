@@ -427,6 +427,7 @@ class FileSearchWindowHelper:
 
     def onMenuItemActivate (self, searchText):
         print "menu item activated; text: '%s'" % searchText
+        self.openSearchDialog(searchText)
         pass
 
     def registerSearcher (self, searcher):
@@ -462,6 +463,9 @@ class FileSearchWindowHelper:
             self.tree.get_widget('btnSearch').set_sensitive(True)
 
     def on_search_files_activate(self, action):
+        self.openSearchDialog()
+
+    def openSearchDialog (self, searchText = None):
         print "(find in files)"
 
         gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
@@ -503,14 +507,15 @@ class FileSearchWindowHelper:
 
         # TODO: the algorithm to select a good default search dir could probably be improved...
 
-        searchText = ""
-        if self._window.get_active_tab():
-            currDoc = self._window.get_active_document()
-            selectionIters = currDoc.get_selection_bounds()
-            if selectionIters and len(selectionIters) == 2:
-                # Only use selected text if it doesn't span multiple lines:
-                if selectionIters[0].get_line() == selectionIters[1].get_line():
-                    searchText = selectionIters[0].get_text(selectionIters[1])
+        if searchText == None:
+            searchText = ""
+            if self._window.get_active_tab():
+                currDoc = self._window.get_active_document()
+                selectionIters = currDoc.get_selection_bounds()
+                if selectionIters and len(selectionIters) == 2:
+                    # Only use selected text if it doesn't span multiple lines:
+                    if selectionIters[0].get_line() == selectionIters[1].get_line():
+                        searchText = selectionIters[0].get_text(selectionIters[1])
         self.tree.get_widget('cboSearchTextEntry').set_text(searchText)
 
         cboLastSearches = self.tree.get_widget('cboSearchTextList')
