@@ -35,7 +35,6 @@ TODO
 - check that activating/deactivating plugin works correctly and leaves no cruft behind
 - check focus behavior of result list
 - add keyboard shortcut for opening search dialog
-- in list of recent dirs, normalize paths (currently same path may appear twice, once with trailing slash and once without, like "/tmp" and "/tmp/")
 - publish initial version
 - maybe limit line length in result list?
   - the result list widget fails to display very long lines (like 10000 chars) correctly anyway...
@@ -61,6 +60,7 @@ TODO
 - display warnings/errors (like "invalid search directory" etc) to the user instead of printing to stdout...
 - add some shortcut (button, context menu...) to result panel for opening new search dialog
 - implement maxEntries argument in RecentDirs ctor
+  - how many directories (or search terms) does Gedit allow in its dialog?
 - test on system with "weird" fonts (and english locale): if digits have different widths, the width of side bar in result panel might flicker...
   - seems to be fixed on recent systems (or with recent fonts): all digits now have similar width, so the width of the "N matches" text now doesn't change so often
 - maybe add a "Replace" button to result panel (above Edit) which replaces all found occurences (like Find & Replace)
@@ -78,8 +78,19 @@ TODO
 sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: Error on line 1 char 64: Element 'markup' was closed, but the currently open element is 'span'
 - for dropdown list of recent search terms: maybe use same list as in normal Gedit search dialog?
   - apparently gedit stores this list in /apps/gnome-settings/gedit/history-gedit2_search_for_entry
-- search dialog: replace Cancel button with Close (to be consistent with normal Gedit search dialog)
-- result panel: use correct singular forms for "N matches in M files" text
 - maybe make result list insensitive if no matches were found?
 - maybe put .glade and .py files into separate subdirectory in ~/.gnome2/gedit/plugins/ ?
 - display better icon for plugin in Gedit -> Preferences -> Plugins
+- add more VCS directory patterns:
+  - Bazaar
+  - Mercurial
+  - RCS
+- translate visible text into other languages (l10n/i18n)
+- should the result list allow find-as-you-type?
+- add test files with different encodings (UTF8, UTF7, UTF16, ISO-8859-1)
+- search dialog: initialize search term field with some sane default (like currently-selected word)
+- sanitize search term before starting search (make sure it contains no line breaks etc.)
+  - or should it be allowed to specify a search term with line breaks?
+- make it possible to copy lines from result list
+  - maybe add context menu for this?
+- remove debug messages
