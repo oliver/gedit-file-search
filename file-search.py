@@ -379,6 +379,7 @@ class FileSearchWindowHelper:
         self._insert_menu()
 
         self._window.connect_object("destroy", FileSearchWindowHelper.destroy, self)
+        self._window.connect_object("tab-added", FileSearchWindowHelper.onTabAdded, self)
 
     def deactivate(self):
         print "file-search: plugin stopped for", self._window
@@ -395,6 +396,37 @@ class FileSearchWindowHelper:
         # Called whenever the window has been updated (active tab
         # changed, etc.)
         #print "file-search: plugin update for", self._window
+        pass
+
+    def onTabAdded (self, tab):
+        print "new tab added (self: %s; tab: %s)" % (self, tab)
+        tab.get_view().connect_object("populate-popup", FileSearchWindowHelper.onPopulatePopup, self, tab)
+
+    def onPopulatePopup (self, menu, tab):
+        print "populate popup (menu: %s)" % menu
+
+        # add separator:
+        sepMi = gtk.MenuItem()
+        sepMi.show()
+        menu.prepend(sepMi)
+
+        # first check if user has selected some text:
+        selText = ""
+        currDoc = tab.get_document()
+        selectionIters = currDoc.get_selection_bounds()
+        if selectionIters and len(selectionIters) == 2:
+            # Only use selected text if it doesn't span multiple lines:
+            if selectionIters[0].get_line() == selectionIters[1].get_line():
+                selText = selectionIters[0].get_text(selectionIters[1])
+
+        # add actual menu item:
+        mi = gtk.MenuItem('Search files for "%s"' % selText, use_underline=False)
+        mi.connect_object("activate", FileSearchWindowHelper.onMenuItemActivate, self, selText)
+        mi.show()
+        menu.prepend(mi)
+
+    def onMenuItemActivate (self, searchText):
+        print "menu item activated; text: '%s'" % searchText
         pass
 
     def registerSearcher (self, searcher):
