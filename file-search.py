@@ -117,7 +117,7 @@ class RecentList:
         self.gclient = gclient
         self.confKey = gconfBase + "/" + confKey
         self.store = gtk.ListStore(str)
-        self.maxEntries = maxEntries
+        self._maxEntries = maxEntries
 
         entries = self.gclient.get_list(self.confKey, gconf.VALUE_STRING)
         entries.reverse()
@@ -136,6 +136,10 @@ class RecentList:
                 self.store.remove(it)
 
         self.store.prepend([entrytext])
+
+        if len(self.store) > self._maxEntries:
+            it = self.store.get_iter(self.store[-1].path)
+            self.store.remove(it)
 
         if doStore:
             entries = []
