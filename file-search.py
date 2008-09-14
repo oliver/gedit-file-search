@@ -443,7 +443,11 @@ class FileSearchWindowHelper:
             selText = startIter.get_text(endIter)
 
         # add actual menu item:
-        mi = gtk.MenuItem('Search files for "%s"' % selText, use_underline=False)
+        if selText:
+            menuText = 'Search files for "%s"' % selText
+        else:
+            menuText = 'Search files...'
+        mi = gtk.MenuItem(menuText, use_underline=False)
         mi.connect_object("activate", FileSearchWindowHelper.onMenuItemActivate, self, selText)
         mi.show()
         menu.prepend(mi)
