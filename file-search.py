@@ -170,6 +170,7 @@ class SearchQuery:
     excludeHidden = True
     excludeBackup = True
     excludeVCS = True
+    selectFileTypes = False
 
     def loadDefaults (self, gclient):
         try:
@@ -202,6 +203,11 @@ class SearchQuery:
         except:
             self.excludeVCS = True
 
+        try:
+            self.selectFileTypes = gclient.get_without_default(gconfBase+"/select_file_types").get_bool()
+        except:
+            self.selectFileTypes = False
+
     def storeDefaults (self, gclient):
         gclient.set_bool(gconfBase+"/case_sensitive", self.caseSensitive)
         gclient.set_bool(gconfBase+"/is_reg_exp", self.isRegExp)
@@ -209,6 +215,7 @@ class SearchQuery:
         gclient.set_bool(gconfBase+"/exclude_hidden", self.excludeHidden)
         gclient.set_bool(gconfBase+"/exclude_backup", self.excludeBackup)
         gclient.set_bool(gconfBase+"/exclude_vcs", self.excludeVCS)
+        gclient.set_bool(gconfBase+"/select_file_types", self.selectFileTypes)
 
 
 class SearchProcess:
@@ -572,6 +579,7 @@ class FileSearchWindowHelper:
         self.tree.get_widget('cbExcludeHidden').set_active(query.excludeHidden)
         self.tree.get_widget('cbExcludeBackups').set_active(query.excludeBackup)
         self.tree.get_widget('cbExcludeVCS').set_active(query.excludeVCS)
+        self.tree.get_widget('cbSelectFileTypes').set_active(query.selectFileTypes)
 
         # display and run the search dialog
         result = self._dialog.run()
@@ -598,6 +606,7 @@ class FileSearchWindowHelper:
         query.excludeHidden = self.tree.get_widget('cbExcludeHidden').get_active()
         query.excludeBackup = self.tree.get_widget('cbExcludeBackups').get_active()
         query.excludeVCS = self.tree.get_widget('cbExcludeVCS').get_active()
+        query.selectFileTypes = self.tree.get_widget('cbSelectFileTypes').get_active()
 
         self._dialog.destroy()
 
