@@ -378,6 +378,7 @@ class FileSearchWindowHelper:
 
         self._lastSearchTerms = RecentList(self.gclient, "recent_search_terms")
         self._lastDirs = RecentList(self.gclient, "recent_dirs")
+        self._lastTypes = RecentList(self.gclient, "recent_types")
 
         self._lastDir = None
 
@@ -549,6 +550,18 @@ class FileSearchWindowHelper:
         cboLastSearches.set_model(self._lastSearchTerms.store)
         cboLastSearches.set_text_column(0)
 
+        # Fill list of file types:
+        cboLastTypes = self.tree.get_widget('cboFileTypeList')
+        cboLastTypes.set_model(self._lastTypes.store)
+        cboLastTypes.set_text_column(0)
+
+        if not(self._lastTypes.isEmpty()):
+            typeListString = self._lastTypes.topEntry()
+            self.tree.get_widget('cboFileTypeEntry').set_text(typeListString)
+        else:
+            self.tree.get_widget('cboFileTypeEntry').set_text("*")
+
+
         # get default values for other controls from GConf:
         query = SearchQuery()
         query.loadDefaults(self.gclient)
@@ -571,6 +584,7 @@ class FileSearchWindowHelper:
         print "(starting search)"
         searchText = self.tree.get_widget('cboSearchTextEntry').get_text()
         searchDir = self.tree.get_widget('cboSearchDirectoryEntry').get_text()
+        typeListString = self.tree.get_widget('cboFileTypeEntry').get_text()
 
         searchDir = os.path.expanduser(searchDir)
         searchDir = os.path.normpath(searchDir) + "/"
@@ -596,6 +610,7 @@ class FileSearchWindowHelper:
 
         self._lastSearchTerms.add(searchText)
         self._lastDirs.add(searchDir)
+        self._lastTypes.add(typeListString)
         query.storeDefaults(self.gclient)
         self._lastDir = searchDir
 
