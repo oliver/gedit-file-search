@@ -224,7 +224,8 @@ class SearchProcess:
         if not(query.includeSubfolders):
             findCmd += """ -maxdepth 1"""
         if query.excludeHidden:
-            findCmd += """ \( ! -path "*/.*" \)"""
+            findCmd += """ \( ! -path "%s*/.*" \)""" % query.directory
+            findCmd += """ \( ! -path "%s.*" \)""" % query.directory
         if query.excludeBackup:
             findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
         if query.excludeVCS:
