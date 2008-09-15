@@ -35,6 +35,7 @@
 import os
 import gedit
 import gtk
+import gtk.glade
 import gobject
 import fcntl
 import popen2
