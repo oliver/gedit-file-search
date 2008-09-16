@@ -171,6 +171,11 @@ class SearchQuery:
     excludeBackup = True
     excludeVCS = True
     selectFileTypes = False
+    fileTypeString = ''
+
+    def parseFileTypeString (self):
+        "Returns a list with the separate file globs from fileTypeString"
+        return self.fileTypeString.split()
 
     def loadDefaults (self, gclient):
         try:
@@ -238,6 +243,12 @@ class SearchProcess:
             findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
         if query.excludeVCS:
             findCmd += """ \( ! -path "*/CVS/*" ! -path "*/.svn/*" ! -path "*/.git/*" \)"""
+        if query.selectFileTypes:
+            fileTypeList = query.parseFileTypeString()
+            findCmd += """ \( -false"""
+            for t in fileTypeList:
+                findCmd += ' -o -name "%s"' % t
+            findCmd += """ \)"""
         findCmd += " -print0 2> /dev/null"
 
         grepCmd = " grep -H -I -n -s -Z"
@@ -607,6 +618,7 @@ class FileSearchWindowHelper:
         query.excludeBackup = self.tree.get_widget('cbExcludeBackups').get_active()
         query.excludeVCS = self.tree.get_widget('cbExcludeVCS').get_active()
         query.selectFileTypes = self.tree.get_widget('cbSelectFileTypes').get_active()
+        query.fileTypeString = typeListString
 
         self._dialog.destroy()
 
