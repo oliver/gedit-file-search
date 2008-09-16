@@ -807,7 +807,7 @@ class FileSearcher:
 
                 it = treeview.get_model().get_iter(path[0])
                 markupText = treeview.get_model().get_value(it, 0)
-                plainText = pango.parse_markup(markupText)[1]
+                plainText = pango.parse_markup(markupText, u'\x00')[1]
 
                 menu = gtk.Menu()
                 mi = gtk.ImageMenuItem("gtk-copy")
