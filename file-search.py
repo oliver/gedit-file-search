@@ -821,7 +821,6 @@ class FileSearcher:
             return False
 
     def onPopupMenuItemActivate (self, text):
-        print "(copy text: '%s')" % text
         clipboard = gtk.clipboard_get()
         clipboard.set_text(text)
         clipboard.store()
