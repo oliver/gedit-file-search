@@ -804,9 +804,12 @@ class FileSearcher:
                 treeview.grab_focus()
                 treeview.set_cursor(path[0], path[1], False)
 
+                it = treeview.get_model().get_iter(path[0])
+                markupText = treeview.get_model().get_value(it, 0)
+
                 menu = gtk.Menu()
                 mi = gtk.ImageMenuItem("gtk-copy")
-                mi.connect_object("activate", FileSearcher.onPopupMenuItemActivate, self)
+                mi.connect_object("activate", FileSearcher.onPopupMenuItemActivate, self, markupText)
                 mi.show()
                 menu.append(mi)
 
@@ -815,9 +818,11 @@ class FileSearcher:
         else:
             return False
 
-    def onPopupMenuItemActivate (self):
-        print "(copy text)"
-        pass
+    def onPopupMenuItemActivate (self, text):
+        print "(copy text: '%s')" % text
+        clipboard = gtk.clipboard_get()
+        clipboard.set_text(text)
+        clipboard.store()
 
 
 def escapeMarkup (origText):
