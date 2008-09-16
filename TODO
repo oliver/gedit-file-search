@@ -93,8 +93,6 @@ sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: E
 - maybe display context menu entry only if enabled in configuration (to make the menu less cluttered)?
 - evil bug: when searching inside a hidden directory, and having the "Exclude hidden files/folders" checkbox enabled, no matches are found
   - similar problems might occur with the other Exclude options...
-- result panel: maybe add some border around result list control?
-  - check how other panel tabs do this
 - idea: it would be nice if the result list would display some "context lines" for every search result
   - maybe as tooltip for every line?
     - the tooltip could display 3 lines before and after the result, with syntax highlighting, and with the search term marked
@@ -105,7 +103,9 @@ sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: E
 - handle empty dropdown lists of recent dirs/texts/types better (normal Gedit search dialog displays a single, empty entry, while we display a 2-pixel-high list...)
 - idea for search dialog: at bottom of list of recent dirs, there could be a separator, followed by some "special" directories: directory of current file, maybe its parent, current working dir of Gedit, current dir of side pane... This could make it easier to access these dirs, without setting them as default
 - in list of recent dirs, maybe write the last path element in bold font, to make it stand out more? Is this even possible?
+  - looks like the gtk.ComboBoxEntry doesn't recognize markup...
 - don't allow the search dialog window to be resizable vertically
 - maybe somehow integrate with File Browser in side pane?
 - would it be possible to add real "text wrap" to the lines in result list? So that lines are correctly wrapped at the window border?
 - check with gedit-2.22.3/gedit/gedittextregion.c: there's a special char in a name, which is displayed wrong in result list
+- if list of recent file types is empty (ie. when starting to use the plugin), maybe add some example entries as recent entries (like "*.C *.c *.h"), so people can see the syntax of that field (space-separated file globs)?
