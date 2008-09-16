@@ -87,10 +87,32 @@ sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: E
   - RCS
 - translate visible text into other languages (l10n/i18n)
 - should the result list allow find-as-you-type?
+  - yes, would be nice to have; also, it should allow searching in path names, single files names (ie. the bold part), line numbers, and lines itself... is that possible?
 - add test files with different encodings (UTF8, UTF7, UTF16, ISO-8859-1)
 - search dialog: initialize search term field with some sane default (like currently-selected word)
+  - current algorithm needs some more testing in actual use cases
 - sanitize search term before starting search (make sure it contains no line breaks etc.)
   - or should it be allowed to specify a search term with line breaks?
 - make it possible to copy lines from result list
   - maybe add context menu for this?
 - remove debug messages
+- maybe display context menu entry only if enabled in configuration (to make the menu less cluttered)?
+- evil bug: when searching inside a hidden directory, and having the "Exclude hidden files/folders" checkbox enabled, no matches are found
+  - similar problems might occur with the other Exclude options...
+- result panel: maybe add some border around result list control?
+  - check how other panel tabs do this
+- idea: it would be nice if the result list would display some "context lines" for every search result
+  - maybe as tooltip for every line?
+    - the tooltip could display 3 lines before and after the result, with syntax highlighting, and with the search term marked
+    - the tooltip could also contain the file name (which is sometimes quite difficult to see, esp. if there are lots of results for a file)
+- maybe add tooltips for (some) controls in search dialog, for explaining the more obscure options like "exclude VCS folders"?
+- handle invalid values in file type text field
+  - display warning message if text field is left empty
+- handle empty dropdown lists of recent dirs/texts/types better (normal Gedit search dialog displays a single, empty entry, while we display a 2-pixel-high list...)
+- idea for search dialog: at bottom of list of recent dirs, there could be a separator, followed by some "special" directories: directory of current file, maybe its parent, current working dir of Gedit, current dir of side pane... This could make it easier to access these dirs, without setting them as default
+- in list of recent dirs, maybe write the last path element in bold font, to make it stand out more? Is this even possible?
+- don't allow the search dialog window to be resizable vertically
+- maybe somehow integrate with File Browser in side pane?
+- escape markup entities in search summary text
+- would it be possible to add real "text wrap" to the lines in result list? So that lines are correctly wrapped at the window border?
+- check with gedit-2.22.3/gedit/gedittextregion.c: there's a special char in a name, which is displayed wrong in result list
