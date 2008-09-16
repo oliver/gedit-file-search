@@ -688,6 +688,7 @@ class FileSearcher:
         print "(finished)"
         self.searchProcess = None
         editBtn = self.tree.get_widget("btnModifyFileSearch")
+        editBtn.hide()
         editBtn.set_label("gtk-edit")
 
         if self.wasCancelled:
