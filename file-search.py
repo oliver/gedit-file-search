@@ -648,7 +648,7 @@ class FileSearcher:
         self._updateSummary()
 
         #searchSummary = "<span size=\"smaller\" foreground=\"#585858\">searching for </span><span size=\"smaller\"><i>%s</i></span><span size=\"smaller\" foreground=\"#585858\"> in </span><span size=\"smaller\"><i>%s</i></span>" % (query.text, query.directory)
-        searchSummary = "<span size=\"smaller\">searching for <i>%s</i> in <i>%s</i></span>" % (query.text, query.directory)
+        searchSummary = "<span size=\"smaller\">searching for <i>%s</i> in <i>%s</i></span>" % (escapeMarkup(query.text), escapeMarkup(query.directory))
         self.treeStore.append(None, [searchSummary, '', 0])
 
         self.searchProcess = SearchProcess(query, self)
