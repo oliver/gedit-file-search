@@ -722,7 +722,7 @@ class FileSearcher:
 
     def _addResultFile (self, filename):
         (directory, file) = os.path.split(filename)
-        line = "%s/<b>%s</b>" % (directory, file)
+        line = "%s/<b>%s</b>" % (escapeMarkup(directory), escapeMarkup(file))
         it = self.treeStore.append(None, [line, filename, 0])
         return it
 
