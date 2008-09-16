@@ -509,6 +509,9 @@ class FileSearchWindowHelper:
         else:
             self.tree.get_widget('btnSearch').set_sensitive(True)
 
+    def on_cbSelectFileTypes_toggled (self, checkbox):
+        self.tree.get_widget('cboFileTypeList').set_sensitive( checkbox.get_active() )
+
     def on_search_files_activate(self, action):
         self.openSearchDialog()
 
@@ -591,6 +594,7 @@ class FileSearchWindowHelper:
         self.tree.get_widget('cbExcludeBackups').set_active(query.excludeBackup)
         self.tree.get_widget('cbExcludeVCS').set_active(query.excludeVCS)
         self.tree.get_widget('cbSelectFileTypes').set_active(query.selectFileTypes)
+        self.tree.get_widget('cboFileTypeList').set_sensitive( query.selectFileTypes )
 
         # display and run the search dialog
         result = self._dialog.run()
