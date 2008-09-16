@@ -797,6 +797,28 @@ class FileSearcher:
             self.searchProcess.cancel()
             self.wasCancelled = True
 
+    def on_tvFileSearchResult_button_press_event (self, treeview, event):
+        if event.button == 3:
+            path = treeview.get_path_at_pos(int(event.x), int(event.y))
+            if path != None:
+                treeview.grab_focus()
+                treeview.set_cursor(path[0], path[1], False)
+
+                menu = gtk.Menu()
+                mi = gtk.ImageMenuItem("gtk-copy")
+                mi.connect_object("activate", FileSearcher.onPopupMenuItemActivate, self)
+                mi.show()
+                menu.append(mi)
+
+                menu.popup(None, None, None, event.button, event.time)
+                return True
+        else:
+            return False
+
+    def onPopupMenuItemActivate (self):
+        print "(copy text)"
+        pass
+
 
 def escapeMarkup (origText):
     "Replaces Pango markup special characters with their escaped replacements"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Tue Sep 16 21:34:57 2008 -->
+<!--Generated with glade3 3.4.5 on Tue Sep 16 21:56:53 2008 -->
 <glade-interface>
   <widget class="GtkDialog" id="searchDialog">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -424,6 +424,7 @@
                 <property name="can_focus">True</property>
                 <property name="events"></property>
                 <property name="headers_visible">False</property>
+                <signal name="button_press_event" handler="on_tvFileSearchResult_button_press_event"/>
                 <signal name="row_activated" handler="on_row_activated"/>
               </widget>
             </child>
