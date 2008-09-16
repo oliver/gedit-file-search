@@ -42,6 +42,7 @@ import popen2
 import re
 import urllib
 import gconf
+import pango
 
 ui_str = """<ui>
   <menubar name="MenuBar">
@@ -806,10 +807,11 @@ class FileSearcher:
 
                 it = treeview.get_model().get_iter(path[0])
                 markupText = treeview.get_model().get_value(it, 0)
+                plainText = pango.parse_markup(markupText)[1]
 
                 menu = gtk.Menu()
                 mi = gtk.ImageMenuItem("gtk-copy")
-                mi.connect_object("activate", FileSearcher.onPopupMenuItemActivate, self, markupText)
+                mi.connect_object("activate", FileSearcher.onPopupMenuItemActivate, self, plainText)
                 mi.show()
                 menu.append(mi)
 
