@@ -59,8 +59,6 @@ TODO
 - maybe implement "search for full words only" function to be consistent with normal Gedit search dialog?
 - display warnings/errors (like "invalid search directory" etc) to the user instead of printing to stdout...
 - add some shortcut (button, context menu...) to result panel for opening new search dialog
-- implement maxEntries argument in RecentDirs ctor
-  - how many directories (or search terms) does Gedit allow in its dialog?
 - test on system with "weird" fonts (and english locale): if digits have different widths, the width of side bar in result panel might flicker...
   - seems to be fixed on recent systems (or with recent fonts): all digits now have similar width, so the width of the "N matches" text now doesn't change so often
 - maybe add a "Replace" button to result panel (above Edit) which replaces all found occurences (like Find & Replace)
@@ -71,16 +69,12 @@ TODO
 - check that files with tabs are no problem
 - improve reading from pipe: start with small read buffer (100 bytes?), and increase it until a maximum is reached (4000 bytes?)
   -> goal: give results quickly yet read efficiently
-- on rhel5, there are apparently bytes left to read in the pipe after we got the HUP signal (at least with buffer = 300 bytes)
-  -> test this on other systems
-  -> maybe, on close, try to read all remaining data from pipe until pipe is empty? Is that possible without blocking?
 - test with file /usr/share/festival/voices/english/kal_diphone/group/kallpc8k.group (from festvox-kallpc8k package): on some systems, when searching for "abc", the following warning appears:
 sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: Error on line 1 char 64: Element 'markup' was closed, but the currently open element is 'span'
 - for dropdown list of recent search terms: maybe use same list as in normal Gedit search dialog?
   - apparently gedit stores this list in /apps/gnome-settings/gedit/history-gedit2_search_for_entry
 - maybe make result list insensitive if no matches were found?
 - maybe put .glade and .py files into separate subdirectory in ~/.gnome2/gedit/plugins/ ?
-- display better icon for plugin in Gedit -> Preferences -> Plugins
 - add more VCS directory patterns:
   - Bazaar
   - Mercurial
@@ -113,6 +107,5 @@ sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: E
 - in list of recent dirs, maybe write the last path element in bold font, to make it stand out more? Is this even possible?
 - don't allow the search dialog window to be resizable vertically
 - maybe somehow integrate with File Browser in side pane?
-- escape markup entities in search summary text
 - would it be possible to add real "text wrap" to the lines in result list? So that lines are correctly wrapped at the window border?
 - check with gedit-2.22.3/gedit/gedittextregion.c: there's a special char in a name, which is displayed wrong in result list
