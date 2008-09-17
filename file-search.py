@@ -513,6 +513,17 @@ class FileSearchWindowHelper:
     def on_cbSelectFileTypes_toggled (self, checkbox):
         self.tree.get_widget('cboFileTypeList').set_sensitive( checkbox.get_active() )
 
+    def on_btnBrowse_clicked (self, button):
+        fileChooser = gtk.FileChooserDialog(title="Select directory to search in",
+            action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+            buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        fileChooser.set_default_response(gtk.RESPONSE_OK)
+
+        response = fileChooser.run()
+        if response == gtk.RESPONSE_OK:
+            self.tree.get_widget('cboSearchDirectoryEntry').set_text( fileChooser.get_filename() )
+        fileChooser.destroy()
+
     def on_search_files_activate(self, action):
         self.openSearchDialog()
 
