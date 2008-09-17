@@ -521,7 +521,8 @@ class FileSearchWindowHelper:
 
         response = fileChooser.run()
         if response == gtk.RESPONSE_OK:
-            self.tree.get_widget('cboSearchDirectoryEntry').set_text( fileChooser.get_filename() )
+            selectedDir = os.path.normpath( fileChooser.get_filename() ) + "/"
+            self.tree.get_widget('cboSearchDirectoryEntry').set_text(selectedDir)
         fileChooser.destroy()
 
     def on_search_files_activate(self, action):
