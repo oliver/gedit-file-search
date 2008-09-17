@@ -518,6 +518,7 @@ class FileSearchWindowHelper:
             action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
             buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         fileChooser.set_default_response(gtk.RESPONSE_OK)
+        fileChooser.set_filename( self.tree.get_widget('cboSearchDirectoryEntry').get_text() )
 
         response = fileChooser.run()
         if response == gtk.RESPONSE_OK:
