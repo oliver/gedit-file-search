@@ -745,7 +745,10 @@ class FileSearcher:
         return it
 
     def _addResultLine (self, it, lineno, linetext):
-        linetext = escapeMarkup(linetext)
+        if len(linetext) > 1000:
+            linetext = escapeMarkup(linetext[:1000]) + "</span><span size=\"smaller\"><i> [...]</i>"
+        else:
+            linetext = escapeMarkup(linetext)
         line = "<b>%d:</b> <span foreground=\"blue\">%s</span>" % (lineno, linetext)
         self.treeStore.append(it, [line, None, lineno])
 
