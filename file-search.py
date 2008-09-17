@@ -805,13 +805,9 @@ class FileSearcher:
                 treeview.grab_focus()
                 treeview.set_cursor(path[0], path[1], False)
 
-                it = treeview.get_model().get_iter(path[0])
-                markupText = treeview.get_model().get_value(it, 0)
-                plainText = pango.parse_markup(markupText, u'\x00')[1]
-
                 menu = gtk.Menu()
                 mi = gtk.ImageMenuItem("gtk-copy")
-                mi.connect_object("activate", FileSearcher.onPopupMenuItemActivate, self, plainText)
+                mi.connect_object("activate", FileSearcher.onPopupMenuItemActivate, self, treeview, path[0])
                 mi.show()
                 menu.append(mi)
 
@@ -820,9 +816,13 @@ class FileSearcher:
         else:
             return False
 
-    def onPopupMenuItemActivate (self, text):
+    def onPopupMenuItemActivate (self, treeview, path):
+        it = treeview.get_model().get_iter(path)
+        markupText = treeview.get_model().get_value(it, 0)
+        plainText = pango.parse_markup(markupText, u'\x00')[1]
+
         clipboard = gtk.clipboard_get()
-        clipboard.set_text(text)
+        clipboard.set_text(plainText)
         clipboard.store()
 
 
