@@ -410,6 +410,7 @@ class FileSearchWindowHelper:
 
         self._window.connect_object("destroy", FileSearchWindowHelper.destroy, self)
         self._window.connect_object("tab-added", FileSearchWindowHelper.onTabAdded, self)
+        self._window.connect_object("tab-removed", FileSearchWindowHelper.onTabRemoved, self)
 
     def deactivate(self):
         print "file-search: plugin stopped for", self._window
@@ -429,9 +430,18 @@ class FileSearchWindowHelper:
         pass
 
     def onTabAdded (self, tab):
-        tab.get_view().connect_object("button-press-event", FileSearchWindowHelper.onButtonPress, self, tab)
-        tab.get_view().connect_object("popup-menu", FileSearchWindowHelper.onPopupMenu, self, tab)
-        tab.get_view().connect_object("populate-popup", FileSearchWindowHelper.onPopulatePopup, self, tab)
+        handlerIds = []
+        handlerIds.append( tab.get_view().connect_object("button-press-event", FileSearchWindowHelper.onButtonPress, self, tab) )
+        handlerIds.append( tab.get_view().connect_object("popup-menu", FileSearchWindowHelper.onPopupMenu, self, tab) )
+        handlerIds.append( tab.get_view().connect_object("populate-popup", FileSearchWindowHelper.onPopulatePopup, self, tab) )
+        tab.set_data("file-search-handlers", handlerIds) # store list of handler IDs so we can later remove the handlers again
+
+    def onTabRemoved (self, tab):
+        handlerIds = tab.get_data("file-search-handlers")
+        if handlerIds:
+            for h in handlerIds:
+                tab.get_view().handler_disconnect(h)
+            tab.set_data("file-search-handlers", None)
 
     def onButtonPress (self, event, tab):
         if event.button == 3:
