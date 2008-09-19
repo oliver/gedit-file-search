@@ -11,6 +11,7 @@ TODO
   - there are also some cases where a result line displays more than one text line...
   - check that files in /testfiles cause no errors/warnings/wrong behavior:
   - testfiles/utf8-extract-1.bin (triggers a Pango warning): is probably this Python bug: http://bugs.python.org/issue3672
+    - maybe this could be fixed by using glib-provided UTF8 conversion functions instead of Pythons unicode() function?
 - implement Edit button in result panel
 - fix counting of found matches (it currently counts found _lines_, but a line can contain multiple matches...)
 - highlight found text in result panel (like, with yellow background for the actually matching text)
@@ -33,6 +34,7 @@ TODO
     - when starting gedit with a file on command line (like File Manager -> double click on text file): use directory of that file
   - note: if currently-focused file couldn't be loaded correctly, then don't use it's dir as search dir (because the dir might not exist...)
 - check that activating/deactivating plugin works correctly and leaves no cruft behind
+  - this also includes on-window-destroy handlers and the like...
 - check focus behavior of result list
 - add keyboard shortcut for opening search dialog
 - publish initial version
@@ -75,6 +77,8 @@ sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: E
   - apparently gedit stores this list in /apps/gnome-settings/gedit/history-gedit2_search_for_entry
 - maybe make result list insensitive if no matches were found?
 - maybe put .glade and .py files into separate subdirectory in ~/.gnome2/gedit/plugins/ ?
+  - are there any rules for Gedit plugins?
+  - in any case, it might be useful to split the Python code into multiple files anyway
 - add more VCS directory patterns:
   - Bazaar
   - Mercurial
@@ -109,3 +113,44 @@ sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: E
 - would it be possible to add real "text wrap" to the lines in result list? So that lines are correctly wrapped at the window border?
 - check with gedit-2.22.3/gedit/gedittextregion.c: there's a special char in a name, which is displayed wrong in result list
 - if list of recent file types is empty (ie. when starting to use the plugin), maybe add some example entries as recent entries (like "*.C *.c *.h"), so people can see the syntax of that field (space-separated file globs)?
+- hide radiobuttons for folder/open files etc.
+- improve RegExp support
+  - goals:
+    - 1. support PCRE (Perl Compatible Regular Expressions) instead of the POSIX Regular Expressions (more comfortable for the user)
+    - 2. highlight RegExp matches in result list
+  - problems:
+    - the "grep" command on Debian and Ubuntu doesn't support PCRE (no -P option); there's a "pcregrep" package available
+    - for problem 2: apparently there's no way to use POSIX RE inside Python, so even if we accept top use POSIX RE for grep, highlighting would not work
+  - possible solutions:
+    - disable RegExp support on systems where neither grep -P nor pcregrep is available
+      - the RegExp checkbox in search dialog could be made insensitive and get a tooltip that tells to look in config dialog for details; config dialog would then ask for path to compatible grep/pcregrep, and would give add'l information
+    - add a fall-back implementation which uses Pythons re module and manually searches through all the files
+      - probably lots of work
+      - probably much slower than grep
+      - Debian/Ubuntu users would experience slowdown without knowing the reason (and would just say "the plugin is just slow")
+    - find a way to translate PCRE to POSIX RE (too feed the user-entered PCRE to normal grep)
+    - to solve just problem 2: find a way to translate POSIX RE to PCRE (user would still have to enter POSIX RE, but highlighting would work)
+- check that the search dialog and result list are not leaked when closed
+  - maybe test this by doing lots of searches and comparing Gedit memory usage?
+- make sure that searching inside a folder with badly-encoded name works correctly
+- maybe add a line to result list when finished (something like "found N matches"), to show that the search has finished?
+- the result list should order files at least in such a manner that files inside a folder are listed together (not interleaved with files in subfolders)
+- it might be nice to be able to specify a single file to search in, instead of a directory
+  - the search dialog should recognize if a file path is entered, and should then disable the folder-related controls
+- if user enters an invalid directory as search dir, maybe display a little warning icon when focus leaves search dir text field?
+- it might be useful to replace the xargs part with custom Python code (ie. spawning separate find and grep processes, and feeding the find output to grep)
+  - we could then detect when find has finished, and estimate the remaining time (or percentage) left for grep, and display that as progress bar or something
+  - the find output could be sorted efficiently (as soon as we have all files and directories in a dir, we could sort them and pass the sorted names to grep, while find keeps running)
+  - this might also be useful in the future, for searching through project files
+- result list: maybe the file name lines could get a tooltip displaying the number of matches in this file?
+- maybe the "N matches in M files" text could be improved for start of search: it could read "no matches yet" until a match is found
+- seen with Gedit 2.16: when moving a document to a new window (via "Documents" menu), the documents' popup menu will have two "Search forfiles" menu entries!
+- idea for result list: add a "Refine" tool to context menu, to search in the result list for all lines that contain a specific word (orRegExp)
+
+
+Blockers for next release:
+- hide radiobuttons in search dialog
+- hide RegExp button (RE syntax is not final yet)
+- display warning if bad directory is entered
+- display warning if bad file type is entered
+- remove frequent debug messages
