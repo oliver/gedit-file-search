@@ -125,7 +125,8 @@ class RecentList:
         entries.reverse()
         for e in entries:
             if e and len(e) > 0:
-                self.add(e, False)
+                decodedName = urllib.unquote(e)
+                self.add(decodedName, False)
 
         # TODO: also listen for gconf changes, and reload the list then
 
@@ -146,7 +147,8 @@ class RecentList:
         if doStore:
             entries = []
             for e in self.store:
-                entries.append(e[0])
+                encodedName = urllib.quote(e[0])
+                entries.append(encodedName)
             self.gclient.set_list(self.confKey, gconf.VALUE_STRING, entries)
 
     def isEmpty (self):
