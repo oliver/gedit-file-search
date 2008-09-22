@@ -898,6 +898,11 @@ def escapeAndHighlight (origText, searchText, caseSensitive):
         startPos = pos+matchLen
     fragments.append(text[startPos:])
 
+    if len(fragments) < 3:
+        print "too few fragments (got only %d)" % len(fragments)
+        print "text: '%s'" % origText.encode("utf8", "replace")
+    #assert(len(fragments) > 2)
+
     # join fragments again, adding markup around matches:
     retText = ""
     highLight = False
