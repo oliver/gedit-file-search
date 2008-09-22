@@ -777,7 +777,7 @@ class FileSearcher:
             linetext = linetext[:1000]
             addTruncationMarker = True
 
-        linetext = escapeMarkup(linetext)
+        linetext = escapeAndHighlight(linetext, self.query.text, self.query.caseSensitive)
 
         if addTruncationMarker:
             linetext += "</span><span size=\"smaller\"><i> [...]</i>"
@@ -868,6 +868,47 @@ def escapeMarkup (origText):
     text = text.replace('<', '&lt;')
     text = text.replace('>', '&gt;')
     return text
+
+def escapeAndHighlight (origText, searchText, caseSensitive):
+    """
+    Replaces Pango markup special characters, and adds highlighting markup
+    around text fragments that match searchText.
+    """
+
+    # split origText by searchText; the resulting list will contain normal text
+    # and matching text interleaved (if two matches are adjacent in origText,
+    # they will be separated by an empty string in the resulting list).
+    matchLen = len(searchText)
+    if not(caseSensitive):
+        searchText = searchText.lower()
+    fragments = []
+    startPos = 0
+    text = origText[:]
+    while True:
+        if not(caseSensitive):
+            pos = text.lower().find(searchText, startPos)
+        else:
+            pos = text.find(searchText, startPos)
+        if pos < 0:
+            break
+        preStr = origText[startPos:pos]
+        matchStr = origText[pos:pos+matchLen]
+        fragments.append(preStr)
+        fragments.append(matchStr)
+        startPos = pos+matchLen
+    fragments.append(text[startPos:])
+
+    # join fragments again, adding markup around matches:
+    retText = ""
+    highLight = False
+    for f in fragments:
+        f = escapeMarkup(f)
+        if highLight:
+            retText += "<span background=\"#FFFF00\">%s</span>" % f
+        else:
+            retText += f
+        highLight = not(highLight)
+    return retText
 
 
 class FileSearchPlugin(gedit.Plugin):
