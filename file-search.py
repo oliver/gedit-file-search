@@ -772,10 +772,15 @@ class FileSearcher:
         return it
 
     def _addResultLine (self, it, lineno, linetext):
+        addTruncationMarker = False
         if len(linetext) > 1000:
-            linetext = escapeMarkup(linetext[:1000]) + "</span><span size=\"smaller\"><i> [...]</i>"
-        else:
-            linetext = escapeMarkup(linetext)
+            linetext = linetext[:1000]
+            addTruncationMarker = True
+
+        linetext = escapeMarkup(linetext)
+
+        if addTruncationMarker:
+            linetext += "</span><span size=\"smaller\"><i> [...]</i>"
         line = "<b>%d:</b> <span foreground=\"blue\">%s</span>" % (lineno, linetext)
         self.treeStore.append(it, [line, None, lineno])
 
