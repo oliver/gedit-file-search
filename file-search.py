@@ -633,7 +633,7 @@ class FileSearchWindowHelper:
             return
 
         print "(starting search)"
-        searchText = self.tree.get_widget('cboSearchTextEntry').get_text()
+        searchText = unicode(self.tree.get_widget('cboSearchTextEntry').get_text())
         searchDir = self.tree.get_widget('cboSearchDirectoryEntry').get_text()
         typeListString = self.tree.get_widget('cboFileTypeEntry').get_text()
 
