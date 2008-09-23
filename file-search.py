@@ -709,7 +709,6 @@ class FileSearcher:
         if expandRow:
             path = self.treeStore.get_path(it)
             self.treeView.expand_row(path, False)
-        self.numMatches += 1
         self._updateSummary()
 
     def handleFinished (self):
@@ -777,7 +776,8 @@ class FileSearcher:
             linetext = linetext[:1000]
             addTruncationMarker = True
 
-        linetext = escapeAndHighlight(linetext, self.query.text, self.query.caseSensitive)
+        (linetext, numLineMatches) = escapeAndHighlight(linetext, self.query.text, self.query.caseSensitive)
+        self.numMatches += numLineMatches
 
         if addTruncationMarker:
             linetext += "</span><span size=\"smaller\"><i> [...]</i>"
@@ -898,9 +898,12 @@ def escapeAndHighlight (origText, searchText, caseSensitive):
         startPos = pos+matchLen
     fragments.append(text[startPos:])
 
+    numMatches = (len(fragments) - 1) / 2
+
     if len(fragments) < 3:
         print "too few fragments (got only %d)" % len(fragments)
         print "text: '%s'" % origText.encode("utf8", "replace")
+        numMatches += 1
     #assert(len(fragments) > 2)
 
     # join fragments again, adding markup around matches:
@@ -913,7 +916,7 @@ def escapeAndHighlight (origText, searchText, caseSensitive):
         else:
             retText += f
         highLight = not(highLight)
-    return retText
+    return (retText, numMatches)
 
 
 class FileSearchPlugin(gedit.Plugin):
