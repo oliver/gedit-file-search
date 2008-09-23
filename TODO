@@ -1,7 +1,6 @@
 TODO
 =====
-- cleanup search dialog layout (convert to correct GTK layout)
-- check encoding of grep output (ie. make sure the lines in result panel are in correct encoding)
+- generally improve layout of search dialog
 - run tests:
   - search through / (or /usr or /usr/share) to find weird corner cases
   - I think there's a bug somewhere when searching through /usr/share on my system (xargs displays warnings)
@@ -9,14 +8,12 @@ TODO
   - check that files in /testfiles cause no errors/warnings/wrong behavior:
   - testfiles/utf8-extract-1.bin (triggers a Pango warning): is probably this Python bug: http://bugs.python.org/issue3672
     - maybe this could be fixed by using glib-provided UTF8 conversion functions instead of Pythons unicode() function?
-- fix counting of found matches (it currently counts found _lines_, but a line can contain multiple matches...)
-- highlight found text in result panel (like, with yellow background for the actually matching text)
 - maybe use single-click on result line to open file (instead of double click?)
-- implement all the options in search dialog
+- implement searching in current file(s)
+- implement searching in project files
+  - needs some project manager to support...
 - maybe improve search directory chooser in search dialog?
   - use some existing widget to choose directory?
-- remember options (last search terms, last search directories, search options)
-  - remember all this also over Gedit restart
 - when opening search dialog, deduce initially-display search dir in a better way
   - it should do "the right thing" yet the user must be able to understand the decision-making way
   - kdevelop seems to do it quite right (at least it doesn't get in my way)
@@ -31,15 +28,13 @@ TODO
 - add keyboard shortcut for opening search dialog
 - publish initial version
 - maybe limit line length in result list?
-  - the result list widget fails to display very long lines (like 10000 chars) correctly anyway...
+  - the result list widget fails to display very long lines (like 10000 chars) correctly anyway, at least with Gedit 2.16
   - also, on older Gedit (2.16) apparently the whole result list is broken if a very long line is added
 - add option to ignore backup files (files ending with ~ etc):
   - *.~
   - .#* (emacs backup files? or from CVS?)
   - test this with a real-life directory
 - create test plan for testing the full functionality and all corner cases with a new release
-- Gedit 2.16 quirks:
-  - result list sometimes displays no more text (maybe caused by too long lines?)
 - test searching through directories with many files, many directories, or big files or files with very long lines
 - there might be a bug (race) in cancelling: if a new grep is started after I got the child PIDs of sh and before I kill find, that new grep process is probably never killed (?!)
 - check that searching through binary files doesn't break the search output etc.
@@ -69,13 +64,12 @@ TODO
   - RCS
 - should the result list allow find-as-you-type?
   - yes, would be nice to have; also, it should allow searching in path names, single files names (ie. the bold part), line numbers, and lines itself... is that possible?
+  - should the find-as-you-type method in result list use "startswith" or "contains"? Is there some Gnome guideline for this?
 - add test files with different encodings (UTF8, UTF7, UTF16, ISO-8859-1)
 - search dialog: initialize search term field with some sane default (like currently-selected word)
   - current algorithm needs some more testing in actual use cases
 - sanitize search term before starting search (make sure it contains no line breaks etc.)
   - or should it be allowed to specify a search term with line breaks?
-- make it possible to copy lines from result list
-  - maybe add context menu for this?
 - remove debug messages
 - maybe display context menu entry only if enabled in configuration (to make the menu less cluttered)?
 - evil bug: when searching inside a hidden directory, and having the "Exclude hidden files/folders" checkbox enabled, no matches are found
@@ -87,14 +81,12 @@ TODO
 - idea for search dialog: at bottom of list of recent dirs, there could be a separator, followed by some "special" directories: directory of current file, maybe its parent, current working dir of Gedit, current dir of side pane... This could make it easier to access these dirs, without setting them as default
 - in list of recent dirs, maybe write the last path element in bold font, to make it stand out more? Is this even possible?
   - looks like the gtk.ComboBoxEntry doesn't recognize markup...
-- don't allow the search dialog window to be resizable vertically
 - maybe somehow integrate with File Browser in side pane?
 - check with gedit-2.22.3/gedit/gedittextregion.c: there's a special char in a name, which is displayed wrong in result list
 - if list of recent file types is empty (ie. when starting to use the plugin), maybe add some example entries as recent entries (like "*.C *.c *.h"), so people can see the syntax of that field (space-separated file globs)?
 - hide radiobuttons for folder/open files etc.
 - check that the search dialog and result list are not leaked when closed
   - maybe test this by doing lots of searches and comparing Gedit memory usage?
-- make sure that searching inside a folder with badly-encoded name works correctly
 - maybe add a line to result list when finished (something like "found N matches"), to show that the search has finished?
 - the result list should order files at least in such a manner that files inside a folder are listed together (not interleaved with files in subfolders)
 - it might be nice to be able to specify a single file to search in, instead of a directory
@@ -102,16 +94,13 @@ TODO
 - if user enters an invalid directory as search dir, maybe display a little warning icon when focus leaves search dir text field?
 - result list: maybe the file name lines could get a tooltip displaying the number of matches in this file?
 - maybe the "N matches in M files" text could be improved for start of search: it could read "no matches yet" until a match is found
-- seen with Gedit 2.16: when moving a document to a new window (via "Documents" menu), the documents' popup menu will have two "Search forfiles" menu entries!
 - idea for result list: add a "Refine" tool to context menu, to search in the result list for all lines that contain a specific word (orRegExp)
   - in addition, maybe the user could specify which folders/files to see (from a list or tree of folders and files)?
 - if two Gedit windows are opened, and a file search dialog is opened in each window, then the first-opened dialog will not respond to any button; but when closing the second dialog, the events queued for the first dialog will trigger as well
-- disable highlighting when searching for RegExp
 - add bottom line to result list, displaying number of matches and number of matching lines
 - with Gedit 2.16, the plugin list doesn't show the search icon (it shows just some generic icon); maybe switch to some other icon (like "find") which is available in older distros?
 - when truncating long lines, it might be better to truncate in such a way that the actually matching text is preserved somehow...
 - compare highlighting color (pure yellow) with Gedit highlighting color (not pure yellow), and match our color to the Gedit one
-- should the find-as-you-type method in result list use "startswith" or "contains"? Is there some Gnome guideline for this?
 - maybe the initial result list line (the summary) should have a tooltip displaying _all_ settings for the search (flags etc.)?
 - counting of matches is broken for RegExp searching (as we can't search for POSIX REs in the result lines)
 - test that case-insensitive RegExp searching works correctly
