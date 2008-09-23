@@ -776,8 +776,12 @@ class FileSearcher:
             linetext = linetext[:1000]
             addTruncationMarker = True
 
-        (linetext, numLineMatches) = escapeAndHighlight(linetext, self.query.text, self.query.caseSensitive)
-        self.numMatches += numLineMatches
+        if not(self.query.isRegExp):
+            (linetext, numLineMatches) = escapeAndHighlight(linetext, self.query.text, self.query.caseSensitive)
+            self.numMatches += numLineMatches
+        else:
+            linetext = escapeMarkup(linetext)
+            self.numMatches += 1
 
         if addTruncationMarker:
             linetext += "</span><span size=\"smaller\"><i> [...]</i>"
