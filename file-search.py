@@ -724,7 +724,20 @@ class FileSearcher:
         elif self.numMatches == 0:
             line = "<i>(no matching files found)</i>"
         else:
-            line = "<i>found %d matches (%d lines) in %d files</i>" % (self.numMatches, self.numLines, len(self.files))
+            if self.numMatches == 1:
+                line = "<i>found 1 match"
+            else:
+                line = "<i>found %d matches" % self.numMatches
+
+            if self.numLines == 1:
+                line += " (1 line)"
+            else:
+                line += " (%d lines)" % self.numLines
+
+            if len(self.files) == 1:
+                line += " in 1 file</i>"
+            else:
+                line += " in %d files</i>" % len(self.files)
         self.treeStore.append(None, [line, '', 0])
 
     def _updateSummary (self):
