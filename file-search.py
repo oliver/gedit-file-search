@@ -685,6 +685,7 @@ class FileSearcher:
         self.query = query
         self.files = {}
         self.numMatches = 0
+        self.numLines = 0
         self.wasCancelled = False
 
         self._createResultPanel()
@@ -723,7 +724,7 @@ class FileSearcher:
         elif self.numMatches == 0:
             line = "<i>(no matching files found)</i>"
         else:
-            line = "<i>found %d matches in %d files</i>" % (self.numMatches, len(self.files))
+            line = "<i>found %d matches (%d lines) in %d files</i>" % (self.numMatches, self.numLines, len(self.files))
         self.treeStore.append(None, [line, '', 0])
 
     def _updateSummary (self):
@@ -783,6 +784,7 @@ class FileSearcher:
         else:
             linetext = escapeMarkup(linetext)
             self.numMatches += 1
+        self.numLines += 1
 
         if addTruncationMarker:
             linetext += "</span><span size=\"smaller\"><i> [...]</i>"
