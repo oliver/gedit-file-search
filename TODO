@@ -146,6 +146,29 @@ sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: E
 - maybe the "N matches in M files" text could be improved for start of search: it could read "no matches yet" until a match is found
 - seen with Gedit 2.16: when moving a document to a new window (via "Documents" menu), the documents' popup menu will have two "Search forfiles" menu entries!
 - idea for result list: add a "Refine" tool to context menu, to search in the result list for all lines that contain a specific word (orRegExp)
+  - in addition, maybe the user could specify which folders/files to see (from a list or tree of folders and files)?
+- if two Gedit windows are opened, and a file search dialog is opened in each window, then the first-opened dialog will not respond to any button; but when closing the second dialog, the events queued for the first dialog will trigger as well
+- fix problems related to different file content encoding:
+  - searching for an Umlaut on an UTF-8 system will not find this Umlaut in a file that is encoded in ISO-8859-1 (latin1)
+  - the result list should display found lines in correct encoding (ie. if a file is in latin1 and has Umlauts, the result lines should display the Umlauts correctly, instead of as "broken UTF8")
+    - related to this, the unicode(x, "replace") call removes too many characters when encountering a latin1-encoded Umlaut; this means that in some cases the actual match might get lost (ie. no highlighting, possibly wrong matches count)
+  - possible solutions:
+    - for every file type: detect with "file" command if encoding is not UTF8 and not ASCII; convert file in those cases (with "iconv -f 8859_1// -t UTF8//" or the like); feed converted output to grep; not sure how much this affects performance
+    - use something like "enca" to recode all input files automatically
+    - detect file types, but then recode the _search string_ for every input file (however, this would still not display the correctly-converted line in result list)
+    - maybe only do these conversions if search text contains non-ASCII characters; this could improve performance while still giving correct results, at least as long all searched files use an ASCII-based encoding (UTF8, Latin...); the optimization would probably not work for completely different encodings (like asian encodings); also this would probably not fix the problem of wrongly displayed example lines (even when searching for ASCII text, the lines might contain latin1-encoded Umlauts)
+- disable highlighting when searching for RegExp
+- add bottom line to result list, displaying number of matches and number of matching lines
+- with Gedit 2.16, the plugin list doesn't show the search icon (it shows just some generic icon); maybe switch to some other icon (like "find") which is available in older distros?
+- when truncating long lines, it might be better to truncate in such a way that the actually matching text is preserved somehow...
+- compare highlighting color (pure yellow) with Gedit highlighting color (not pure yellow), and match our color to the Gedit one
+- the displayed result lines should be shown with syntax highlighting
+- should the find-as-you-type method in result list use "startswith" or "contains"? Is there some Gnome guideline for this?
+- maybe the initial result list line (the summary) should have a tooltip displaying _all_ settings for the search (flags etc.)?
+- counting of matches is broken for RegExp searching (as we can't search for POSIX REs in the result lines)
+- test that case-insensitive RegExp searching works correctly
+- in result panel, rename Cancel button to Stop (more consistent with Gnome HIG)
+- search dialog: make sure all elements have consistent border distance (esp. for Close/OK buttons vs. the other controls)
 
 
 Blockers for next release:
