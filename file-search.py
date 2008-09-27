@@ -771,7 +771,7 @@ class FileSearcher:
         panel.activate_item(resultContainer)
 
         editBtn = self.tree.get_widget("btnModifyFileSearch")
-        editBtn.set_label("gtk-cancel")
+        editBtn.set_label("gtk-stop")
 
         panel.set_property("visible", True)
 
