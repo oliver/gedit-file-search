@@ -776,6 +776,8 @@ class FileSearcher:
         self.treeView = self.tree.get_widget('tvFileSearchResult')
         self.treeView.set_model(self.treeStore)
 
+        self.treeView.set_search_equal_func(resultSearchCb)
+
         tc = gtk.TreeViewColumn("File", gtk.CellRendererText(), markup=0)
         self.treeView.append_column(tc)
 
@@ -879,6 +881,23 @@ class FileSearcher:
         clipboard = gtk.clipboard_get()
         clipboard.set_text(plainText)
         clipboard.store()
+
+
+def resultSearchCb (model, column, key, it):
+    """Callback function for searching in result list"""
+    lineText = model.get_value(it, column)
+    plainText = pango.parse_markup(lineText, u'\x00')[1] # remove Pango markup
+
+    # if search text contains only lower-case characters, do case-insensitive matching:
+    if key.islower():
+        plainText = plainText.lower()
+
+    # if the line contains the search text, it matches:
+    if plainText.find(key) >= 0:
+        return False
+
+    # line doesn't match:
+    return True
 
 
 def escapeMarkup (origText):
