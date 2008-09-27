@@ -101,11 +101,20 @@ TODO
 - with Gedit 2.16, the plugin list doesn't show the search icon (it shows just some generic icon); maybe switch to some other icon (like "find") which is available in older distros?
 - when truncating long lines, it might be better to truncate in such a way that the actually matching text is preserved somehow...
 - compare highlighting color (pure yellow) with Gedit highlighting color (not pure yellow), and match our color to the Gedit one
+  - apparently this color is set in the color styles (in /usr/share/gtksourceview-2.0/styles/); so we should try to use the color from there?
+  - if we use the color from the current style, then the whole result list should be colored according to style (otherwise the highlight color might not be easily visible)
 - maybe the initial result list line (the summary) should have a tooltip displaying _all_ settings for the search (flags etc.)?
 - counting of matches is broken for RegExp searching (as we can't search for POSIX REs in the result lines)
 - test that case-insensitive RegExp searching works correctly
 - in result panel, rename Cancel button to Stop (more consistent with Gnome HIG)
 - search dialog: make sure all elements have consistent border distance (esp. for Close/OK buttons vs. the other controls)
+- compare features with "ack" (http://petdance.com/ack/)
+  - the "Note that ack's --perl also checks the shebang lines of files without suffixes, which the find command will not." feature sounds nice
+  - also check the list of ignored files (core files, vim temp files...)
+- result list: maybe the file paths should be shorter, by removing the search directory from every file path?
+- result list: maybe add context menu entry for collapsing all file entries for the current path?
+  - in fact, for every path element there must be a separate menu entry to collapse all files inside that path element...
+- result lines should be better aligned (currently, lines numbers with different number of digits will foul up alignment)
 
 
 Larger work packages:
