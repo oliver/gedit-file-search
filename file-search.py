@@ -76,17 +76,21 @@ class ProcessInfo:
                 name = ''
                 ppid = 0
                 fileName = "/proc/%d/status" % pid
-                fd = open(fileName, "r")
-                for line in fd.readlines():
-                    m = nameRe.match(line)
-                    if m:
-                        name = m.group(1)
-                        continue
-                    m = ppidRe.match(line)
-                    if m:
-                        ppid = int(m.group(1))
-                        continue
-                self.pids.append( (pid, name, ppid) )
+                try:
+                    fd = open(fileName, "r")
+                except IOError:
+                    pass
+                else:
+                    for line in fd.readlines():
+                        m = nameRe.match(line)
+                        if m:
+                            name = m.group(1)
+                            continue
+                        m = ppidRe.match(line)
+                        if m:
+                            ppid = int(m.group(1))
+                            continue
+                    self.pids.append( (pid, name, ppid) )
 
     def getName (self, mainPid):
         for pid in self.pids:
