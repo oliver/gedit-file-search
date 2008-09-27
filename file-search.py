@@ -786,8 +786,18 @@ class FileSearcher:
         self.treeView.append_column(tc)
 
     def _addResultFile (self, filename):
-        (directory, file) = os.path.split( gobject.filename_display_name(filename) )
-        line = "%s/<b>%s</b>" % (escapeMarkup(directory), escapeMarkup(file))
+        dispFilename = filename
+        # remove leading search directory part if present:
+        if dispFilename.startswith(self.query.directory):
+            dispFilename = dispFilename[ len(self.query.directory): ]
+            dispFilename.lstrip("/")
+        dispFilename = gobject.filename_display_name(dispFilename)
+
+        (directory, file) = os.path.split( dispFilename )
+        if directory:
+            directory = os.path.normpath(directory) + "/"
+
+        line = "%s<b>%s</b>" % (escapeMarkup(directory), escapeMarkup(file))
         it = self.treeStore.append(None, [line, filename, 0])
         return it
 
