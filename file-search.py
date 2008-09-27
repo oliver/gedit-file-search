@@ -902,6 +902,11 @@ def resultSearchCb (model, column, key, it):
     lineText = model.get_value(it, column)
     plainText = pango.parse_markup(lineText, u'\x00')[1] # remove Pango markup
 
+    # for file names, add a leading slash before matching:
+    parentIter = model.iter_parent(it)
+    if parentIter == None and not(plainText.startswith("/")):
+        plainText = "/" + plainText
+
     # if search text contains only lower-case characters, do case-insensitive matching:
     if key.islower():
         plainText = plainText.lower()
