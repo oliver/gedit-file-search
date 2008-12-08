@@ -627,22 +627,36 @@ class FileSearchWindowHelper:
         self.tree.get_widget('cbSelectFileTypes').set_active(query.selectFileTypes)
         self.tree.get_widget('cboFileTypeList').set_sensitive( query.selectFileTypes )
 
-        # display and run the search dialog
-        result = self._dialog.run()
-        print "result: %s" % result
+        inputValid = False
+        while not(inputValid):
+            # display and run the search dialog (in a loop until all fields are correctly entered)
+            result = self._dialog.run()
+            print "result: %s" % result
 
-        if result != 1:
-            print "(cancelled)"
-            self._dialog.destroy()
-            return
+            if result != 1:
+                print "(cancelled)"
+                self._dialog.destroy()
+                return
+
+            searchText = unicode(self.tree.get_widget('cboSearchTextEntry').get_text())
+            searchDir = self.tree.get_widget('cboSearchDirectoryEntry').get_text()
+            typeListString = self.tree.get_widget('cboFileTypeEntry').get_text()
+
+            searchDir = os.path.expanduser(searchDir)
+            searchDir = os.path.normpath(searchDir) + "/"
+
+            if searchText == "":
+                print "internal error: search text is empty!"
+            elif not(os.path.exists(searchDir)):
+                msgDialog = gtk.MessageDialog(self._dialog, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, "Directory does not exist")
+                msgDialog.format_secondary_text("The specified directory does not exist.")
+                msgDialog.run()
+                msgDialog.destroy()
+            else:
+                inputValid = True
 
         print "(starting search)"
-        searchText = unicode(self.tree.get_widget('cboSearchTextEntry').get_text())
-        searchDir = self.tree.get_widget('cboSearchDirectoryEntry').get_text()
-        typeListString = self.tree.get_widget('cboFileTypeEntry').get_text()
-
-        searchDir = os.path.expanduser(searchDir)
-        searchDir = os.path.normpath(searchDir) + "/"
 
         query.text = searchText
         query.directory = searchDir
@@ -658,12 +672,6 @@ class FileSearchWindowHelper:
         self._dialog.destroy()
 
         print "searching for '%s' in '%s'" % (searchText, searchDir)
-        if searchText == "":
-            print "internal error: search text is empty!"
-            return
-        if not(os.path.exists(searchDir)):
-            print "error: directory '%s' doesn't exist!" % searchDir
-            return
 
         self._lastSearchTerms.add(searchText)
         self._lastDirs.add(searchDir)
