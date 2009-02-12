@@ -188,6 +188,4 @@ sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: E
 Blockers for next release:
 - hide radiobuttons in search dialog
 - hide RegExp button (RE syntax is not final yet)
-- display warning if bad directory is entered
 - display warning if bad file type is entered
-- remove frequent debug messages
