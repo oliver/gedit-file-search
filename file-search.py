@@ -258,7 +258,7 @@ class SearchProcess:
             fileTypeList = query.parseFileTypeString()
             findCmd += """ \( -false"""
             for t in fileTypeList:
-                findCmd += ' -o -name "%s"' % t.replace('"', '\\"')
+                findCmd += ' -o -name "%s"' % t.replace('\\', '\\\\\\\\').replace('"', '\\"')
             findCmd += """ \)"""
         findCmd += " -print0 2> /dev/null"
 
