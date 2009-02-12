@@ -267,7 +267,7 @@ class SearchProcess:
             grepCmd += " -i"
         if not(query.isRegExp):
             grepCmd += " -F"
-        grepCmd += " -e '%s' 2> /dev/null" % (query.text)
+        grepCmd += """ -e "%s" 2> /dev/null""" % (query.text.replace('\\', '\\\\').replace('"', '\\"'))
 
         cmd = findCmd + " | xargs -0" + grepCmd
         #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
