@@ -242,12 +242,14 @@ class SearchProcess:
     def __init__ (self, query, resultHandler):
         self.parser = GrepParser(resultHandler)
 
-        findCmd = "find '%s'" % query.directory
+        directoryEsc = query.directory.replace('"', '\\"')
+
+        findCmd = 'find "%s"' % directoryEsc
         if not(query.includeSubfolders):
             findCmd += """ -maxdepth 1"""
         if query.excludeHidden:
-            findCmd += """ \( ! -path "%s*/.*" \)""" % query.directory
-            findCmd += """ \( ! -path "%s.*" \)""" % query.directory
+            findCmd += """ \( ! -path "%s*/.*" \)""" % directoryEsc
+            findCmd += """ \( ! -path "%s.*" \)""" % directoryEsc
         if query.excludeBackup:
             findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
         if query.excludeVCS:
