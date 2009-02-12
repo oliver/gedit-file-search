@@ -103,6 +103,7 @@ TODO
 - compare highlighting color (pure yellow) with Gedit highlighting color (not pure yellow), and match our color to the Gedit one
   - apparently this color is set in the color styles (in /usr/share/gtksourceview-2.0/styles/); so we should try to use the color from there?
   - if we use the color from the current style, then the whole result list should be colored according to style (otherwise the highlight color might not be easily visible)
+  - Note: on Gedit 2.16, there are no styles... The highlighting color is probably hardcoded there...
 - maybe the initial result list line (the summary) should have a tooltip displaying _all_ settings for the search (flags etc.)?
 - counting of matches is broken for RegExp searching (as we can't search for POSIX REs in the result lines)
 - test that case-insensitive RegExp searching works correctly
@@ -115,6 +116,8 @@ TODO
 - result list: maybe add context menu entry for collapsing all file entries for the current path?
   - in fact, for every path element there must be a separate menu entry to collapse all files inside that path element...
 - result lines should be better aligned (currently, lines numbers with different number of digits will foul up alignment)
+- for RegExp searches, it might be nice to have "syntax highlighting" for the RegExp in the search field
+  - this might also help to show the user that RE searching is active
 
 
 Larger work packages:
@@ -132,6 +135,7 @@ Larger work packages:
   - need to design some user interface for this
   - maybe get list of files suffixes (*.C, *.py...) from Gedits internal syntax highlighting database?
 - maybe sort result files? By name?
+  - adding a " | sort -z -f -b" before the xargs call basically works (no big performance hit for "normal" projects); but it should separate files and directories (currently files and directories are treated the same, and are mingled together by the sorter)
 - maybe implement "search for full words only" function to be consistent with normal Gedit search dialog?
 - maybe add a "Replace" button to result panel (above Edit) which replaces all found occurences (like Find & Replace)
 - in result list, there should probably be an easy way to get the file name for a line (if there are some hundred results in a file, it is apparently difficult to get to the file name row of these lines...)
@@ -177,6 +181,8 @@ Larger work packages:
 sys:1: GtkWarning: Failed to set text from markup due to error parsing markup: Error on line 1 char 64: Element 'markup' was closed, but the currently open element is 'span'
   - maybe some unprintable characters (<32); but removing those chars leads to invalid UTF-8...
 - the displayed result lines should be shown with syntax highlighting
+- work with remote directories (GVFS/GIO)
+  - maybe using the FUSE bridge is sufficient for this?
 
 
 Blockers for next release:
