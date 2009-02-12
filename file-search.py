@@ -169,16 +169,17 @@ class SearchQuery:
     """
     Contains all parameters for a single search action.
     """
-    text = ''
-    directory = ''
-    caseSensitive = True
-    isRegExp = False
-    includeSubfolders = True
-    excludeHidden = True
-    excludeBackup = True
-    excludeVCS = True
-    selectFileTypes = False
-    fileTypeString = ''
+    def __init__ (self):
+        self.text = ''
+        self.directory = ''
+        self.caseSensitive = True
+        self.isRegExp = False
+        self.includeSubfolders = True
+        self.excludeHidden = True
+        self.excludeBackup = True
+        self.excludeVCS = True
+        self.selectFileTypes = False
+        self.fileTypeString = ''
 
     def parseFileTypeString (self):
         "Returns a list with the separate file globs from fileTypeString"
