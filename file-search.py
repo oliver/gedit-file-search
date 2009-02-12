@@ -29,6 +29,7 @@
 # Helper classes:
 # - ProcessInfo (gets process tree info, for killing search processes)
 # - RecentList (holds list of recently-selected search directories, for search dialog)
+# - SearchQuery (holds all parameters for a search; also, can read and write these from/to GConf)
 #
 
 
