@@ -315,14 +315,14 @@ class SearchProcess:
             return False
 
     def cancel (self):
-        print "(cancelling search command)"
+        #print "(cancelling search command)"
         mainPid = self.popenObj.pid
         pi = ProcessInfo()
         allProcs = [mainPid]
         allProcs.extend(pi.getAllChildren(mainPid))
-        print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
+        #print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
         for pid in allProcs:
-            print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
+            #print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
             os.kill(pid, 15)
         self.parser.cancel()
 
@@ -394,7 +394,7 @@ class GrepParser:
 
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
-        print "file-search: plugin created for", window
+        #print "file-search: plugin created for", window
         self._window = window
         self._plugin = plugin
         self._dialog = None
@@ -418,11 +418,11 @@ class FileSearchWindowHelper:
         self._window.connect_object("tab-removed", FileSearchWindowHelper.onTabRemoved, self)
 
     def deactivate(self):
-        print "file-search: plugin stopped for", self._window
+        #print "file-search: plugin stopped for", self._window
         self.destroy()
 
     def destroy (self):
-        print "have to destroy %d existing searchers" % len(self.searchers)
+        #print "have to destroy %d existing searchers" % len(self.searchers)
         for s in self.searchers[:]:
             s.destroy()
         self._window = None
@@ -548,8 +548,6 @@ class FileSearchWindowHelper:
         self.openSearchDialog()
 
     def openSearchDialog (self, searchText = None):
-        print "(find in files)"
-
         gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
         self.tree = gtk.glade.XML(gladeFile)
         self.tree.signal_autoconnect(self)
@@ -632,10 +630,7 @@ class FileSearchWindowHelper:
         while not(inputValid):
             # display and run the search dialog (in a loop until all fields are correctly entered)
             result = self._dialog.run()
-            print "result: %s" % result
-
             if result != 1:
-                print "(cancelled)"
                 self._dialog.destroy()
                 return
 
@@ -657,8 +652,6 @@ class FileSearchWindowHelper:
             else:
                 inputValid = True
 
-        print "(starting search)"
-
         query.text = searchText
         query.directory = searchDir
         query.caseSensitive = self.tree.get_widget('cbCaseSensitive').get_active()
@@ -672,7 +665,7 @@ class FileSearchWindowHelper:
 
         self._dialog.destroy()
 
-        print "searching for '%s' in '%s'" % (searchText, searchDir)
+        #print "searching for '%s' in '%s'" % (searchText, searchDir)
 
         self._lastSearchTerms.add(searchText)
         self._lastDirs.add(searchDir)
@@ -726,7 +719,7 @@ class FileSearcher:
         self._updateSummary()
 
     def handleFinished (self):
-        print "(finished)"
+        #print "(finished)"
         self.searchProcess = None
         editBtn = self.tree.get_widget("btnModifyFileSearch")
         editBtn.hide()
@@ -766,8 +759,6 @@ class FileSearcher:
 
 
     def _createResultPanel (self):
-        print "(add result panel)"
-
         gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
         self.tree = gtk.glade.XML(gladeFile, 'hbxFileSearchResult')
         self.tree.signal_autoconnect(self)
