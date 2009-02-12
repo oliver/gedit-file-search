@@ -242,7 +242,7 @@ class SearchProcess:
     def __init__ (self, query, resultHandler):
         self.parser = GrepParser(resultHandler)
 
-        directoryEsc = query.directory.replace('"', '\\"')
+        directoryEsc = query.directory.replace('\\', '\\\\').replace('"', '\\"')
 
         findCmd = 'find "%s"' % directoryEsc
         if not(query.includeSubfolders):
