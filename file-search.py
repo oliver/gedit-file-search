@@ -386,6 +386,7 @@ class GrepParser:
             # TODO: what's the actual encoding of grep's output?
             linetext = unicode(linetext, 'utf8', 'replace')
             #print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
+            linetext = linetext.rstrip("\n\r")
             self.resultHandler.handleResult(filename, lineno, linetext)
 
     def finish (self):
