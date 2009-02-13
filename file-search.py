@@ -232,15 +232,101 @@ class SearchQuery:
         gclient.set_bool(gconfBase+"/select_file_types", self.selectFileTypes)
 
 
+class LineSplitter:
+    "Split incoming text into lines which are passed to the resultHandler object"
+    def __init__ (self, resultHandler):
+        self.buf = ""
+        self.cancelled = False
+        self.resultHandler = resultHandler
+
+    def cancel (self):
+        self.cancelled = True
+
+    def parseFragment (self, text):
+        if self.cancelled:
+            return
+
+        self.buf = self.buf + text
+
+        while '\n' in self.buf:
+            pos = self.buf.index('\n')
+            line = self.buf[:pos]
+            self.buf = self.buf[pos + 1:]
+            self.resultHandler.handleLine(line)
+
+    def finish (self):
+        self.parseFragment("")
+        if self.buf != "":
+            self.resultHandler.handleLine(self.buf)
+        self.resultHandler.handleFinished()
+
+
+class RunCommand:
+    "Run a command in background, passing all of its stdout output to a LineSplitter"
+    def __init__ (self, cmd, resultHandler):
+        self.lineSplitter = LineSplitter(resultHandler)
+
+        print "executing command: %s" % cmd
+        self.popenObj = popen2.Popen3(cmd)
+        self.pipe = self.popenObj.fromchild
+
+        # make pipe non-blocking:
+        fl = fcntl.fcntl(self.pipe, fcntl.F_GETFL)
+        fcntl.fcntl(self.pipe, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+
+        #print "(add watch)"
+        gobject.io_add_watch(self.pipe, gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
+            self.onPipeReadable, priority=gobject.PRIORITY_LOW)
+
+    def onPipeReadable (self, fd, cond):
+        #print "condition: %s" % cond
+        if (cond & gobject.IO_IN):
+            readText = self.pipe.read(4000)
+            #print "(read %d bytes)" % len(readText)
+            if self.lineSplitter:
+                self.lineSplitter.parseFragment(readText)
+            return True
+        else:
+            # read all remaining data from pipe
+            while True:
+                readText = self.pipe.read(4000)
+                #print "(read %d bytes before finish)" % len(readText)
+                if len(readText) <= 0:
+                    break
+                if self.lineSplitter:
+                    self.lineSplitter.parseFragment(readText)
+
+            if self.lineSplitter:
+                self.lineSplitter.finish()
+            #print "(closing pipe)"
+            result = self.pipe.close()
+            if result == None:
+                #print "(search finished successfully)"
+                pass
+            else:
+                #print "(search finished with exit code %d; exited: %s, exit status: %d)" % (result,
+                #str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
+                pass
+            self.popenObj.wait()
+            return False
+
+    def cancel (self):
+        #print "(cancelling search command)"
+        mainPid = self.popenObj.pid
+        pi = ProcessInfo()
+        allProcs = [mainPid]
+        allProcs.extend(pi.getAllChildren(mainPid))
+        #print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
+        for pid in allProcs:
+            #print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
+            os.kill(pid, 15)
+        self.lineSplitter.cancel()
+        self.lineSplitter = None
+
+
 class SearchProcess:
-    """
-    - starts the search command
-    - asynchronously waits for output from search command
-    - passes output to GrepParser
-    - kills search command if requested
-    """
     def __init__ (self, query, resultHandler):
-        self.parser = GrepParser(resultHandler)
+        self.resultHandler = resultHandler
 
         directoryEsc = query.directory.replace('\\', '\\\\').replace('"', '\\"')
 
@@ -270,104 +356,18 @@ class SearchProcess:
         grepCmd += """ -e "%s" 2> /dev/null""" % (query.text.replace('\\', '\\\\').replace('"', '\\"'))
 
         cmd = findCmd + " | xargs -0" + grepCmd
-        #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
-        #cmd = "sleep 2"
-        #cmd = "echo 'abc'"
-        #print "executing command: %s" % cmd
-        self.popenObj = popen2.Popen3(cmd)
-        self.pipe = self.popenObj.fromchild
 
-        # make pipe non-blocking:
-        fl = fcntl.fcntl(self.pipe, fcntl.F_GETFL)
-        fcntl.fcntl(self.pipe, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-
-        #print "(add watch)"
-        gobject.io_add_watch(self.pipe, gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
-            self.onPipeReadable, priority=gobject.PRIORITY_LOW)
-
-    def onPipeReadable (self, fd, cond):
-        #print "condition: %s" % cond
-        if (cond & gobject.IO_IN):
-            readText = self.pipe.read(4000)
-            #print "(read %d bytes)" % len(readText)
-            if self.parser:
-                self.parser.parseFragment(readText)
-            return True
-        else:
-            # read all remaining data from pipe
-            while True:
-                readText = self.pipe.read(4000)
-                #print "(read %d bytes before finish)" % len(readText)
-                if len(readText) <= 0:
-                    break
-                if self.parser:
-                    self.parser.parseFragment(readText)
-
-            if self.parser:
-                self.parser.finish()
-            #print "(closing pipe)"
-            result = self.pipe.close()
-            if result == None:
-                #print "(search finished successfully)"
-                pass
-            else:
-                #print "(search finished with exit code %d; exited: %s, exit status: %d)" % (result,
-                #str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
-                pass
-            self.popenObj.wait()
-            return False
+        # run command:
+        self.cmdRunner = RunCommand(cmd, self)
 
     def cancel (self):
-        #print "(cancelling search command)"
-        mainPid = self.popenObj.pid
-        pi = ProcessInfo()
-        allProcs = [mainPid]
-        allProcs.extend(pi.getAllChildren(mainPid))
-        #print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
-        for pid in allProcs:
-            #print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
-            os.kill(pid, 15)
-        self.parser.cancel()
+        self.cmdRunner.cancel()
 
     def destroy (self):
-        """
-        Force search process to stop as soon as possible, and ignore any further results.
-        """
-        self.cancel()
-        self.parser = None
+        self.cmdRunner.cancel()
+        self.cmdRunner = None
 
-
-class GrepParser:
-    """
-    - buffers output from grep command
-    - extracts full lines
-    - parses lines for file name, line number, and line text
-    - passes extracted info to resultHandler
-    """
-    def __init__ (self, resultHandler):
-        self.buf = ""
-        self.cancelled = False
-        self.resultHandler = resultHandler
-
-    def cancel (self):
-        self.cancelled = True
-
-    def parseFragment (self, text):
-        if self.cancelled:
-            return
-
-        self.buf = self.buf + text
-
-        while '\n' in self.buf:
-            pos = self.buf.index('\n')
-            line = self.buf[:pos]
-            self.buf = self.buf[pos + 1:]
-            self.parseLine(line)
-
-    def parseLine (self, line):
-        if self.cancelled:
-            return
-
+    def handleLine (self, line):
         filename = None
         lineno = None
         linetext = ""
@@ -389,10 +389,7 @@ class GrepParser:
             linetext = linetext.rstrip("\n\r")
             self.resultHandler.handleResult(filename, lineno, linetext)
 
-    def finish (self):
-        self.parseFragment("")
-        if self.buf != "":
-            self.parseLine(self.buf)
+    def handleFinished (self):
         self.resultHandler.handleFinished()
 
 
