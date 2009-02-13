@@ -845,6 +845,9 @@ class FileSearcher:
             currView = gedit.tab_get_from_document(currDoc).get_view()
             currView.scroll_to_cursor()
 
+            # workaround to scroll to cursor position when opening file into window of "Unnamed Document":
+            gobject.idle_add(scrollToCursorCb, currView)
+
     def on_btnClose_clicked (self, button):
         self.destroy()
 
@@ -900,6 +903,10 @@ class FileSearcher:
         clipboard.set_text(plainText)
         clipboard.store()
 
+
+def scrollToCursorCb (view):
+    view.scroll_to_cursor()
+    return False
 
 def resultSearchCb (model, column, key, it):
     """Callback function for searching in result list"""
