@@ -78,7 +78,7 @@ TODO
 - handle invalid values in file type text field
   - display warning message if text field is left empty
 - handle empty dropdown lists of recent dirs/texts/types better (normal Gedit search dialog displays a single, empty entry, while we display a 2-pixel-high list...)
-- idea for search dialog: at bottom of list of recent dirs, there could be a separator, followed by some "special" directories: directory of current file, maybe its parent, current working dir of Gedit, current dir of side pane... This could make it easier to access these dirs, without setting them as default
+- idea for search dialog: at bottom of list of recent dirs, there could be a separator, followed by some "special" directories: directory of current file, maybe its parent, current working dir of Gedit, current dir of side pane, current root_dir from ProjectMarker (if not used already), maybe _all_ project roots, or the project roots of open files... This could make it easier to access these dirs, without setting them as default
 - in list of recent dirs, maybe write the last path element in bold font, to make it stand out more? Is this even possible?
   - looks like the gtk.ComboBoxEntry doesn't recognize markup...
 - maybe somehow integrate with File Browser in side pane?
