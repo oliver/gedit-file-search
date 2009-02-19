@@ -571,10 +571,15 @@ class FileSearchWindowHelper:
         else:
             # this is the first search since opening this Gedit window...
             if self._window.get_active_tab():
-                # there's a file open => try to use directory of that file
-                currFileDir = self._window.get_active_tab().get_document().get_uri()
-                if currFileDir != None and currFileDir.startswith("file:///"):
-                    searchDir = os.path.dirname(currFileDir[7:])
+                # if ProjectMarker plugin has set a valid project root for the current file, use that:
+                projectMarkerRootDir = self._window.get_active_tab().get_view().get_data("root_dir")
+                if projectMarkerRootDir:
+                    searchDir = projectMarkerRootDir
+                else:
+                    # otherwise, try to use directory of that file
+                    currFileDir = self._window.get_active_tab().get_document().get_uri()
+                    if currFileDir != None and currFileDir.startswith("file:///"):
+                        searchDir = os.path.dirname(currFileDir[7:])
             else:
                 # there's no file open => fall back to Gedit's current working dir
                 pass
