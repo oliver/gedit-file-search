@@ -301,17 +301,17 @@ class RunCommand:
             #print "(closing pipe)"
             result = self.pipe.close()
             if result == None:
-                #print "(search finished successfully)"
+                #print "(command finished successfully)"
                 pass
             else:
-                #print "(search finished with exit code %d; exited: %s, exit status: %d)" % (result,
-                #str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
+                #print "(command finished with exit code %d; exited: %s, exit status: %d)" % (result,
+                    #str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
                 pass
             self.popenObj.wait()
             return False
 
     def cancel (self):
-        #print "(cancelling search command)"
+        #print "(cancelling command)"
         mainPid = self.popenObj.pid
         pi = ProcessInfo()
         allProcs = [mainPid]
