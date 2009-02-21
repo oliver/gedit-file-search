@@ -414,6 +414,7 @@ class SearchProcess:
 
     def handleFinished (self):
         print "find finished"
+        self.cmdRunner = None
         pass
 
     def runGrep (self):
