@@ -787,6 +787,9 @@ class FileSearcher:
 
     def handleFinished (self):
         #print "(finished)"
+        if not(self.tree):
+            return
+
         self.searchProcess = None
         editBtn = self.tree.get_widget("btnModifyFileSearch")
         editBtn.hide()
