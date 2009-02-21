@@ -44,6 +44,7 @@ import re
 import urllib
 import gconf
 import pango
+import errno
 
 ui_str = """<ui>
   <menubar name="MenuBar">
@@ -320,7 +321,11 @@ class RunCommand:
         #print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
         for pid in allProcs:
             #print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
-            os.kill(pid, 15)
+            try:
+                os.kill(pid, 15)
+            except OSError, e:
+                if e.errno != errno.ESRCH:
+                    print "error killing PID %d (child of %d): %s" % (pid, mainPid, e)
         self.lineSplitter.cancel()
 
 
