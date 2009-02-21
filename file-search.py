@@ -324,48 +324,10 @@ class RunCommand:
         self.lineSplitter = None
 
 
-class SearchProcess:
-    def __init__ (self, query, resultHandler):
-        self.resultHandler = resultHandler
-
-        directoryEsc = query.directory.replace('\\', '\\\\').replace('"', '\\"')
-
-        findCmd = 'find "%s"' % directoryEsc
-        if not(query.includeSubfolders):
-            findCmd += """ -maxdepth 1"""
-        if query.excludeHidden:
-            findCmd += """ \( ! -path "%s*/.*" \)""" % directoryEsc
-            findCmd += """ \( ! -path "%s.*" \)""" % directoryEsc
-        if query.excludeBackup:
-            findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
-        if query.excludeVCS:
-            findCmd += """ \( ! -path "*/CVS/*" ! -path "*/.svn/*" ! -path "*/.git/*" ! -path "*/RCS/*" \)"""
-        if query.selectFileTypes:
-            fileTypeList = query.parseFileTypeString()
-            findCmd += """ \( -false"""
-            for t in fileTypeList:
-                findCmd += ' -o -name "%s"' % t.replace('\\', '\\\\\\\\').replace('"', '\\"')
-            findCmd += """ \)"""
-        findCmd += " -print0 2> /dev/null"
-
-        grepCmd = " grep -H -I -n -s -Z"
-        if not(query.caseSensitive):
-            grepCmd += " -i"
-        if not(query.isRegExp):
-            grepCmd += " -F"
-        grepCmd += """ -e "%s" 2> /dev/null""" % (query.text.replace('\\', '\\\\').replace('"', '\\"'))
-
-        cmd = findCmd + " | xargs -0" + grepCmd
-
-        # run command:
-        self.cmdRunner = RunCommand(cmd, self)
-
-    def cancel (self):
-        self.cmdRunner.cancel()
-
-    def destroy (self):
-        self.cmdRunner.cancel()
-        self.cmdRunner = None
+class GrepProcess:
+    def __init__ (self, resultCb, finishedCb):
+        self.resultCb = resultCb
+        self.finishedCb = finishedCb
 
     def handleLine (self, line):
         filename = None
@@ -387,11 +349,115 @@ class SearchProcess:
             linetext = unicode(linetext, 'utf8', 'replace')
             #print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
             linetext = linetext.rstrip("\n\r")
-            self.resultHandler.handleResult(filename, lineno, linetext)
+            self.resultCb(filename, lineno, linetext)
 
     def handleFinished (self):
-        self.resultHandler.handleFinished()
+        self.finishedCb()
 
+
+class SearchProcess:
+    def __init__ (self, query, resultHandler):
+        self.query = query
+        self.queryTextEsc = query.text.replace('\\', '\\\\').replace('"', '\\"')
+        self.resultHandler = resultHandler
+        self.cancelled = False
+
+        directoryEsc = query.directory.replace('\\', '\\\\').replace('"', '\\"')
+
+        findCmd = 'find "%s"' % directoryEsc
+        if not(query.includeSubfolders):
+            findCmd += """ -maxdepth 1"""
+        if query.excludeHidden:
+            findCmd += """ \( ! -path "%s*/.*" \)""" % directoryEsc
+            findCmd += """ \( ! -path "%s.*" \)""" % directoryEsc
+        if query.excludeBackup:
+            findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
+        if query.excludeVCS:
+            findCmd += """ \( ! -path "*/CVS/*" ! -path "*/.svn/*" ! -path "*/.git/*" ! -path "*/RCS/*" \)"""
+        if query.selectFileTypes:
+            fileTypeList = query.parseFileTypeString()
+            findCmd += """ \( -false"""
+            for t in fileTypeList:
+                findCmd += ' -o -name "%s"' % t.replace('\\', '\\\\\\\\').replace('"', '\\"')
+            findCmd += """ \)"""
+        findCmd += " -print 2> /dev/null"
+
+        self.fileNames = []
+        self.grepRunner = None
+
+        self.numGreps = 0
+
+        self.cmdRunner = RunCommand(findCmd, self)
+
+    def cancel (self):
+        self.cancelled = True
+        if self.cmdRunner:
+            self.cmdRunner.cancel()
+            self.cmdRunner = None
+        if self.grepRunner:
+            self.grepRunner.cancel()
+            self.grepRunner = None
+
+    def destroy (self):
+        self.cancel()
+
+    def handleLine (self, line):
+        #print "find result line: '%s' (type: %s)" % (line, type(line))
+
+        # Assume that find output is in UTF8 encoding, and convert it to
+        # a Unicode string. Also, sanitize non-UTF8 characters.
+        # TODO: what's the actual encoding of find's output?
+        line = unicode(line, 'utf8', 'replace')
+
+        self.fileNames.append(line)
+        self.runGrep()
+
+    def handleFinished (self):
+        print "find finished"
+        pass
+
+    def runGrep (self):
+        if self.grepRunner or len(self.fileNames) == 0 or self.cancelled:
+            return
+
+        # run Grep on many files at once:
+        maxGrepFiles = 5000
+        maxGrepLine = 3800
+        fileNameString = ""
+
+        i = 0
+        for f in self.fileNames:
+            fileNameString += "\"" + f.replace('\\', '\\\\').replace('"', '\\"') + "\" "
+            i+=1
+            if i > maxGrepFiles or len(fileNameString) > maxGrepLine:
+                break
+        self.fileNames = self.fileNames[i:]
+
+        self.numGreps += 1
+        if self.numGreps % 100 == 0:
+            print "ran %d greps so far" % self.numGreps
+
+        grepCmd = " grep -H -I -n -s -Z"
+        if not(self.query.caseSensitive):
+            grepCmd += " -i"
+        if not(self.query.isRegExp):
+            grepCmd += " -F"
+        grepCmd += """ -e "%s" %s 2> /dev/null""" % (self.queryTextEsc, fileNameString)
+
+        self.grepHandler = GrepProcess(self.handleGrepResult, self.handleGrepFinished)
+        self.grepRunner = RunCommand(grepCmd, self.grepHandler)
+
+    def handleGrepResult (self, filename, lineno, linetext):
+        self.resultHandler.handleResult(filename, lineno, linetext)
+
+    def handleGrepFinished (self):
+        self.grepRunner = None
+
+        if len(self.fileNames) > 0 and not(self.cancelled):
+            self.runGrep()
+        else:
+            print "ran %d greps" % self.numGreps
+            self.resultHandler.handleFinished()
 
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
