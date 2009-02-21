@@ -263,7 +263,7 @@ class LineSplitter:
 
 class RunCommand:
     "Run a command in background, passing all of its stdout output to a LineSplitter"
-    def __init__ (self, cmd, resultHandler):
+    def __init__ (self, cmd, resultHandler, prio=gobject.PRIORITY_LOW):
         self.lineSplitter = LineSplitter(resultHandler)
 
         print "executing command: %s" % cmd
@@ -276,7 +276,7 @@ class RunCommand:
 
         #print "(add watch)"
         gobject.io_add_watch(self.pipe, gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
-            self.onPipeReadable, priority=gobject.PRIORITY_LOW)
+            self.onPipeReadable, priority=prio)
 
     def onPipeReadable (self, fd, cond):
         #print "condition: %s" % cond
@@ -387,7 +387,7 @@ class SearchProcess:
 
         self.numGreps = 0
 
-        self.cmdRunner = RunCommand(findCmd, self)
+        self.cmdRunner = RunCommand(findCmd, self, gobject.PRIORITY_DEFAULT_IDLE)
 
     def cancel (self):
         self.cancelled = True
