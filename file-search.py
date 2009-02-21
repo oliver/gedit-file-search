@@ -296,8 +296,6 @@ class RunCommand:
                 if self.lineSplitter:
                     self.lineSplitter.parseFragment(readText)
 
-            if self.lineSplitter:
-                self.lineSplitter.finish()
             #print "(closing pipe)"
             result = self.pipe.close()
             if result == None:
@@ -308,6 +306,9 @@ class RunCommand:
                     #str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
                 pass
             self.popenObj.wait()
+            if self.lineSplitter:
+                self.lineSplitter.finish()
+                self.lineSplitter = None
             return False
 
     def cancel (self):
@@ -321,7 +322,6 @@ class RunCommand:
             #print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
             os.kill(pid, 15)
         self.lineSplitter.cancel()
-        self.lineSplitter = None
 
 
 class GrepProcess:
