@@ -380,7 +380,7 @@ class SearchProcess:
             for t in fileTypeList:
                 findCmd += ' -o -name "%s"' % t.replace('\\', '\\\\\\\\').replace('"', '\\"')
             findCmd += """ \)"""
-        findCmd += " -print 2> /dev/null"
+        findCmd += " -type f -print 2> /dev/null"
 
         self.fileNames = []
         self.grepRunner = None
