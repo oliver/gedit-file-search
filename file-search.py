@@ -340,6 +340,7 @@ class GrepProcess:
         self.cmdRunner = None
         self.cancelled = False
         self.numGreps = 0
+        self.inputFinished = False
 
     def cancel (self):
         self.cancelled = True
@@ -351,6 +352,10 @@ class GrepProcess:
     def addFilename (self, filename):
         self.fileNames.append(filename)
         self.runGrep()
+
+    def handleInputFinished (self):
+        "Called when there will be no more input files added"
+        self.inputFinished = True
 
     def runGrep (self):
         if self.cmdRunner or len(self.fileNames) == 0 or self.cancelled:
@@ -410,8 +415,9 @@ class GrepProcess:
         if len(self.fileNames) > 0 and not(self.cancelled):
             self.runGrep()
         else:
-            print "ran %d greps" % self.numGreps
-            self.finishedCb()
+            if self.inputFinished:
+                print "ran %d greps" % self.numGreps
+                self.finishedCb()
 
 
 class SearchProcess:
@@ -467,6 +473,7 @@ class SearchProcess:
     def handleFinished (self):
         print "find finished"
         self.cmdRunner = None
+        self.grepProcess.handleInputFinished()
 
     def handleGrepResult (self, filename, lineno, linetext):
         self.resultHandler.handleResult(filename, lineno, linetext)
