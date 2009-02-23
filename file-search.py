@@ -330,100 +330,30 @@ class RunCommand:
 
 
 class GrepProcess:
-    def __init__ (self, resultCb, finishedCb):
+    def __init__ (self, query, resultCb, finishedCb):
+        self.query = query
+        self.queryTextEsc = query.text.replace('\\', '\\\\').replace('"', '\\"')
         self.resultCb = resultCb
         self.finishedCb = finishedCb
 
-    def handleLine (self, line):
-        filename = None
-        lineno = None
-        linetext = ""
-        if '\0' in line:
-            [filename, end] = line.split('\0', 1)
-            if ':' in end:
-                [lineno, linetext] = end.split(':', 1)
-                lineno = int(lineno)
-
-        if lineno == None:
-            #print "(ignoring invalid line)"
-            pass
-        else:
-            # Assume that grep output is in UTF8 encoding, and convert it to
-            # a Unicode string. Also, sanitize non-UTF8 characters.
-            # TODO: what's the actual encoding of grep's output?
-            linetext = unicode(linetext, 'utf8', 'replace')
-            #print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
-            linetext = linetext.rstrip("\n\r")
-            self.resultCb(filename, lineno, linetext)
-
-    def handleFinished (self):
-        self.finishedCb()
-
-
-class SearchProcess:
-    def __init__ (self, query, resultHandler):
-        self.query = query
-        self.queryTextEsc = query.text.replace('\\', '\\\\').replace('"', '\\"')
-        self.resultHandler = resultHandler
-        self.cancelled = False
-
-        directoryEsc = query.directory.replace('\\', '\\\\').replace('"', '\\"')
-
-        findCmd = 'find "%s"' % directoryEsc
-        if not(query.includeSubfolders):
-            findCmd += """ -maxdepth 1"""
-        if query.excludeHidden:
-            findCmd += """ \( ! -path "%s*/.*" \)""" % directoryEsc
-            findCmd += """ \( ! -path "%s.*" \)""" % directoryEsc
-        if query.excludeBackup:
-            findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
-        if query.excludeVCS:
-            findCmd += """ \( ! -path "*/CVS/*" ! -path "*/.svn/*" ! -path "*/.git/*" ! -path "*/RCS/*" \)"""
-        if query.selectFileTypes:
-            fileTypeList = query.parseFileTypeString()
-            findCmd += """ \( -false"""
-            for t in fileTypeList:
-                findCmd += ' -o -name "%s"' % t.replace('\\', '\\\\\\\\').replace('"', '\\"')
-            findCmd += """ \)"""
-        findCmd += " -type f -print 2> /dev/null"
-
         self.fileNames = []
-        self.grepRunner = None
-
+        self.cmdRunner = None
+        self.cancelled = False
         self.numGreps = 0
-
-        self.cmdRunner = RunCommand(findCmd, self, gobject.PRIORITY_DEFAULT_IDLE)
 
     def cancel (self):
         self.cancelled = True
         if self.cmdRunner:
             self.cmdRunner.cancel()
             self.cmdRunner = None
-        if self.grepRunner:
-            self.grepRunner.cancel()
-            self.grepRunner = None
-
-    def destroy (self):
-        self.cancel()
-
-    def handleLine (self, line):
-        #print "find result line: '%s' (type: %s)" % (line, type(line))
-
-        # Assume that find output is in UTF8 encoding, and convert it to
-        # a Unicode string. Also, sanitize non-UTF8 characters.
-        # TODO: what's the actual encoding of find's output?
-        line = unicode(line, 'utf8', 'replace')
-
-        self.fileNames.append(line)
-        self.runGrep()
-
-    def handleFinished (self):
-        print "find finished"
-        self.cmdRunner = None
         pass
 
+    def addFilename (self, filename):
+        self.fileNames.append(filename)
+        self.runGrep()
+
     def runGrep (self):
-        if self.grepRunner or len(self.fileNames) == 0 or self.cancelled:
+        if self.cmdRunner or len(self.fileNames) == 0 or self.cancelled:
             return
 
         # run Grep on many files at once:
@@ -450,20 +380,100 @@ class SearchProcess:
             grepCmd += " -F"
         grepCmd += """ -e "%s" %s 2> /dev/null""" % (self.queryTextEsc, fileNameString)
 
-        self.grepHandler = GrepProcess(self.handleGrepResult, self.handleGrepFinished)
-        self.grepRunner = RunCommand(grepCmd, self.grepHandler)
+        self.cmdRunner = RunCommand(grepCmd, self)
+
+    def handleLine (self, line):
+        filename = None
+        lineno = None
+        linetext = ""
+        if '\0' in line:
+            [filename, end] = line.split('\0', 1)
+            if ':' in end:
+                [lineno, linetext] = end.split(':', 1)
+                lineno = int(lineno)
+
+        if lineno == None:
+            #print "(ignoring invalid line)"
+            pass
+        else:
+            # Assume that grep output is in UTF8 encoding, and convert it to
+            # a Unicode string. Also, sanitize non-UTF8 characters.
+            # TODO: what's the actual encoding of grep's output?
+            linetext = unicode(linetext, 'utf8', 'replace')
+            #print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
+            linetext = linetext.rstrip("\n\r")
+            self.resultCb(filename, lineno, linetext)
+
+    def handleFinished (self):
+        #print "grep finished"
+        self.cmdRunner = None
+        if len(self.fileNames) > 0 and not(self.cancelled):
+            self.runGrep()
+        else:
+            print "ran %d greps" % self.numGreps
+            self.finishedCb()
+
+
+class SearchProcess:
+    def __init__ (self, query, resultHandler):
+        self.resultHandler = resultHandler
+        self.cancelled = False
+
+        self.grepProcess = GrepProcess(query, self.handleGrepResult, self.handleGrepFinished)
+
+        directoryEsc = query.directory.replace('\\', '\\\\').replace('"', '\\"')
+
+        findCmd = 'find "%s"' % directoryEsc
+        if not(query.includeSubfolders):
+            findCmd += """ -maxdepth 1"""
+        if query.excludeHidden:
+            findCmd += """ \( ! -path "%s*/.*" \)""" % directoryEsc
+            findCmd += """ \( ! -path "%s.*" \)""" % directoryEsc
+        if query.excludeBackup:
+            findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
+        if query.excludeVCS:
+            findCmd += """ \( ! -path "*/CVS/*" ! -path "*/.svn/*" ! -path "*/.git/*" ! -path "*/RCS/*" \)"""
+        if query.selectFileTypes:
+            fileTypeList = query.parseFileTypeString()
+            findCmd += """ \( -false"""
+            for t in fileTypeList:
+                findCmd += ' -o -name "%s"' % t.replace('\\', '\\\\\\\\').replace('"', '\\"')
+            findCmd += """ \)"""
+        findCmd += " -type f -print 2> /dev/null"
+
+        self.cmdRunner = RunCommand(findCmd, self, gobject.PRIORITY_DEFAULT_IDLE)
+
+    def cancel (self):
+        self.cancelled = True
+        if self.cmdRunner:
+            self.cmdRunner.cancel()
+            self.cmdRunner = None
+        if self.grepProcess:
+            self.grepProcess.cancel()
+
+    def destroy (self):
+        self.cancel()
+
+    def handleLine (self, line):
+        #print "find result line: '%s' (type: %s)" % (line, type(line))
+
+        # Assume that find output is in UTF8 encoding, and convert it to
+        # a Unicode string. Also, sanitize non-UTF8 characters.
+        # TODO: what's the actual encoding of find's output?
+        line = unicode(line, 'utf8', 'replace')
+
+        self.grepProcess.addFilename(line)
+
+    def handleFinished (self):
+        print "find finished"
+        self.cmdRunner = None
 
     def handleGrepResult (self, filename, lineno, linetext):
         self.resultHandler.handleResult(filename, lineno, linetext)
 
     def handleGrepFinished (self):
-        self.grepRunner = None
-
-        if len(self.fileNames) > 0 and not(self.cancelled):
-            self.runGrep()
-        else:
-            print "ran %d greps" % self.numGreps
-            self.resultHandler.handleFinished()
+        self.resultHandler.handleFinished()
+        self.grepProcess = None
 
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
