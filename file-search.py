@@ -383,6 +383,10 @@ class GrepProcess:
             grepCmd += " -i"
         if not(self.query.isRegExp):
             grepCmd += " -F"
+
+        # Assume all file contents are in UTF-8 encoding (AFAIK grep will just search for byte sequences, it doesn't care about encodings):
+        self.queryTextEsc = self.queryTextEsc.encode("utf-8")
+
         grepCmd += """ -e "%s" %s 2> /dev/null""" % (self.queryTextEsc, fileNameString)
 
         self.cmdRunner = RunCommand(grepCmd, self)
