@@ -332,7 +332,7 @@ class RunCommand:
 class GrepProcess:
     def __init__ (self, query, resultCb, finishedCb):
         self.query = query
-        self.queryTextEsc = query.text.replace('\\', '\\\\').replace('"', '\\"')
+        self.queryText = query.text
         self.resultCb = resultCb
         self.finishedCb = finishedCb
 
@@ -364,13 +364,13 @@ class GrepProcess:
         # run Grep on many files at once:
         maxGrepFiles = 5000
         maxGrepLine = 3800
-        fileNameString = ""
+        fileNameList = []
 
         i = 0
         for f in self.fileNames:
-            fileNameString += "\"" + f.replace('\\', '\\\\').replace('"', '\\"') + "\" "
+            fileNameList += [f]
             i+=1
-            if i > maxGrepFiles or len(fileNameString) > maxGrepLine:
+            if i > maxGrepFiles or len(fileNameList) > maxGrepLine:
                 break
         self.fileNames = self.fileNames[i:]
 
@@ -378,16 +378,17 @@ class GrepProcess:
         if self.numGreps % 100 == 0:
             print "ran %d greps so far" % self.numGreps
 
-        grepCmd = " grep -H -I -n -s -Z"
+        grepCmd = ["grep", "-H", "-I", "-n", "-s", "-Z"]
         if not(self.query.caseSensitive):
-            grepCmd += " -i"
+            grepCmd += ["-i"]
         if not(self.query.isRegExp):
-            grepCmd += " -F"
+            grepCmd += ["-F"]
 
         # Assume all file contents are in UTF-8 encoding (AFAIK grep will just search for byte sequences, it doesn't care about encodings):
-        self.queryTextEsc = self.queryTextEsc.encode("utf-8")
+        self.queryText = self.queryText.encode("utf-8")
 
-        grepCmd += """ -e "%s" %s 2> /dev/null""" % (self.queryTextEsc, fileNameString)
+        grepCmd += ["-e", self.queryText]
+        grepCmd += fileNameList
 
         self.cmdRunner = RunCommand(grepCmd, self)
 
