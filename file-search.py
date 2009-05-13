@@ -463,10 +463,8 @@ class SearchProcess:
     def handleLine (self, line):
         #print "find result line: '%s' (type: %s)" % (line, type(line))
 
-        # Assume that find output is in UTF8 encoding, and convert it to
-        # a Unicode string. Also, sanitize non-UTF8 characters.
-        # TODO: what's the actual encoding of find's output?
-        line = unicode(line, 'utf8', 'replace')
+        # Note: we don't assume anything about the encoding of output from `find`
+        # but just treat it as encoding-less byte sequence.
 
         self.grepProcess.addFilename(line)
 
