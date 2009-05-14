@@ -432,25 +432,23 @@ class SearchProcess:
 
         self.grepProcess = GrepProcess(query, self.handleGrepResult, self.handleGrepFinished)
 
-        directoryEsc = query.directory.replace('\\', '\\\\').replace('"', '\\"')
-
-        findCmd = 'find "%s"' % directoryEsc
+        findCmd = ["find", query.directory]
         if not(query.includeSubfolders):
-            findCmd += """ -maxdepth 1"""
+            findCmd += ["-maxdepth", "1"]
         if query.excludeHidden:
-            findCmd += """ \( ! -path "%s*/.*" \)""" % directoryEsc
-            findCmd += """ \( ! -path "%s.*" \)""" % directoryEsc
+            findCmd += ["(", "!", "-path", "%s*/.*" % query.directory, ")"]
+            findCmd += ["(", "!", "-path", "%s.*" % query.directory, ")"]
         if query.excludeBackup:
-            findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
+            findCmd += ["(", "!", "-name", "*~", "!", "-name", ".#*.*", ")"]
         if query.excludeVCS:
-            findCmd += """ \( ! -path "*/CVS/*" ! -path "*/.svn/*" ! -path "*/.git/*" ! -path "*/RCS/*" \)"""
+            findCmd += ["(", "!", "-path", "*/CVS/*", "!", "-path", "*/.svn/*", "!", "-path", "*/.git/*", "!", "-path", "*/RCS/*", ")"]
         if query.selectFileTypes:
             fileTypeList = query.parseFileTypeString()
-            findCmd += """ \( -false"""
+            findCmd += ["(", "-false"]
             for t in fileTypeList:
-                findCmd += ' -o -name "%s"' % t.replace('\\', '\\\\\\\\').replace('"', '\\"')
-            findCmd += """ \)"""
-        findCmd += " -type f -print 2> /dev/null"
+                findCmd += ["-o", "-name", t]
+            findCmd += [")"]
+        findCmd += ["-type", "f", "-print"]
 
         self.cmdRunner = RunCommand(findCmd, self, gobject.PRIORITY_DEFAULT_IDLE)
 
