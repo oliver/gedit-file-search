@@ -450,7 +450,7 @@ class SearchProcess:
             for t in fileTypeList:
                 findCmd += ["-o", "-name", t]
             findCmd += [")"]
-        findCmd += ["-type", "f", "-print"]
+        findCmd += ["-xtype", "f", "-print"]
 
         self.cmdRunner = RunCommand(findCmd, self, gobject.PRIORITY_DEFAULT_IDLE)
 
