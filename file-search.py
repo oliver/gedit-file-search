@@ -367,10 +367,12 @@ class GrepProcess:
         fileNameList = []
 
         i = 0
+        numChars = 0
         for f in self.fileNames:
             fileNameList += [f]
             i+=1
-            if i > maxGrepFiles or len(fileNameList) > maxGrepLine:
+            numChars += len(f)
+            if i > maxGrepFiles or numChars > maxGrepLine:
                 break
         self.fileNames = self.fileNames[i:]
 
