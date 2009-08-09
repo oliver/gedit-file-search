@@ -44,6 +44,7 @@ import re
 import urllib
 import gconf
 import pango
+import errno
 
 ui_str = """<ui>
   <menubar name="MenuBar">
@@ -232,118 +233,8 @@ class SearchQuery:
         gclient.set_bool(gconfBase+"/select_file_types", self.selectFileTypes)
 
 
-class SearchProcess:
-    """
-    - starts the search command
-    - asynchronously waits for output from search command
-    - passes output to GrepParser
-    - kills search command if requested
-    """
-    def __init__ (self, query, resultHandler):
-        self.parser = GrepParser(resultHandler)
-
-        directoryEsc = query.directory.replace('\\', '\\\\').replace('"', '\\"')
-
-        findCmd = 'find "%s"' % directoryEsc
-        if not(query.includeSubfolders):
-            findCmd += """ -maxdepth 1"""
-        if query.excludeHidden:
-            findCmd += """ \( ! -path "%s*/.*" \)""" % directoryEsc
-            findCmd += """ \( ! -path "%s.*" \)""" % directoryEsc
-        if query.excludeBackup:
-            findCmd += """ \( ! -name "*~" ! -name ".#*.*" \)"""
-        if query.excludeVCS:
-            findCmd += """ \( ! -path "*/CVS/*" ! -path "*/.svn/*" ! -path "*/.git/*" ! -path "*/RCS/*" \)"""
-        if query.selectFileTypes:
-            fileTypeList = query.parseFileTypeString()
-            findCmd += """ \( -false"""
-            for t in fileTypeList:
-                findCmd += ' -o -name "%s"' % t.replace('\\', '\\\\\\\\').replace('"', '\\"')
-            findCmd += """ \)"""
-        findCmd += " -print0 2> /dev/null"
-
-        grepCmd = " grep -H -I -n -s -Z"
-        if not(query.caseSensitive):
-            grepCmd += " -i"
-        if not(query.isRegExp):
-            grepCmd += " -F"
-        grepCmd += """ -e "%s" 2> /dev/null""" % (query.text.replace('\\', '\\\\').replace('"', '\\"'))
-
-        cmd = findCmd + " | xargs -0" + grepCmd
-        #cmd = "sleep 2; echo -n 'abc'; sleep 3; echo 'xyz'; sleep 3"
-        #cmd = "sleep 2"
-        #cmd = "echo 'abc'"
-        #print "executing command: %s" % cmd
-        self.popenObj = popen2.Popen3(cmd)
-        self.pipe = self.popenObj.fromchild
-
-        # make pipe non-blocking:
-        fl = fcntl.fcntl(self.pipe, fcntl.F_GETFL)
-        fcntl.fcntl(self.pipe, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-
-        #print "(add watch)"
-        gobject.io_add_watch(self.pipe, gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
-            self.onPipeReadable, priority=gobject.PRIORITY_LOW)
-
-    def onPipeReadable (self, fd, cond):
-        #print "condition: %s" % cond
-        if (cond & gobject.IO_IN):
-            readText = self.pipe.read(4000)
-            #print "(read %d bytes)" % len(readText)
-            if self.parser:
-                self.parser.parseFragment(readText)
-            return True
-        else:
-            # read all remaining data from pipe
-            while True:
-                readText = self.pipe.read(4000)
-                #print "(read %d bytes before finish)" % len(readText)
-                if len(readText) <= 0:
-                    break
-                if self.parser:
-                    self.parser.parseFragment(readText)
-
-            if self.parser:
-                self.parser.finish()
-            #print "(closing pipe)"
-            result = self.pipe.close()
-            if result == None:
-                #print "(search finished successfully)"
-                pass
-            else:
-                #print "(search finished with exit code %d; exited: %s, exit status: %d)" % (result,
-                #str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
-                pass
-            self.popenObj.wait()
-            return False
-
-    def cancel (self):
-        #print "(cancelling search command)"
-        mainPid = self.popenObj.pid
-        pi = ProcessInfo()
-        allProcs = [mainPid]
-        allProcs.extend(pi.getAllChildren(mainPid))
-        #print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
-        for pid in allProcs:
-            #print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
-            os.kill(pid, 15)
-        self.parser.cancel()
-
-    def destroy (self):
-        """
-        Force search process to stop as soon as possible, and ignore any further results.
-        """
-        self.cancel()
-        self.parser = None
-
-
-class GrepParser:
-    """
-    - buffers output from grep command
-    - extracts full lines
-    - parses lines for file name, line number, and line text
-    - passes extracted info to resultHandler
-    """
+class LineSplitter:
+    "Split incoming text into lines which are passed to the resultHandler object"
     def __init__ (self, resultHandler):
         self.buf = ""
         self.cancelled = False
@@ -362,12 +253,148 @@ class GrepParser:
             pos = self.buf.index('\n')
             line = self.buf[:pos]
             self.buf = self.buf[pos + 1:]
-            self.parseLine(line)
+            self.resultHandler.handleLine(line)
 
-    def parseLine (self, line):
-        if self.cancelled:
+    def finish (self):
+        self.parseFragment("")
+        if self.buf != "":
+            self.resultHandler.handleLine(self.buf)
+        self.resultHandler.handleFinished()
+
+
+class RunCommand:
+    "Run a command in background, passing all of its stdout output to a LineSplitter"
+    def __init__ (self, cmd, resultHandler, prio=gobject.PRIORITY_LOW):
+        self.lineSplitter = LineSplitter(resultHandler)
+
+        print "executing command: %s" % cmd
+        self.popenObj = popen2.Popen3(cmd)
+        self.pipe = self.popenObj.fromchild
+
+        # make pipe non-blocking:
+        fl = fcntl.fcntl(self.pipe, fcntl.F_GETFL)
+        fcntl.fcntl(self.pipe, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+
+        #print "(add watch)"
+        gobject.io_add_watch(self.pipe, gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
+            self.onPipeReadable, priority=prio)
+
+    def onPipeReadable (self, fd, cond):
+        #print "condition: %s" % cond
+        if (cond & gobject.IO_IN):
+            readText = self.pipe.read(4000)
+            #print "(read %d bytes)" % len(readText)
+            if self.lineSplitter:
+                self.lineSplitter.parseFragment(readText)
+            return True
+        else:
+            # read all remaining data from pipe
+            while True:
+                readText = self.pipe.read(4000)
+                #print "(read %d bytes before finish)" % len(readText)
+                if len(readText) <= 0:
+                    break
+                if self.lineSplitter:
+                    self.lineSplitter.parseFragment(readText)
+
+            #print "(closing pipe)"
+            result = self.pipe.close()
+            if result == None:
+                #print "(command finished successfully)"
+                pass
+            else:
+                #print "(command finished with exit code %d; exited: %s, exit status: %d)" % (result,
+                    #str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
+                pass
+            self.popenObj.wait()
+            if self.lineSplitter:
+                self.lineSplitter.finish()
+                self.lineSplitter = None
+            return False
+
+    def cancel (self):
+        #print "(cancelling command)"
+        mainPid = self.popenObj.pid
+        pi = ProcessInfo()
+        allProcs = [mainPid]
+        allProcs.extend(pi.getAllChildren(mainPid))
+        #print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
+        for pid in allProcs:
+            #print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
+            try:
+                os.kill(pid, 15)
+            except OSError, e:
+                if e.errno != errno.ESRCH:
+                    print "error killing PID %d (child of %d): %s" % (pid, mainPid, e)
+        self.lineSplitter.cancel()
+
+
+class GrepProcess:
+    def __init__ (self, query, resultCb, finishedCb):
+        self.query = query
+        self.queryText = query.text
+        self.resultCb = resultCb
+        self.finishedCb = finishedCb
+
+        self.fileNames = []
+        self.cmdRunner = None
+        self.cancelled = False
+        self.numGreps = 0
+        self.inputFinished = False
+
+    def cancel (self):
+        self.cancelled = True
+        if self.cmdRunner:
+            self.cmdRunner.cancel()
+            self.cmdRunner = None
+        pass
+
+    def addFilename (self, filename):
+        self.fileNames.append(filename)
+        self.runGrep()
+
+    def handleInputFinished (self):
+        "Called when there will be no more input files added"
+        self.inputFinished = True
+
+    def runGrep (self):
+        if self.cmdRunner or len(self.fileNames) == 0 or self.cancelled:
             return
 
+        # run Grep on many files at once:
+        maxGrepFiles = 5000
+        maxGrepLine = 3800
+        fileNameList = []
+
+        i = 0
+        numChars = 0
+        for f in self.fileNames:
+            fileNameList += [f]
+            i+=1
+            numChars += len(f)
+            if i > maxGrepFiles or numChars > maxGrepLine:
+                break
+        self.fileNames = self.fileNames[i:]
+
+        self.numGreps += 1
+        if self.numGreps % 100 == 0:
+            print "ran %d greps so far" % self.numGreps
+
+        grepCmd = ["grep", "-H", "-I", "-n", "-s", "-Z"]
+        if not(self.query.caseSensitive):
+            grepCmd += ["-i"]
+        if not(self.query.isRegExp):
+            grepCmd += ["-F"]
+
+        # Assume all file contents are in UTF-8 encoding (AFAIK grep will just search for byte sequences, it doesn't care about encodings):
+        self.queryText = self.queryText.encode("utf-8")
+
+        grepCmd += ["-e", self.queryText]
+        grepCmd += fileNameList
+
+        self.cmdRunner = RunCommand(grepCmd, self)
+
+    def handleLine (self, line):
         filename = None
         lineno = None
         linetext = ""
@@ -387,13 +414,89 @@ class GrepParser:
             linetext = unicode(linetext, 'utf8', 'replace')
             #print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
             linetext = linetext.rstrip("\n\r")
-            self.resultHandler.handleResult(filename, lineno, linetext)
+            self.resultCb(filename, lineno, linetext)
 
-    def finish (self):
-        self.parseFragment("")
-        if self.buf != "":
-            self.parseLine(self.buf)
+    def handleFinished (self):
+        #print "grep finished"
+        self.cmdRunner = None
+        if len(self.fileNames) > 0 and not(self.cancelled):
+            self.runGrep()
+        else:
+            if self.inputFinished:
+                print "ran %d greps" % self.numGreps
+                self.finishedCb()
+
+
+class SearchProcess:
+    def __init__ (self, query, resultHandler):
+        self.resultHandler = resultHandler
+        self.cancelled = False
+        self.files = []
+
+        self.grepProcess = GrepProcess(query, self.handleGrepResult, self.handleGrepFinished)
+
+        findCmd = ["find", query.directory]
+        if not(query.includeSubfolders):
+            findCmd += ["-maxdepth", "1"]
+        if query.excludeHidden:
+            findCmd += ["(", "!", "-path", "%s*/.*" % query.directory, ")"]
+            findCmd += ["(", "!", "-path", "%s.*" % query.directory, ")"]
+        if query.excludeBackup:
+            findCmd += ["(", "!", "-name", "*~", "!", "-name", ".#*.*", ")"]
+        if query.excludeVCS:
+            findCmd += ["(", "!", "-path", "*/CVS/*", "!", "-path", "*/.svn/*", "!", "-path", "*/.git/*", "!", "-path", "*/RCS/*", ")"]
+        if query.selectFileTypes:
+            fileTypeList = query.parseFileTypeString()
+            findCmd += ["(", "-false"]
+            for t in fileTypeList:
+                findCmd += ["-o", "-name", t]
+            findCmd += [")"]
+        findCmd += ["-xtype", "f", "-print"]
+
+        self.cmdRunner = RunCommand(findCmd, self, gobject.PRIORITY_DEFAULT_IDLE)
+
+    def cancel (self):
+        self.cancelled = True
+        if self.cmdRunner:
+            self.cmdRunner.cancel()
+            self.cmdRunner = None
+        if self.grepProcess:
+            self.grepProcess.cancel()
+
+    def destroy (self):
+        self.cancel()
+
+    def handleLine (self, line):
+        #print "find result line: '%s' (type: %s)" % (line, type(line))
+
+        # Note: we don't assume anything about the encoding of output from `find`
+        # but just treat it as encoding-less byte sequence.
+
+        self.files.append(line)
+
+    def handleFinished (self):
+        print "find finished (%d files found)" % len(self.files)
+        self.cmdRunner = None
+
+        self.files.sort(pathCompare)
+
+        for f in self.files:
+            self.grepProcess.addFilename(f)
+        self.files = []
+        self.grepProcess.handleInputFinished()
+
+    def handleGrepResult (self, filename, lineno, linetext):
+        self.resultHandler.handleResult(filename, lineno, linetext)
+
+    def handleGrepFinished (self):
         self.resultHandler.handleFinished()
+        self.grepProcess = None
+
+def pathCompare (p1, p2):
+    "Sort path names (files before directories; alphabetically)"
+    s1 = os.path.split(p1)
+    s2 = os.path.split(p2)
+    return cmp(s1, s2)
 
 
 class FileSearchWindowHelper:
@@ -731,6 +834,9 @@ class FileSearcher:
 
     def handleFinished (self):
         #print "(finished)"
+        if not(self.tree):
+            return
+
         self.searchProcess = None
         editBtn = self.tree.get_widget("btnModifyFileSearch")
         editBtn.hide()
