@@ -431,6 +431,7 @@ class SearchProcess:
     def __init__ (self, query, resultHandler):
         self.resultHandler = resultHandler
         self.cancelled = False
+        self.files = []
 
         self.grepProcess = GrepProcess(query, self.handleGrepResult, self.handleGrepFinished)
 
@@ -471,11 +472,17 @@ class SearchProcess:
         # Note: we don't assume anything about the encoding of output from `find`
         # but just treat it as encoding-less byte sequence.
 
-        self.grepProcess.addFilename(line)
+        self.files.append(line)
 
     def handleFinished (self):
-        print "find finished"
+        print "find finished (%d files found)" % len(self.files)
         self.cmdRunner = None
+
+        self.files.sort(pathCompare)
+
+        for f in self.files:
+            self.grepProcess.addFilename(f)
+        self.files = []
         self.grepProcess.handleInputFinished()
 
     def handleGrepResult (self, filename, lineno, linetext):
@@ -484,6 +491,13 @@ class SearchProcess:
     def handleGrepFinished (self):
         self.resultHandler.handleFinished()
         self.grepProcess = None
+
+def pathCompare (p1, p2):
+    "Sort path names (files before directories; alphabetically)"
+    s1 = os.path.split(p1)
+    s2 = os.path.split(p2)
+    return cmp(s1, s2)
+
 
 class FileSearchWindowHelper:
     def __init__(self, plugin, window):
