@@ -267,7 +267,7 @@ class RunCommand:
     def __init__ (self, cmd, resultHandler, prio=gobject.PRIORITY_LOW):
         self.lineSplitter = LineSplitter(resultHandler)
 
-        print "executing command: %s" % cmd
+        #print "executing command: %s" % cmd
         self.popenObj = popen2.Popen3(cmd)
         self.pipe = self.popenObj.fromchild
 
@@ -377,8 +377,8 @@ class GrepProcess:
         self.fileNames = self.fileNames[i:]
 
         self.numGreps += 1
-        if self.numGreps % 100 == 0:
-            print "ran %d greps so far" % self.numGreps
+        #if self.numGreps % 100 == 0:
+            #print "ran %d greps so far" % self.numGreps
 
         grepCmd = ["grep", "-H", "-I", "-n", "-s", "-Z"]
         if not(self.query.caseSensitive):
@@ -423,7 +423,7 @@ class GrepProcess:
             self.runGrep()
         else:
             if self.inputFinished:
-                print "ran %d greps" % self.numGreps
+                #print "ran %d greps" % self.numGreps
                 self.finishedCb()
 
 
@@ -475,7 +475,7 @@ class SearchProcess:
         self.files.append(line)
 
     def handleFinished (self):
-        print "find finished (%d files found)" % len(self.files)
+        #print "find finished (%d files found)" % len(self.files)
         self.cmdRunner = None
 
         self.files.sort(pathCompare)
