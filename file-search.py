@@ -23,8 +23,10 @@
 # - FileSearchPlugin (the actual plugin, which implements the Gedit plugin interface)
 #
 # Search functionality classes:
-# - SearchProcess (starts the external find/grep commands for searching, and reads the output)
-# - GrepParser (accumulates output from grep command and parses it to extract files, line numbers, and lines)
+# - LineSplitter (accumulates incoming strings and splits them into lines)
+# - RunCommand (runs a shell command and passes the output to LineSplitter)
+# - GrepProcess (uses RunCommand to run Grep, parses its output, and passes that to the result window)
+# - SearchProcess (uses RunCommand to run Find, parses its output, and starts GrepProcess)
 #
 # Helper classes:
 # - ProcessInfo (gets process tree info, for killing search processes)
