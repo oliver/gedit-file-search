@@ -47,6 +47,7 @@ import urllib
 import gconf
 import pango
 import errno
+import dircache
 
 ui_str = """<ui>
   <menubar name="MenuBar">
@@ -517,6 +518,7 @@ class FileSearchWindowHelper:
         self._lastTypes = RecentList(self.gclient, "recent_types")
 
         self._lastDir = None
+        self._autoCompleteList = None
 
         self._lastClickIter = None # TextIter at position of last right-click or last popup menu
 
@@ -639,6 +641,21 @@ class FileSearchWindowHelper:
     def on_cbSelectFileTypes_toggled (self, checkbox):
         self.tree.get_widget('cboFileTypeList').set_sensitive( checkbox.get_active() )
 
+    def on_cboSearchDirectoryEntry_changed (self, entry):
+        text = entry.get_text()
+        if text and self._autoCompleteList != None:
+            path = os.path.dirname(text)
+            start = os.path.basename(text)
+            files = dircache.listdir(path)
+            self._autoCompleteList.clear()
+            for f in files:
+                if f.startswith(start):
+                    if path == "/":
+                        match = path + f
+                    else:
+                        match = path + os.sep + f
+                    self._autoCompleteList.append([match])
+
     def on_btnBrowse_clicked (self, button):
         fileChooser = gtk.FileChooserDialog(title="Select directory to search in",
             parent=self._dialog,
@@ -695,6 +712,13 @@ class FileSearchWindowHelper:
 
         # ... and display that in the text field:
         self.tree.get_widget('cboSearchDirectoryEntry').set_text(searchDir)
+
+        # Set up autocompletion for search directory:
+        completion = gtk.EntryCompletion()
+        self.tree.get_widget('cboSearchDirectoryEntry').set_completion(completion)
+        self._autoCompleteList = gtk.ListStore(str)
+        completion.set_model(self._autoCompleteList)
+        completion.set_text_column(0)
 
         # Fill the drop-down part of the text field with recent dirs:
         cboLastDirs = self.tree.get_widget('cboSearchDirectoryList')
