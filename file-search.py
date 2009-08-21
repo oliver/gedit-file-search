@@ -649,11 +649,12 @@ class FileSearchWindowHelper:
 
             self._autoCompleteList.clear()
             try:
-                files = dircache.listdir(path)
+                files = dircache.listdir(path)[:]
             except OSError:
                 return
+            dircache.annotate(path, files)
             for f in files:
-                if f.startswith(start):
+                if f.startswith(start) and f.endswith("/"):
                     if path == "/":
                         match = path + f
                     else:
