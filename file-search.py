@@ -646,8 +646,12 @@ class FileSearchWindowHelper:
         if text and self._autoCompleteList != None:
             path = os.path.dirname(text)
             start = os.path.basename(text)
-            files = dircache.listdir(path)
+
             self._autoCompleteList.clear()
+            try:
+                files = dircache.listdir(path)
+            except OSError:
+                return
             for f in files:
                 if f.startswith(start):
                     if path == "/":
