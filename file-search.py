@@ -654,6 +654,9 @@ class FileSearchWindowHelper:
                 return
             dircache.annotate(path, files)
             for f in files:
+                if f.startswith(".") and not(start.startswith(".")):
+                    # show hidden dirs only if explicitly requested by user
+                    continue
                 if f.startswith(start) and f.endswith("/"):
                     if path == "/":
                         match = path + f
