@@ -270,7 +270,7 @@ class RunCommand:
     def __init__ (self, cmd, resultHandler, prio=gobject.PRIORITY_LOW):
         self.lineSplitter = LineSplitter(resultHandler)
 
-        #print "executing command: %s" % cmd
+        print "executing command: %s" % cmd
         self.popenObj = popen2.Popen3(cmd)
         self.pipe = self.popenObj.fromchild
 
@@ -316,14 +316,15 @@ class RunCommand:
             return False
 
     def cancel (self):
-        #print "(cancelling command)"
+        print "(cancelling command)"
         mainPid = self.popenObj.pid
-        pi = ProcessInfo()
+        #pi = ProcessInfo()
         allProcs = [mainPid]
-        allProcs.extend(pi.getAllChildren(mainPid))
-        #print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
+        #allProcs.extend(pi.getAllChildren(mainPid))
+        print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
         for pid in allProcs:
             #print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
+            print "killing pid %d" % pid
             try:
                 os.kill(pid, 15)
             except OSError, e:
@@ -408,19 +409,19 @@ class GrepProcess:
                 lineno = int(lineno)
 
         if lineno == None:
-            #print "(ignoring invalid line)"
+            print "(ignoring invalid line: '%s')" % line
             pass
         else:
             # Assume that grep output is in UTF8 encoding, and convert it to
             # a Unicode string. Also, sanitize non-UTF8 characters.
             # TODO: what's the actual encoding of grep's output?
             linetext = unicode(linetext, 'utf8', 'replace')
-            #print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
+            print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
             linetext = linetext.rstrip("\n\r")
             self.resultCb(filename, lineno, linetext)
 
     def handleFinished (self):
-        #print "grep finished"
+        print "grep finished"
         self.cmdRunner = None
         if len(self.fileNames) > 0 and not(self.cancelled):
             self.runGrep()
@@ -454,7 +455,7 @@ class SearchProcess:
             for t in fileTypeList:
                 findCmd += ["-o", "-name", t]
             findCmd += [")"]
-        findCmd += ["-xtype", "f", "-print"]
+        findCmd += ["-type", "f", "-print"]
 
         self.cmdRunner = RunCommand(findCmd, self, gobject.PRIORITY_DEFAULT_IDLE)
 
@@ -470,7 +471,7 @@ class SearchProcess:
         self.cancel()
 
     def handleLine (self, line):
-        #print "find result line: '%s' (type: %s)" % (line, type(line))
+        #print "find result line: '%s'" % line
 
         # Note: we don't assume anything about the encoding of output from `find`
         # but just treat it as encoding-less byte sequence.
@@ -478,8 +479,13 @@ class SearchProcess:
         self.files.append(line)
 
     def handleFinished (self):
-        #print "find finished (%d files found)" % len(self.files)
+        print "find finished (%d files found)" % len(self.files)
         self.cmdRunner = None
+        
+        if self.cancelled:
+            self.resultHandler.handleFinished()
+            self.files = []
+            return
 
         self.files.sort(pathCompare)
 
