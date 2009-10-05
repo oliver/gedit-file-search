@@ -481,6 +481,11 @@ class SearchProcess:
         #print "find finished (%d files found)" % len(self.files)
         self.cmdRunner = None
 
+        if self.cancelled:
+            self.resultHandler.handleFinished()
+            self.files = []
+            return
+
         self.files.sort(pathCompare)
 
         for f in self.files:
