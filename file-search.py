@@ -450,10 +450,12 @@ class SearchProcess:
             findCmd += ["(", "!", "-path", "*/CVS/*", "!", "-path", "*/.svn/*", "!", "-path", "*/.git/*", "!", "-path", "*/RCS/*", ")"]
         if query.selectFileTypes:
             fileTypeList = query.parseFileTypeString()
-            findCmd += ["(", "-false"]
-            for t in fileTypeList:
-                findCmd += ["-o", "-name", t]
-            findCmd += [")"]
+            if fileTypeList:
+                findCmd += ["("]
+                for t in fileTypeList:
+                    findCmd += ["-name", t, "-o"]
+                findCmd.pop()
+                findCmd += [")"]
         findCmd += ["-xtype", "f", "-print"]
 
         self.cmdRunner = RunCommand(findCmd, self, gobject.PRIORITY_DEFAULT_IDLE)
