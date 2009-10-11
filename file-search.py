@@ -718,7 +718,7 @@ class FileSearchWindowHelper:
                     # otherwise, try to use directory of that file
                     currFileDir = self._window.get_active_tab().get_document().get_uri()
                     if currFileDir != None and currFileDir.startswith("file:///"):
-                        searchDir = os.path.dirname(currFileDir[7:])
+                        searchDir = urllib.unquote(os.path.dirname(currFileDir[7:]))
             else:
                 # there's no file open => fall back to Gedit's current working dir
                 pass
