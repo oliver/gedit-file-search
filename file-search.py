@@ -359,6 +359,9 @@ class GrepProcess:
     def handleInputFinished (self):
         "Called when there will be no more input files added"
         self.inputFinished = True
+        if not(self.cmdRunner):
+            # this can happen if no files at all are found
+            self.finishedCb()
 
     def runGrep (self):
         if self.cmdRunner or len(self.fileNames) == 0 or self.cancelled:
