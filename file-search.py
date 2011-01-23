@@ -335,9 +335,11 @@ class RunCommand:
 class GrepProcess:
     def __init__ (self, query, resultCb, finishedCb):
         self.query = query
-        self.queryText = query.text
         self.resultCb = resultCb
         self.finishedCb = finishedCb
+
+        # Assume all file contents are in UTF-8 encoding (AFAIK grep will just search for byte sequences, it doesn't care about encodings):
+        self.queryText = query.text.encode("utf-8")
 
         self.fileNames = []
         self.cmdRunner = None
@@ -391,9 +393,6 @@ class GrepProcess:
             grepCmd += ["-i"]
         if not(self.query.isRegExp):
             grepCmd += ["-F"]
-
-        # Assume all file contents are in UTF-8 encoding (AFAIK grep will just search for byte sequences, it doesn't care about encodings):
-        self.queryText = self.queryText.encode("utf-8")
 
         grepCmd += ["-e", self.queryText]
         grepCmd += fileNameList
