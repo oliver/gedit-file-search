@@ -1,0 +1,69 @@
+This is a test file for "whole-word" search option.
+
+Some text with an a and an aa and aaa and abc and ab...
+
+There is no Letter_a standalone in this line.
+
+
+
+German word for houses:
+Häuser
+The word "Häuser" can also be written as "Haeuser" to avoid using Umlauts like the letters ä and Ä are.
+
+Hint: search for "also " (note the trailing space...)
+
+
+Here: the word also  with _two_ trailing spaces 
+Here: also the word also  with _two_ trailing spaces
+
+
+bugfix  bug
+bugfix  fix
+
+
+
+random characters (the bracket-ampersand-percent sequence occurs three times - can you find it?)
+&%$(&%$&/(%%$(&%(=/&(=(&%
+
+
+
+regexp for validating email addresses:
+\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b
+
+x+abc+def+xyz
+
+And I said: "My name is Sue! How do you do! Now you gonna die!"
+
+here is a long_word_with_underscores
+The word under without scores...
+
+
+
+There are some ambiguous situations when searching for "whole words"; esp.
+between grep (as tested on Jaunty) and simple '\b...\b' RE searching.
+
+Also, grep (at least on Jaunty and Lucid) has errors regarding its -w option;
+see eg. http://www.mail-archive.com/bug-grep@gnu.org/msg01621.html
+
+Decisions to make:
+- given "@[A-Z0-9.-]+\.[A-Z]{2,4}\b":
+  - should it find "+" as whole word? -> YES
+  - should it find "A-Z0" as whole word? -> YES
+  - should it find "[A-Z0-9.-]+\.[A-Z]" as whole word? -> YES
+- given "abc xyz foo bar":
+  - should it find "xyz " as whole word? -> YES
+  - should it find "xyz foo" as whole word? -> YES
+  - should it find " " as whole word? -> YES
+- given "abc xyz  foo bar":
+  - should it find "xyz " as whole word? -> ???
+- given "xyz  foo":
+  - should it find " " as whole word? -> ???
+  - should it find "  " as whole word? -> ???
+- given "this doesn't work":
+  - should it find "t" as whole word? -> YES
+  - should it find "doesn't" as whole word? -> YES
+- given "instance_signal_id_pair":
+  - should it find "pair" as whole word? -> NO
+  - should it find "_" as whole word? -> NO
+
+
