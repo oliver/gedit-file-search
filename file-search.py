@@ -178,6 +178,7 @@ class SearchQuery:
         self.text = ''
         self.directory = ''
         self.caseSensitive = True
+        self.wholeWord = False
         self.isRegExp = False
         self.includeSubfolders = True
         self.excludeHidden = True
@@ -195,6 +196,11 @@ class SearchQuery:
             self.caseSensitive = gclient.get_without_default(gconfBase+"/case_sensitive").get_bool()
         except:
             self.caseSensitive = True
+
+        try:
+            self.wholeWord = gclient.get_without_default(gconfBase+"/whole_word").get_bool()
+        except:
+            self.wholeWord = False
 
         try:
             self.isRegExp = gclient.get_without_default(gconfBase+"/is_reg_exp").get_bool()
@@ -228,6 +234,7 @@ class SearchQuery:
 
     def storeDefaults (self, gclient):
         gclient.set_bool(gconfBase+"/case_sensitive", self.caseSensitive)
+        gclient.set_bool(gconfBase+"/whole_word", self.wholeWord)
         gclient.set_bool(gconfBase+"/is_reg_exp", self.isRegExp)
         gclient.set_bool(gconfBase+"/include_subfolders", self.includeSubfolders)
         gclient.set_bool(gconfBase+"/exclude_hidden", self.excludeHidden)
@@ -332,6 +339,25 @@ class RunCommand:
         self.lineSplitter.cancel()
 
 
+def buildQueryRE (queryText, caseSensitive, wholeWord):
+    "returns a RegEx pattern for searching for the given queryText"
+
+    # word detection etc. cannot be done on an encoding-less string:
+    assert(type(queryText) == unicode)
+
+    pattern = re.escape(queryText)
+    if wholeWord:
+        if re.search('^\w', queryText, re.UNICODE):
+            pattern = '\\b' + pattern
+        if re.search('\w$', queryText, re.UNICODE):
+            pattern = pattern + '\\b'
+
+    flags = re.UNICODE
+    if not(caseSensitive):
+        flags |= re.IGNORECASE
+    return re.compile(pattern, flags)
+
+
 class GrepProcess:
     def __init__ (self, query, resultCb, finishedCb):
         self.query = query
@@ -346,6 +372,10 @@ class GrepProcess:
         self.cancelled = False
         self.numGreps = 0
         self.inputFinished = False
+
+        self.postSearchPattern = None
+        if query.wholeWord:
+            self.postSearchPattern = buildQueryRE(self.query.text, query.caseSensitive, True)
 
     def cancel (self):
         self.cancelled = True
@@ -419,6 +449,12 @@ class GrepProcess:
             linetext = unicode(linetext, 'utf8', 'replace')
             #print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
             linetext = linetext.rstrip("\n\r")
+
+            # do some manual grep'ing on each line (for whole-word search):
+            if self.postSearchPattern is not None and \
+                self.postSearchPattern.search(linetext) is None:
+                return
+
             self.resultCb(filename, lineno, linetext)
 
     def handleFinished (self):
@@ -776,6 +812,7 @@ class FileSearchWindowHelper:
         query.loadDefaults(self.gclient)
         self.tree.get_widget('cbCaseSensitive').set_active(query.caseSensitive)
         self.tree.get_widget('cbRegExp').set_active(query.isRegExp)
+        self.tree.get_widget('cbWholeWord').set_active(query.wholeWord)
         self.tree.get_widget('cbIncludeSubfolders').set_active(query.includeSubfolders)
         self.tree.get_widget('cbExcludeHidden').set_active(query.excludeHidden)
         self.tree.get_widget('cbExcludeBackups').set_active(query.excludeBackup)
@@ -813,6 +850,7 @@ class FileSearchWindowHelper:
         query.directory = searchDir
         query.caseSensitive = self.tree.get_widget('cbCaseSensitive').get_active()
         query.isRegExp = self.tree.get_widget('cbRegExp').get_active()
+        query.wholeWord = self.tree.get_widget('cbWholeWord').get_active()
         query.includeSubfolders = self.tree.get_widget('cbIncludeSubfolders').get_active()
         query.excludeHidden = self.tree.get_widget('cbExcludeHidden').get_active()
         query.excludeBackup = self.tree.get_widget('cbExcludeBackups').get_active()
@@ -968,7 +1006,7 @@ class FileSearcher:
             addTruncationMarker = True
 
         if not(self.query.isRegExp):
-            (linetext, numLineMatches) = escapeAndHighlight(linetext, self.query.text, self.query.caseSensitive)
+            (linetext, numLineMatches) = escapeAndHighlight(linetext, self.query.text, self.query.caseSensitive, self.query.wholeWord)
             self.numMatches += numLineMatches
         else:
             linetext = escapeMarkup(linetext)
@@ -1094,7 +1132,7 @@ def escapeMarkup (origText):
     text = text.replace('>', '&gt;')
     return text
 
-def escapeAndHighlight (origText, searchText, caseSensitive):
+def escapeAndHighlight (origText, searchText, caseSensitive, wholeWord):
     """
     Replaces Pango markup special characters, and adds highlighting markup
     around text fragments that match searchText.
@@ -1104,18 +1142,16 @@ def escapeAndHighlight (origText, searchText, caseSensitive):
     # and matching text interleaved (if two matches are adjacent in origText,
     # they will be separated by an empty string in the resulting list).
     matchLen = len(searchText)
-    if not(caseSensitive):
-        searchText = searchText.lower()
     fragments = []
     startPos = 0
     text = origText[:]
+    pattern = buildQueryRE(searchText, caseSensitive, wholeWord)
     while True:
-        if not(caseSensitive):
-            pos = text.lower().find(searchText, startPos)
-        else:
-            pos = text.find(searchText, startPos)
-        if pos < 0:
+        m = pattern.search(text, startPos)
+        if m is None:
             break
+        pos = m.start()
+
         preStr = origText[startPos:pos]
         matchStr = origText[pos:pos+matchLen]
         fragments.append(preStr)
