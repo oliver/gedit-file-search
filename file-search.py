@@ -888,6 +888,7 @@ class FileSearcher:
         self.numMatches = 0
         self.numLines = 0
         self.wasCancelled = False
+        self._collapseAll = False # if true, new nodes will be displayed collapsed
 
         self._createResultPanel()
         self._updateSummary()
@@ -907,6 +908,8 @@ class FileSearcher:
             expandRow = True
         else:
             it = self.files[file]
+        if self._collapseAll:
+            expandRow = False
         self._addResultLine(it, lineno, linetext)
         if expandRow:
             path = self.treeStore.get_path(it)
@@ -1079,7 +1082,21 @@ class FileSearcher:
 
                 menu = gtk.Menu()
                 mi = gtk.ImageMenuItem("gtk-copy")
-                mi.connect_object("activate", FileSearcher.onPopupMenuItemActivate, self, treeview, path[0])
+                mi.connect_object("activate", FileSearcher.onCopyActivate, self, treeview, path[0])
+                mi.show()
+                menu.append(mi)
+
+                mi = gtk.SeparatorMenuItem()
+                mi.show()
+                menu.append(mi)
+
+                mi = gtk.MenuItem("Expand All")
+                mi.connect_object("activate", FileSearcher.onExpandAllActivate, self, treeview)
+                mi.show()
+                menu.append(mi)
+
+                mi = gtk.MenuItem("Collapse All")
+                mi.connect_object("activate", FileSearcher.onCollapseAllActivate, self, treeview)
                 mi.show()
                 menu.append(mi)
 
@@ -1088,7 +1105,7 @@ class FileSearcher:
         else:
             return False
 
-    def onPopupMenuItemActivate (self, treeview, path):
+    def onCopyActivate (self, treeview, path):
         it = treeview.get_model().get_iter(path)
         markupText = treeview.get_model().get_value(it, 0)
         plainText = pango.parse_markup(markupText, u'\x00')[1]
@@ -1096,6 +1113,14 @@ class FileSearcher:
         clipboard = gtk.clipboard_get()
         clipboard.set_text(plainText)
         clipboard.store()
+
+    def onExpandAllActivate (self, treeview):
+        self._collapseAll = False
+        treeview.expand_all()
+
+    def onCollapseAllActivate (self, treeview):
+        self._collapseAll = True
+        treeview.collapse_all()
 
 
 def scrollToCursorCb (view):
