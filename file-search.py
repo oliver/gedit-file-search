@@ -888,6 +888,7 @@ class FileSearcher:
         self.numMatches = 0
         self.numLines = 0
         self.wasCancelled = False
+        self.searchProcess = None
         self._collapseAll = False # if true, new nodes will be displayed collapsed
 
         self._createResultPanel()
@@ -899,6 +900,7 @@ class FileSearcher:
         self.treeStore.append(None, [searchSummary, '', 0])
 
         self.searchProcess = SearchProcess(query, self)
+        self._updateSummary()
 
     def handleResult (self, file, lineno, linetext):
         expandRow = False
@@ -925,6 +927,8 @@ class FileSearcher:
         editBtn = self.tree.get_widget("btnModifyFileSearch")
         editBtn.hide()
         editBtn.set_label("gtk-edit")
+
+        self._updateSummary()
 
         if self.wasCancelled:
             line = "<i><span foreground=\"red\">(search was cancelled)</span></i>"
@@ -956,6 +960,8 @@ class FileSearcher:
             summary += "\nin 1 file"
         else:
             summary += "\nin %d files" % len(self.files)
+        if self.searchProcess:
+            summary += u"\u2026" # ellipsis character
         self.tree.get_widget("lblNumMatches").set_label(summary)
 
 
