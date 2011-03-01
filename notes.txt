@@ -1,0 +1,41 @@
+Making a New Release
+=====================
+
+- review which changes have been made in this cycle (eg. since last release tag)
+  - based on this (among other things), decide whether a new release is in order
+- ensure all these changes are actually checked in and published to Github
+
+- ensure repository is in clean state: no local changes, and at same commit as Github repo 
+  - this is esp. important for creating tgz later
+
+- decide on new version number (eg. "0.2")
+  - or eg. "0.2.1" if the release only contains "follow-up fixes" for the previous release
+
+- write release announcement in blog (as draft)
+  - mention contributors
+  - list noteworthy changes (see above):
+    - changes that are directly useful to the user
+    - changes that the user should be aware of (risky, requires adaption etc.)
+  - include link to GH page (http://oliver.github.com/gedit-file-search/) and to new tgz
+  - note URL that will be given to blog entry once published
+
+- set tag in Git
+  - eg. "git tag GEDIT_FILE_SEARCH_V0.2"
+- "git push --tags origin master"
+
+- create tgz: "make tgz"
+- rename tgz to correct name (eg. "gedit-file-search-0.2.tgz")
+- upload tgz to github.com, at https://github.com/oliver/gedit-file-search/downloads
+
+- in gedit-search/ directory, switch to "gh-pages" branch
+  - in a clean checkout: "git checkout gh-pages"
+- edit index.html:
+  - update link to new tgz
+  - update feedback link to point to new release announcement URL (see above)
+  - also check instructions and other page content for correctness
+  - if necessary, also create updated screenshots and replace old ones
+- "git commit"
+- "git push origin gh-pages"
+
+- review and publish release announcement
+
