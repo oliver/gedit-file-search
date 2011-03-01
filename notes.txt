@@ -19,12 +19,14 @@ Making a New Release
   - include link to GH page (http://oliver.github.com/gedit-file-search/) and to new tgz
   - note URL that will be given to blog entry once published
 
+- create tgz: "make tgz"
+- rename tgz to correct name (eg. "gedit-file-search-0.2.tgz")
+- test that tgz basically works on all available platforms
+
 - set tag in Git
   - eg. "git tag GEDIT_FILE_SEARCH_V0.2"
 - "git push --tags origin master"
 
-- create tgz: "make tgz"
-- rename tgz to correct name (eg. "gedit-file-search-0.2.tgz")
 - upload tgz to github.com, at https://github.com/oliver/gedit-file-search/downloads
 
 - in gedit-search/ directory, switch to "gh-pages" branch
