@@ -49,6 +49,14 @@ import pango
 import errno
 import dircache
 
+# only display remote directories in file chooser if GIO is available:
+onlyLocalPathes = False
+try:
+    import gio
+except ImportError:
+    onlyLocalPathes = True
+
+
 ui_str = """<ui>
   <menubar name="MenuBar">
     <menu name="SearchMenu" action="Search">
@@ -715,6 +723,7 @@ class FileSearchWindowHelper:
             action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
             buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         fileChooser.set_default_response(gtk.RESPONSE_OK)
+        fileChooser.set_local_only(onlyLocalPathes)
         fileChooser.set_filename( self.tree.get_widget('cboSearchDirectoryEntry').get_text() )
 
         response = fileChooser.run()
@@ -754,9 +763,14 @@ class FileSearchWindowHelper:
                     searchDir = projectMarkerRootDir
                 else:
                     # otherwise, try to use directory of that file
-                    currFileDir = self._window.get_active_tab().get_document().get_uri()
-                    if currFileDir != None and currFileDir.startswith("file:///"):
-                        searchDir = urllib.unquote(os.path.dirname(currFileDir[7:]))
+                    currFilePath = self._window.get_active_tab().get_document().get_uri()
+                    if currFilePath != None:
+                        if onlyLocalPathes:
+                            if currFilePath.startswith("file:///"):
+                                searchDir = urllib.unquote(os.path.dirname(currFilePath[7:]))
+                        else:
+                            gFilePath = gio.File(currFilePath)
+                            searchDir = gFilePath.get_parent().get_path()
             else:
                 # there's no file open => fall back to Gedit's current working dir
                 pass
