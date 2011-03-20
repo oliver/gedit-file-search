@@ -1062,8 +1062,8 @@ class FileSearcher:
             currView = gedit.tab_get_from_document(currDoc).get_view()
             currView.scroll_to_cursor()
 
-            # workaround to scroll to cursor position when opening file into window of "Unnamed Document":
-            gobject.idle_add(scrollToCursorCb, currView)
+        # use an Idle handler so the document has time to load:  
+        gobject.idle_add(self.onDocumentOpenedCb, (lineno > 0))
 
     def on_btnClose_clicked (self, button):
         self.destroy()
@@ -1142,10 +1142,24 @@ class FileSearcher:
         self._collapseAll = True
         treeview.collapse_all()
 
+    def onDocumentOpenedCb (self, doScroll):
+        currDoc = self._window.get_active_document()
 
-def scrollToCursorCb (view):
-    view.scroll_to_cursor()
-    return False
+        if doScroll:
+            # workaround to scroll to cursor position when opening file into window of "Unnamed Document":
+            currView = gedit.tab_get_from_document(currDoc).get_view()
+            currView.scroll_to_cursor()
+
+        # highlight matches in opened document:
+        flags = 0
+        if self.query.caseSensitive:
+            flags |= 4
+        if self.query.wholeWord:
+            flags |= 2
+
+        currDoc.set_search_text(self.query.text, flags)
+        return False
+
 
 def resultSearchCb (model, column, key, it):
     """Callback function for searching in result list"""
