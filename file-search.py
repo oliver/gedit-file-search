@@ -561,6 +561,7 @@ class FileSearchWindowHelper:
         self._window = window
         self._plugin = plugin
         self._dialog = None
+        self._bus = None
         self.searchers = [] # list of existing SearchProcess instances
 
         self.gclient = gconf.client_get_default()
@@ -576,6 +577,7 @@ class FileSearchWindowHelper:
         self._lastClickIter = None # TextIter at position of last right-click or last popup menu
 
         self._insert_menu()
+        self._addFileBrowserMenuItem()
 
         self._window.connect_object("destroy", FileSearchWindowHelper.destroy, self)
         self._window.connect_object("tab-added", FileSearchWindowHelper.onTabAdded, self)
@@ -659,6 +661,37 @@ class FileSearchWindowHelper:
     def onMenuItemActivate (self, searchText):
         self.openSearchDialog(searchText)
 
+    def _addFileBrowserMenuItem (self):
+        if hasattr(self._window, 'get_message_bus'):
+            self._bus = self._window.get_message_bus()
+
+            fbAction = gtk.Action('search-files-plugin', "Search files...", "Search in files", None)
+            fbAction.connect('activate', self.onFbMenuItemActivate)
+            self._bus.send_sync('/plugins/filebrowser', 'add_context_item',
+                {'action':fbAction, 'path':'/FilePopup/FilePopup_Opt3'})
+
+    def onFbMenuItemActivate (self, action):
+        responseMsg = self._bus.send_sync('/plugins/filebrowser', 'get_view')
+        fbView = responseMsg.get_value('view')
+        (model, rowPathes) = fbView.get_selection().get_selected_rows()
+
+        selectedUri = None
+        for rowPath in rowPathes:
+            fileFlags = model[rowPath][3]
+            isDirectory = bool(fileFlags & 1)
+            if isDirectory:
+                selectedUri = model[rowPath][2]
+                break
+
+        if selectedUri is None:
+            msg = self._bus.send_sync('/plugins/filebrowser', 'get_root')
+            selectedUri = msg.get_value('uri')
+
+        fileObj = gio.File(selectedUri)
+        selectedDir = fileObj.get_path()
+
+        self.openSearchDialog(searchDirectory=selectedDir)
+
     def registerSearcher (self, searcher):
         self.searchers.append(searcher)
 
@@ -735,7 +768,7 @@ class FileSearchWindowHelper:
     def on_search_files_activate(self, action):
         self.openSearchDialog()
 
-    def openSearchDialog (self, searchText = None):
+    def openSearchDialog (self, searchText = None, searchDirectory = None):
         gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
         self.tree = gtk.glade.XML(gladeFile)
         self.tree.signal_autoconnect(self)
@@ -774,6 +807,9 @@ class FileSearchWindowHelper:
             else:
                 # there's no file open => fall back to Gedit's current working dir
                 pass
+
+        if searchDirectory is not None:
+            searchDir = searchDirectory
 
         searchDir = os.path.normpath(searchDir) + "/"
 
