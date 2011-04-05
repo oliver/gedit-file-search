@@ -662,7 +662,7 @@ class FileSearchWindowHelper:
         self.openSearchDialog(searchText)
 
     def _addFileBrowserMenuItem (self):
-        if hasattr(self._window, 'get_message_bus'):
+        if hasattr(self._window, 'get_message_bus') and gedit.version >= (2,27,4):
             self._bus = self._window.get_message_bus()
 
             fbAction = gtk.Action('search-files-plugin', "Search files...", "Search in files", None)
