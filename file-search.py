@@ -666,9 +666,12 @@ class FileSearchWindowHelper:
             self._bus = self._window.get_message_bus()
 
             fbAction = gtk.Action('search-files-plugin', "Search files...", "Search in files", None)
+            try:
+                self._bus.send_sync('/plugins/filebrowser', 'add_context_item',
+                    {'action':fbAction, 'path':'/FilePopup/FilePopup_Opt3'})
+            except StandardError, e:
+                return
             fbAction.connect('activate', self.onFbMenuItemActivate)
-            self._bus.send_sync('/plugins/filebrowser', 'add_context_item',
-                {'action':fbAction, 'path':'/FilePopup/FilePopup_Opt3'})
 
     def onFbMenuItemActivate (self, action):
         responseMsg = self._bus.send_sync('/plugins/filebrowser', 'get_view')
