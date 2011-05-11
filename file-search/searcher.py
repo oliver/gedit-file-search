@@ -23,9 +23,6 @@
 # - GrepProcess (uses RunCommand to run Grep, parses its output, and passes that to the result window)
 # - SearchProcess (uses RunCommand to run Find, parses its output, and starts GrepProcess)
 #
-# Helper classes:
-# - ProcessInfo (gets process tree info, for killing search processes)
-#
 
 
 import os
@@ -34,63 +31,6 @@ import fcntl
 import popen2
 import re
 import errno
-
-
-class ProcessInfo:
-    """
-    Parses the process table in /proc and offers info
-    about processes and their parents.
-    """
-    def __init__ (self):
-
-        self.pids = []
-
-        intRe = re.compile('^\d+$')
-        nameRe = re.compile('^Name:\s+(\w+)$')
-        ppidRe = re.compile('^PPid:\s+(\d+)$')
-        for d in os.listdir('/proc'):
-            if intRe.match(d):
-                pid = int(d)
-                name = ''
-                ppid = 0
-                fileName = "/proc/%d/status" % pid
-                try:
-                    fd = open(fileName, "r")
-                except IOError:
-                    pass
-                else:
-                    for line in fd.readlines():
-                        m = nameRe.match(line)
-                        if m:
-                            name = m.group(1)
-                            continue
-                        m = ppidRe.match(line)
-                        if m:
-                            ppid = int(m.group(1))
-                            continue
-                    self.pids.append( (pid, name, ppid) )
-
-    def getName (self, mainPid):
-        for pid in self.pids:
-            if pid[0] == mainPid:
-                return pid[1]
-        return None
-
-    def getDirectChildren (self, mainPid):
-        res = []
-        for pid in self.pids:
-            if pid[2] == mainPid:
-                res.append(pid[0])
-        return res
-
-    def getAllChildren (self, mainPid):
-        "Returns a list of all (direct and indirect) child processes"
-        res = []
-        directChildren = self.getDirectChildren(mainPid)
-        res.extend(directChildren)
-        for pid in directChildren:
-            res.extend( self.getAllChildren(pid) )
-        return res
 
 
 class LineSplitter:
@@ -174,18 +114,13 @@ class RunCommand:
 
     def cancel (self):
         #print "(cancelling command)"
-        mainPid = self.popenObj.pid
-        pi = ProcessInfo()
-        allProcs = [mainPid]
-        allProcs.extend(pi.getAllChildren(mainPid))
-        #print "main pid: %d; num procs: %d" % (mainPid, len(allProcs))
-        for pid in allProcs:
-            #print "killing pid %d (name: %s)" % (pid, pi.getName(pid))
-            try:
-                os.kill(pid, 15)
-            except OSError, e:
-                if e.errno != errno.ESRCH:
-                    print "error killing PID %d (child of %d): %s" % (pid, mainPid, e)
+        pid = self.popenObj.pid
+        #print "pid: %d" % pid
+        try:
+            os.kill(pid, 15)
+        except OSError, e:
+            if e.errno != errno.ESRCH:
+                print "error killing PID %d: %s" % (pid, e)
         self.lineSplitter.cancel()
 
 
