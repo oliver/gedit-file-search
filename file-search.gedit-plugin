@@ -6,5 +6,5 @@ Name=File Search
 Description=Search in multiple files
 Icon=search
 Authors=Oliver Gerlich <oliver.gerlich@gmx.de>
-Copyright=Copyright © 2008 Oliver Gerlich <oliver.gerlich@gmx.de>
-Website=http://www.gedit.org
+Copyright=Copyright © 2008-2011 Oliver Gerlich <oliver.gerlich@gmx.de>
+Website=http://oliver.github.com/gedit-file-search/
