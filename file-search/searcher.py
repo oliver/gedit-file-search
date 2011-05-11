@@ -28,7 +28,7 @@
 import os
 import gobject
 import fcntl
-import popen2
+import subprocess
 import re
 import errno
 
@@ -68,8 +68,8 @@ class RunCommand:
         self.lineSplitter = LineSplitter(resultHandler)
 
         #print "executing command: %s" % cmd
-        self.popenObj = popen2.Popen3(cmd)
-        self.pipe = self.popenObj.fromchild
+        self.proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, close_fds=True)
+        self.pipe = self.proc.stdout
 
         # make pipe non-blocking:
         fl = fcntl.fcntl(self.pipe, fcntl.F_GETFL)
@@ -98,15 +98,8 @@ class RunCommand:
                     self.lineSplitter.parseFragment(readText)
 
             #print "(closing pipe)"
-            result = self.pipe.close()
-            if result == None:
-                #print "(command finished successfully)"
-                pass
-            else:
-                #print "(command finished with exit code %d; exited: %s, exit status: %d)" % (result,
-                    #str(os.WIFEXITED(result)), os.WEXITSTATUS(result))
-                pass
-            self.popenObj.wait()
+            self.pipe.close()
+            self.proc.wait()
             if self.lineSplitter:
                 self.lineSplitter.finish()
                 self.lineSplitter = None
@@ -114,7 +107,7 @@ class RunCommand:
 
     def cancel (self):
         #print "(cancelling command)"
-        pid = self.popenObj.pid
+        pid = self.proc.pid
         #print "pid: %d" % pid
         try:
             os.kill(pid, 15)
