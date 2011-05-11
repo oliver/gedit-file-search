@@ -571,6 +571,13 @@ class FileSearchWindowHelper:
         self._lastDirs = RecentList(self.gclient, "recent_dirs")
         self._lastTypes = RecentList(self.gclient, "recent_types")
 
+        if self._lastTypes.isEmpty():
+            # add some default file types
+            self._lastTypes.add('*.C *.cpp *.cxx *.h *.hpp')
+            self._lastTypes.add('*.c *.h')
+            self._lastTypes.add('*.py')
+            self._lastTypes.add('*')
+
         self._lastDir = None
         self._autoCompleteList = None
 
@@ -856,8 +863,6 @@ class FileSearchWindowHelper:
         if not(self._lastTypes.isEmpty()):
             typeListString = self._lastTypes.topEntry()
             self.tree.get_widget('cboFileTypeEntry').set_text(typeListString)
-        else:
-            self.tree.get_widget('cboFileTypeEntry').set_text("*")
 
 
         # get default values for other controls from GConf:
