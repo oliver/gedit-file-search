@@ -12,6 +12,8 @@ DIST_FILES= \
 
 TGZ_FOLDER=gedit-file-search
 
+all: po mo
+
 tgz: po mo
 	mkdir -p $(TGZ_FOLDER)
 	cp --parents -r $(DIST_FILES) $(TGZ_FOLDER)
