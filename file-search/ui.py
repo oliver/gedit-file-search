@@ -1,5 +1,6 @@
 #    Gedit file search plugin
 #    Copyright (C) 2008-2011  Oliver Gerlich <oliver.gerlich@gmx.de>
+#    Copyright (C) 2011  Jean-Philippe Fleury <contact@jpfleury.net>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +27,6 @@
 # - SearchQuery (holds all parameters for a search; also, can read and write these from/to GConf)
 #
 
-
 import os
 import gedit
 import gtk
@@ -36,6 +36,15 @@ import urllib
 import gconf
 import pango
 import dircache
+from gettext import gettext, translation
+
+# translation
+APP_NAME = 'file-search'
+LOCALE_PATH = os.path.dirname(__file__) + '/locale'
+t = translation(APP_NAME, LOCALE_PATH, fallback=True)
+_ = t.ugettext
+ngettext = t.ungettext
+gtk.glade.bindtextdomain(APP_NAME, LOCALE_PATH)
 
 from searcher import SearchProcess, buildQueryRE
 
@@ -286,9 +295,9 @@ class FileSearchWindowHelper:
 
         # add actual menu item:
         if selText:
-            menuText = 'Search files for "%s"' % selText
+            menuText = _('Search files for "%s"') % selText
         else:
-            menuText = 'Search files...'
+            menuText = _('Search files...')
         mi = gtk.MenuItem(menuText, use_underline=False)
         mi.connect_object("activate", FileSearchWindowHelper.onMenuItemActivate, self, selText)
         mi.show()
@@ -409,7 +418,7 @@ class FileSearchWindowHelper:
 
     def openSearchDialog (self, searchText = None, searchDirectory = None):
         gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
-        self.tree = gtk.glade.XML(gladeFile)
+        self.tree = gtk.glade.XML(gladeFile, domain = APP_NAME)
         self.tree.signal_autoconnect(self)
 
         self._dialog = self.tree.get_widget('searchDialog')
@@ -526,8 +535,8 @@ class FileSearchWindowHelper:
                 print "internal error: search text is empty!"
             elif not(os.path.exists(searchDir)):
                 msgDialog = gtk.MessageDialog(self._dialog, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, "Directory does not exist")
-                msgDialog.format_secondary_text("The specified directory does not exist.")
+                    gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, _("Directory does not exist"))
+                msgDialog.format_secondary_text(_("The specified directory does not exist."))
                 msgDialog.run()
                 msgDialog.destroy()
             else:
@@ -582,8 +591,7 @@ class FileSearcher:
         self._updateSummary()
 
         #searchSummary = "<span size=\"smaller\" foreground=\"#585858\">searching for </span><span size=\"smaller\"><i>%s</i></span><span size=\"smaller\" foreground=\"#585858\"> in </span><span size=\"smaller\"><i>%s</i></span>" % (query.text, query.directory)
-        searchSummary = "<span size=\"smaller\">searching for <i>%s</i> in <i>%s</i></span>" % (
-            escapeMarkup(query.text), escapeMarkup(gobject.filename_display_name(query.directory)))
+        searchSummary = "<span size=\"smaller\">" + _("searching for <i>%(keywords)s</i> in <i>%(folder)s</i>") % {'keywords': escapeMarkup(query.text), 'folder': escapeMarkup(gobject.filename_display_name(query.directory))} + "</span>"
         self.treeStore.append(None, [searchSummary, '', 0])
 
         self.searchProcess = SearchProcess(query, self)
@@ -618,35 +626,18 @@ class FileSearcher:
         self._updateSummary()
 
         if self.wasCancelled:
-            line = "<i><span foreground=\"red\">(search was cancelled)</span></i>"
+            line = "<i><span foreground=\"red\">" + _("(search was cancelled)") + "</span></i>"
         elif self.numMatches == 0:
-            line = "<i>(no matching files found)</i>"
+            line = "<i>" + _("(no matching files found)") + "</i>"
         else:
-            if self.numMatches == 1:
-                line = "<i>found 1 match"
-            else:
-                line = "<i>found %d matches" % self.numMatches
-
-            if self.numLines == 1:
-                line += " (1 line)"
-            else:
-                line += " (%d lines)" % self.numLines
-
-            if len(self.files) == 1:
-                line += " in 1 file</i>"
-            else:
-                line += " in %d files</i>" % len(self.files)
+            line = "<i>" + ngettext("found %d match", "found %d matches", self.numMatches) % self.numMatches
+            line += ngettext(" (%d line)", " (%d lines)", self.numLines) % self.numLines
+            line += ngettext(" in %d file", " in %d files", len(self.files)) % len(self.files) + "</i>"
         self.treeStore.append(None, [line, '', 0])
 
     def _updateSummary (self):
-        if self.numMatches == 1:
-            summary = "<b>1</b> match"
-        else:
-            summary = "<b>%d</b> matches" % self.numMatches
-        if len(self.files) == 1:
-            summary += "\nin 1 file"
-        else:
-            summary += "\nin %d files" % len(self.files)
+        summary = ngettext("<b>%d</b> match", "<b>%d</b> matches", self.numMatches) % self.numMatches
+        summary += "\n" + ngettext("in %d file", "in %d files", len(self.files)) % len(self.files)
         if self.searchProcess:
             summary += u"\u2026" # ellipsis character
         self.tree.get_widget("lblNumMatches").set_label(summary)
@@ -654,7 +645,7 @@ class FileSearcher:
 
     def _createResultPanel (self):
         gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
-        self.tree = gtk.glade.XML(gladeFile, 'hbxFileSearchResult')
+        self.tree = gtk.glade.XML(gladeFile, 'hbxFileSearchResult', domain = APP_NAME)
         self.tree.signal_autoconnect(self)
         resultContainer = self.tree.get_widget('hbxFileSearchResult')
 
@@ -783,12 +774,12 @@ class FileSearcher:
                 mi.show()
                 menu.append(mi)
 
-                mi = gtk.MenuItem("Expand All")
+                mi = gtk.MenuItem(_("Expand All"))
                 mi.connect_object("activate", FileSearcher.onExpandAllActivate, self, treeview)
                 mi.show()
                 menu.append(mi)
 
-                mi = gtk.MenuItem("Collapse All")
+                mi = gtk.MenuItem(_("Collapse All"))
                 mi.connect_object("activate", FileSearcher.onCollapseAllActivate, self, treeview)
                 mi.show()
                 menu.append(mi)
