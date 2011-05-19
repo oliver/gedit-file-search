@@ -352,8 +352,8 @@ class FileSearchWindowHelper:
 
         # Create a new action group
         self._action_group = gtk.ActionGroup("FileSearchPluginActions")
-        self._action_group.add_actions([("FileSearch", "gtk-find", _("Find in files ..."),
-                                         "<control><shift>F", _("Search in multiple files"),
+        self._action_group.add_actions([("FileSearch", "gtk-find", _("Search files..."),
+                                         "<control><shift>F", _("Search in all files in a directory"),
                                          self.on_search_files_activate)])
 
         # Insert the action group
