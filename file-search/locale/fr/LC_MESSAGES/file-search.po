@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: File Search\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-05-19 21:45+0200\n"
+"POT-Creation-Date: 2011-05-20 20:37+0200\n"
 "PO-Revision-Date: 2011-05-18 16:40-0400\n"
 "Last-Translator: Jean-Philippe Fleury <contact@jpfleury.net>\n"
 "Language-Team: \n"
@@ -109,16 +109,12 @@ msgstr "gtk-edit"
 msgid "Search files for \"%s\""
 msgstr "Rechercher des fichiers contenant \"%s\""
 
-#: file-search/ui.py:300
+#: file-search/ui.py:300 file-search/ui.py:313 file-search/ui.py:355
 msgid "Search files..."
 msgstr "Rechercher des fichiers..."
 
-#: file-search/ui.py:355
-msgid "Find in files ..."
-msgstr "Rechercher dans les fichiers"
-
-#: file-search/ui.py:356
-msgid "Search in multiple files"
+#: file-search/ui.py:313 file-search/ui.py:356
+msgid "Search in all files in a directory"
 msgstr "Recherche dans plusieurs fichiers"
 
 #: file-search/ui.py:538
