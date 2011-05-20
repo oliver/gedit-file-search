@@ -399,7 +399,7 @@ class FileSearchWindowHelper:
                     self._autoCompleteList.append([match])
 
     def on_btnBrowse_clicked (self, button):
-        fileChooser = gtk.FileChooserDialog(title="Select directory to search in",
+        fileChooser = gtk.FileChooserDialog(title=_("Select Directory"),
             parent=self._dialog,
             action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
             buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
