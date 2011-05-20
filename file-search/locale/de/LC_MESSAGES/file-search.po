@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: File Search\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-05-19 22:29+0200\n"
-"PO-Revision-Date: 2011-05-19 22:17+0200\n"
+"POT-Creation-Date: 2011-05-20 20:32+0200\n"
+"PO-Revision-Date: 2011-05-20 20:32+0200\n"
 "Last-Translator: Oliver Gerlich <oliver.gerlich@gmx.de>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -109,11 +109,11 @@ msgstr ""
 msgid "Search files for \"%s\""
 msgstr "In Dateien nach \"%s\" suchen"
 
-#: file-search/ui.py:300 file-search/ui.py:355
+#: file-search/ui.py:300 file-search/ui.py:313 file-search/ui.py:355
 msgid "Search files..."
 msgstr "In Dateien suchen ..."
 
-#: file-search/ui.py:356
+#: file-search/ui.py:313 file-search/ui.py:356
 msgid "Search in all files in a directory"
 msgstr "Dateien in einem Verzeichnis durchsuchen"
 

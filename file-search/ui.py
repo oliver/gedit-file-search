@@ -310,7 +310,7 @@ class FileSearchWindowHelper:
         if hasattr(self._window, 'get_message_bus') and gedit.version >= (2,27,4):
             self._bus = self._window.get_message_bus()
 
-            fbAction = gtk.Action('search-files-plugin', "Search files...", "Search in files", None)
+            fbAction = gtk.Action('search-files-plugin', _("Search files..."), _("Search in all files in a directory"), None)
             try:
                 self._bus.send_sync('/plugins/filebrowser', 'add_context_item',
                     {'action':fbAction, 'path':'/FilePopup/FilePopup_Opt3'})
