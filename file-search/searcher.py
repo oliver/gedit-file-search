@@ -263,7 +263,7 @@ class SearchProcess:
         if query.excludeBackup:
             findCmd += ["(", "!", "-name", "*~", "!", "-name", ".#*.*", ")"]
         if query.excludeVCS:
-            findCmd += ["(", "!", "-path", "*/CVS/*", "!", "-path", "*/.svn/*", "!", "-path", "*/.git/*", "!", "-path", "*/RCS/*", ")"]
+            findCmd += ["(", "!", "-path", "*/CVS/*", "!", "-path", "*/.svn/*", "!", "-path", "*/.git/*", "!", "-path", "*/RCS/*", "!", "-path", "*/.bzr/*", ")"]
         if query.selectFileTypes:
             fileTypeList = query.parseFileTypeString()
             if fileTypeList:
