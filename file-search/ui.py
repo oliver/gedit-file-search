@@ -651,8 +651,11 @@ class FileSearcher:
 
         resultContainer.set_data("filesearcher", self)
 
+        tabTitle = self.query.text
+        if len(tabTitle) > 30:
+            tabTitle = tabTitle[:30] + u"\u2026" # ellipsis character 
         panel = self._window.get_bottom_panel()
-        panel.add_item(resultContainer, self.query.text, "gtk-find")
+        panel.add_item(resultContainer, tabTitle, "gtk-find")
         panel.activate_item(resultContainer)
 
         editBtn = self.tree.get_widget("btnModifyFileSearch")
