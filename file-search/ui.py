@@ -295,7 +295,10 @@ class FileSearchWindowHelper:
 
         # add actual menu item:
         if selText:
-            menuText = _('Search files for "%s"') % selText
+            menuSelText = selText
+            if len(menuSelText) > 30:
+                menuSelText = menuSelText[:30] + u"\u2026" # ellipsis character
+            menuText = _('Search files for "%s"') % menuSelText
         else:
             menuText = _('Search files...')
         mi = gtk.MenuItem(menuText, use_underline=False)
