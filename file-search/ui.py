@@ -77,8 +77,9 @@ class RecentList:
     def __init__ (self, gclient, confKey, maxEntries = 10):
         self.gclient = gclient
         self.confKey = gconfBase + "/" + confKey
-        self.store = gtk.ListStore(str)
+        self.store = gtk.ListStore(str, bool, bool) # text, save-to-gconf, is-separator
         self._maxEntries = maxEntries
+        self._haveSeparator = False
 
         entries = self.gclient.get_list(self.confKey, gconf.VALUE_STRING)
         entries.reverse()
@@ -97,7 +98,7 @@ class RecentList:
                 it = self.store.get_iter(row.path)
                 self.store.remove(it)
 
-        self.store.prepend([entrytext])
+        self.store.prepend([entrytext, True, False])
 
         if len(self.store) > self._maxEntries:
             it = self.store.get_iter(self.store[-1].path)
@@ -106,9 +107,27 @@ class RecentList:
         if doStore:
             entries = []
             for e in self.store:
+                if not(e[1]):
+                    continue
                 encodedName = urllib.quote(e[0])
                 entries.append(encodedName)
             self.gclient.set_list(self.confKey, gconf.VALUE_STRING, entries)
+
+    def addTemp (self, entrytext):
+        if not(self._haveSeparator):
+            self.store.append(["(_sep_)", False, True])
+            self._haveSeparator = True
+        self.store.append([entrytext, False, False])
+
+    def resetTemps (self):
+        for row in self.store:
+            if not(row[1]):
+                it = self.store.get_iter(row.path)
+                self.store.remove(it)
+        self._haveSeparator = False
+
+    def separatorRowFunc (self, model, it):
+        return model[it][2]
 
     def isEmpty (self):
         return (len(self.store) == 0)
@@ -431,6 +450,18 @@ class FileSearchWindowHelper:
         # set initial values for search dialog widgets
         #
 
+        # get base directory of currently opened file:
+        currentDocDir = None
+        if self._window.get_active_tab():
+            currFilePath = self._window.get_active_tab().get_document().get_uri()
+            if currFilePath != None:
+                if onlyLocalPathes:
+                    if currFilePath.startswith("file:///"):
+                        currentDocDir = urllib.unquote(os.path.dirname(currFilePath[7:]))
+                else:
+                    gFilePath = gio.File(currFilePath)
+                    currentDocDir = gFilePath.get_parent().get_path()
+
         # find a nice default value for the search directory:
         searchDir = os.getcwdu()
         if self._lastDir != None:
@@ -447,14 +478,8 @@ class FileSearchWindowHelper:
                     searchDir = projectMarkerRootDir
                 else:
                     # otherwise, try to use directory of that file
-                    currFilePath = self._window.get_active_tab().get_document().get_uri()
-                    if currFilePath != None:
-                        if onlyLocalPathes:
-                            if currFilePath.startswith("file:///"):
-                                searchDir = urllib.unquote(os.path.dirname(currFilePath[7:]))
-                        else:
-                            gFilePath = gio.File(currFilePath)
-                            searchDir = gFilePath.get_parent().get_path()
+                    if currentDocDir is not None:
+                        searchDir = currentDocDir
             else:
                 # there's no file open => fall back to Gedit's current working dir
                 pass
@@ -478,6 +503,11 @@ class FileSearchWindowHelper:
         cboLastDirs = self.tree.get_widget('cboSearchDirectoryList')
         cboLastDirs.set_model(self._lastDirs.store)
         cboLastDirs.set_text_column(0)
+        cboLastDirs.set_row_separator_func(self._lastDirs.separatorRowFunc)
+
+        self._lastDirs.resetTemps()
+        if currentDocDir is not None:
+            self._lastDirs.addTemp(currentDocDir)
 
         # TODO: the algorithm to select a good default search dir could probably be improved...
 
