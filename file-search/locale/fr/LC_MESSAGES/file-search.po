@@ -6,14 +6,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: File Search\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-05-20 20:37+0200\n"
+"POT-Creation-Date: 2011-05-27 23:30-0400\n"
 "PO-Revision-Date: 2011-05-18 16:40-0400\n"
 "Last-Translator: Jean-Philippe Fleury <contact@jpfleury.net>\n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: file-search/file-search.glade:8
@@ -97,8 +97,8 @@ msgid ""
 "<b>0</b> matches\n"
 "in 0 files"
 msgstr ""
-"<b>0</b> occurences\n"
-"dans 0 fichiers"
+"<b>0</b> occurence\n"
+"dans 0 fichier"
 
 #: file-search/file-search.glade:480
 msgid "gtk-edit"
@@ -115,15 +115,19 @@ msgstr "Rechercher des fichiers..."
 
 #: file-search/ui.py:313 file-search/ui.py:356
 msgid "Search in all files in a directory"
-msgstr "Recherche dans plusieurs fichiers"
+msgstr "Recherche dans tous les fichiers d'un dossier"
+
+#: file-search/ui.py:402
+msgid "Select Directory"
+msgstr "Sélectionner un dossier"
 
 #: file-search/ui.py:538
 msgid "Directory does not exist"
-msgstr "Le répertoire n'existe pas"
+msgstr "Le dossier n'existe pas"
 
 #: file-search/ui.py:539
 msgid "The specified directory does not exist."
-msgstr "Le répertoire spécifié n'existe pas."
+msgstr "Le dossier spécifié n'existe pas."
 
 #: file-search/ui.py:594
 #, python-format
@@ -136,7 +140,7 @@ msgstr "(la recherche a été arrêtée)"
 
 #: file-search/ui.py:631
 msgid "(no matching files found)"
-msgstr "aucun fichier correspondant n'a été trouvé"
+msgstr "(aucun fichier correspondant n'a été trouvé)"
 
 #: file-search/ui.py:633
 #, python-format
