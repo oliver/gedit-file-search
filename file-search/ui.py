@@ -1,4 +1,3 @@
-#    Gedit file search plugin
 #    Copyright (C) 2008-2011  Oliver Gerlich <oliver.gerlich@gmx.de>
 #    Copyright (C) 2011  Jean-Philippe Fleury <contact@jpfleury.net>
 #
@@ -28,15 +27,13 @@
 #
 
 import os
-import gedit
-import gtk
-import gtk.glade
-import gobject
 import urllib
 import gconf
 import pango
 import dircache
 from gettext import gettext, translation
+
+from gi.repository import Gedit, GObject, Gtk
 
 # translation
 APP_NAME = 'file-search'
@@ -44,14 +41,16 @@ LOCALE_PATH = os.path.dirname(__file__) + '/locale'
 t = translation(APP_NAME, LOCALE_PATH, fallback=True)
 _ = t.ugettext
 ngettext = t.ungettext
-gtk.glade.bindtextdomain(APP_NAME, LOCALE_PATH)
+
+# TODO: Is this necessary with Glade 3?
+# gtk.glade.bindtextdomain(APP_NAME, LOCALE_PATH)
 
 from searcher import SearchProcess, buildQueryRE
 
 # only display remote directories in file chooser if GIO is available:
 onlyLocalPathes = False
 try:
-    import gio
+    from gi.repository import Gio
 except ImportError:
     onlyLocalPathes = True
 
@@ -77,7 +76,7 @@ class RecentList:
     def __init__ (self, gclient, confKey, maxEntries = 10):
         self.gclient = gclient
         self.confKey = gconfBase + "/" + confKey
-        self.store = gtk.ListStore(str, bool, bool) # text, save-to-gconf, is-separator
+        self.store = Gtk.ListStore(str, bool, bool) # text, save-to-gconf, is-separator
         self._maxEntries = maxEntries
         self._haveSeparator = False
 
@@ -98,7 +97,8 @@ class RecentList:
                 it = self.store.get_iter(row.path)
                 self.store.remove(it)
 
-        self.store.prepend([entrytext, True, False])
+        treeiter = self.store.prepend()
+	self.store.set_row(treeiter, [entrytext, True, False])
 
         if len(self.store) > self._maxEntries:
             it = self.store.get_iter(self.store[-1].path)
@@ -126,7 +126,7 @@ class RecentList:
                 self.store.remove(it)
         self._haveSeparator = False
 
-    def separatorRowFunc (self, model, it):
+    def separatorRowFunc (self, model, it, data):
         return model[it][2]
 
     def isEmpty (self):
@@ -212,11 +212,16 @@ class SearchQuery:
         gclient.set_bool(gconfBase+"/select_file_types", self.selectFileTypes)
 
 
-class FileSearchWindowHelper:
-    def __init__(self, plugin, window):
+class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
+    __gtype_name__ = "FileSearchWindowHelper"
+    window = GObject.property(type=Gedit.Window)
+
+    def __init__(self):
+        GObject.Object.__init__(self)
+
+    def do_activate(self):
         #print "file-search: plugin created for", window
-        self._window = window
-        self._plugin = plugin
+        self._window = self.window
         self._dialog = None
         self._bus = None
         self.searchers = [] # list of existing SearchProcess instances
@@ -247,7 +252,7 @@ class FileSearchWindowHelper:
         self._window.connect_object("tab-added", FileSearchWindowHelper.onTabAdded, self)
         self._window.connect_object("tab-removed", FileSearchWindowHelper.onTabRemoved, self)
 
-    def deactivate(self):
+    def do_deactivate(self):
         #print "file-search: plugin stopped for", self._window
         self.destroy()
 
@@ -256,9 +261,8 @@ class FileSearchWindowHelper:
         for s in self.searchers[:]:
             s.destroy()
         self._window = None
-        self._plugin = None
 
-    def update_ui(self):
+    def do_update_state(self):
         # Called whenever the window has been updated (active tab
         # changed, etc.)
         #print "file-search: plugin update for", self._window
@@ -280,7 +284,7 @@ class FileSearchWindowHelper:
 
     def onButtonPress (self, event, tab):
         if event.button == 3:
-            (bufX, bufY) = tab.get_view().window_to_buffer_coords(gtk.TEXT_WINDOW_TEXT, int(event.x), int(event.y))
+            (bufX, bufY) = tab.get_view().window_to_buffer_coords(Gtk.TextWindowType.TEXT, int(event.x), int(event.y))
             self._lastClickIter = tab.get_view().get_iter_at_location(bufX, bufY)
 
     def onPopupMenu (self, tab):
@@ -289,7 +293,7 @@ class FileSearchWindowHelper:
 
     def onPopulatePopup (self, menu, tab):
         # add separator:
-        sepMi = gtk.MenuItem()
+        sepMi = Gtk.MenuItem()
         sepMi.show()
         menu.prepend(sepMi)
 
@@ -320,7 +324,7 @@ class FileSearchWindowHelper:
             menuText = _('Search files for "%s"') % menuSelText
         else:
             menuText = _('Search files...')
-        mi = gtk.MenuItem(menuText, use_underline=False)
+        mi = Gtk.MenuItem.new_with_label(menuText)
         mi.connect_object("activate", FileSearchWindowHelper.onMenuItemActivate, self, selText)
         mi.show()
         menu.prepend(mi)
@@ -329,10 +333,10 @@ class FileSearchWindowHelper:
         self.openSearchDialog(searchText)
 
     def _addFileBrowserMenuItem (self):
-        if hasattr(self._window, 'get_message_bus') and gedit.version >= (2,27,4):
+        if hasattr(self._window, 'get_message_bus'):
             self._bus = self._window.get_message_bus()
 
-            fbAction = gtk.Action('search-files-plugin', _("Search files..."), _("Search in all files in a directory"), None)
+            fbAction = Gtk.Action('search-files-plugin', _("Search files..."), _("Search in all files in a directory"), None)
             try:
                 self._bus.send_sync('/plugins/filebrowser', 'add_context_item',
                     {'action':fbAction, 'path':'/FilePopup/FilePopup_Opt3'})
@@ -357,7 +361,7 @@ class FileSearchWindowHelper:
             msg = self._bus.send_sync('/plugins/filebrowser', 'get_root')
             selectedUri = msg.get_value('uri')
 
-        fileObj = gio.File(selectedUri)
+        fileObj = Gio.file_new_for_uri(selectedUri)
         selectedDir = fileObj.get_path()
 
         self.openSearchDialog(searchDirectory=selectedDir)
@@ -373,7 +377,7 @@ class FileSearchWindowHelper:
         manager = self._window.get_ui_manager()
 
         # Create a new action group
-        self._action_group = gtk.ActionGroup("FileSearchPluginActions")
+        self._action_group = Gtk.ActionGroup("FileSearchPluginActions")
         self._action_group.add_actions([("FileSearch", "gtk-find", _("Search files..."),
                                          "<control><shift>F", _("Search in all files in a directory"),
                                          self.on_search_files_activate)])
@@ -390,12 +394,12 @@ class FileSearchWindowHelper:
         disables the Search button whenever no search text is entered.
         """
         if textEntry.get_text() == "":
-            self.tree.get_widget('btnSearch').set_sensitive(False)
+            self.builder.get_object('btnSearch').set_sensitive(False)
         else:
-            self.tree.get_widget('btnSearch').set_sensitive(True)
+            self.builder.get_object('btnSearch').set_sensitive(True)
 
     def on_cbSelectFileTypes_toggled (self, checkbox):
-        self.tree.get_widget('cboFileTypeList').set_sensitive( checkbox.get_active() )
+        self.builder.get_object('cboFileTypeList').set_sensitive( checkbox.get_active() )
 
     def on_cboSearchDirectoryEntry_changed (self, entry):
         text = entry.get_text()
@@ -421,29 +425,30 @@ class FileSearchWindowHelper:
                     self._autoCompleteList.append([match])
 
     def on_btnBrowse_clicked (self, button):
-        fileChooser = gtk.FileChooserDialog(title=_("Select Directory"),
+        fileChooser = Gtk.FileChooserDialog(title=_("Select Directory"),
             parent=self._dialog,
-            action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-            buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        fileChooser.set_default_response(gtk.RESPONSE_OK)
+            action=Gtk.FileChooserAction.SELECT_FOLDER,
+            buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        fileChooser.set_default_response(Gtk.ResponseType.OK)
         fileChooser.set_local_only(onlyLocalPathes)
-        fileChooser.set_filename( self.tree.get_widget('cboSearchDirectoryEntry').get_text() )
+        fileChooser.set_filename( self.builder.get_object('cboSearchDirectoryEntry').get_text() )
 
         response = fileChooser.run()
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             selectedDir = os.path.normpath( fileChooser.get_filename() ) + "/"
-            self.tree.get_widget('cboSearchDirectoryEntry').set_text(selectedDir)
+            self.builder.get_object('cboSearchDirectoryEntry').set_text(selectedDir)
         fileChooser.destroy()
 
-    def on_search_files_activate(self, action):
+    def on_search_files_activate(self, action, user_data):
         self.openSearchDialog()
 
     def openSearchDialog (self, searchText = None, searchDirectory = None):
-        gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
-        self.tree = gtk.glade.XML(gladeFile, domain = APP_NAME)
-        self.tree.signal_autoconnect(self)
+        gladeFile = os.path.join(os.path.dirname(__file__), "file-search.ui")
+        self.builder = Gtk.Builder()
+        self.builder.add_objects_from_file(gladeFile, ['searchDialog'])
+        self.builder.connect_signals(self)
 
-        self._dialog = self.tree.get_widget('searchDialog')
+        self._dialog = self.builder.get_object('searchDialog')
         self._dialog.set_transient_for(self._window)
 
         #
@@ -453,13 +458,12 @@ class FileSearchWindowHelper:
         # get base directory of currently opened file:
         currentDocDir = None
         if self._window.get_active_tab():
-            currFilePath = self._window.get_active_tab().get_document().get_uri()
-            if currFilePath != None:
+            gFilePath = self._window.get_active_tab().get_document().get_location()
+            if gFilePath != None:
                 if onlyLocalPathes:
-                    if currFilePath.startswith("file:///"):
-                        currentDocDir = urllib.unquote(os.path.dirname(currFilePath[7:]))
+                    if gFilePath.is_native():
+                        currentDocDir = gFilePath.get_path()
                 else:
-                    gFilePath = gio.File(currFilePath)
                     currentDocDir = gFilePath.get_parent().get_path()
 
         # find a nice default value for the search directory:
@@ -490,20 +494,20 @@ class FileSearchWindowHelper:
         searchDir = os.path.normpath(searchDir) + "/"
 
         # ... and display that in the text field:
-        self.tree.get_widget('cboSearchDirectoryEntry').set_text(searchDir)
+        self.builder.get_object('cboSearchDirectoryEntry').set_text(searchDir)
 
         # Set up autocompletion for search directory:
-        completion = gtk.EntryCompletion()
-        self.tree.get_widget('cboSearchDirectoryEntry').set_completion(completion)
-        self._autoCompleteList = gtk.ListStore(str)
+        completion = Gtk.EntryCompletion()
+        self.builder.get_object('cboSearchDirectoryEntry').set_completion(completion)
+        self._autoCompleteList = Gtk.ListStore(str)
         completion.set_model(self._autoCompleteList)
         completion.set_text_column(0)
 
         # Fill the drop-down part of the text field with recent dirs:
-        cboLastDirs = self.tree.get_widget('cboSearchDirectoryList')
+        cboLastDirs = self.builder.get_object('cboSearchDirectoryList')
         cboLastDirs.set_model(self._lastDirs.store)
-        cboLastDirs.set_text_column(0)
-        cboLastDirs.set_row_separator_func(self._lastDirs.separatorRowFunc)
+        cboLastDirs.set_entry_text_column(0)
+        cboLastDirs.set_row_separator_func(self._lastDirs.separatorRowFunc, None)
 
         self._lastDirs.resetTemps()
         if currentDocDir is not None:
@@ -520,34 +524,34 @@ class FileSearchWindowHelper:
                     # Only use selected text if it doesn't span multiple lines:
                     if selectionIters[0].get_line() == selectionIters[1].get_line():
                         searchText = selectionIters[0].get_text(selectionIters[1])
-        self.tree.get_widget('cboSearchTextEntry').set_text(searchText)
+        self.builder.get_object('cboSearchTextEntry').set_text(searchText)
 
-        cboLastSearches = self.tree.get_widget('cboSearchTextList')
+        cboLastSearches = self.builder.get_object('cboSearchTextList')
         cboLastSearches.set_model(self._lastSearchTerms.store)
-        cboLastSearches.set_text_column(0)
+        cboLastSearches.set_entry_text_column(0)
 
         # Fill list of file types:
-        cboLastTypes = self.tree.get_widget('cboFileTypeList')
+        cboLastTypes = self.builder.get_object('cboFileTypeList')
         cboLastTypes.set_model(self._lastTypes.store)
-        cboLastTypes.set_text_column(0)
+        cboLastTypes.set_entry_text_column(0)
 
         if not(self._lastTypes.isEmpty()):
             typeListString = self._lastTypes.topEntry()
-            self.tree.get_widget('cboFileTypeEntry').set_text(typeListString)
+            self.builder.get_object('cboFileTypeEntry').set_text(typeListString)
 
 
         # get default values for other controls from GConf:
         query = SearchQuery()
         query.loadDefaults(self.gclient)
-        self.tree.get_widget('cbCaseSensitive').set_active(query.caseSensitive)
-        self.tree.get_widget('cbRegExp').set_active(query.isRegExp)
-        self.tree.get_widget('cbWholeWord').set_active(query.wholeWord)
-        self.tree.get_widget('cbIncludeSubfolders').set_active(query.includeSubfolders)
-        self.tree.get_widget('cbExcludeHidden').set_active(query.excludeHidden)
-        self.tree.get_widget('cbExcludeBackups').set_active(query.excludeBackup)
-        self.tree.get_widget('cbExcludeVCS').set_active(query.excludeVCS)
-        self.tree.get_widget('cbSelectFileTypes').set_active(query.selectFileTypes)
-        self.tree.get_widget('cboFileTypeList').set_sensitive( query.selectFileTypes )
+        self.builder.get_object('cbCaseSensitive').set_active(query.caseSensitive)
+        self.builder.get_object('cbRegExp').set_active(query.isRegExp)
+        self.builder.get_object('cbWholeWord').set_active(query.wholeWord)
+        self.builder.get_object('cbIncludeSubfolders').set_active(query.includeSubfolders)
+        self.builder.get_object('cbExcludeHidden').set_active(query.excludeHidden)
+        self.builder.get_object('cbExcludeBackups').set_active(query.excludeBackup)
+        self.builder.get_object('cbExcludeVCS').set_active(query.excludeVCS)
+        self.builder.get_object('cbSelectFileTypes').set_active(query.selectFileTypes)
+        self.builder.get_object('cboFileTypeList').set_sensitive( query.selectFileTypes )
 
         inputValid = False
         while not(inputValid):
@@ -557,9 +561,9 @@ class FileSearchWindowHelper:
                 self._dialog.destroy()
                 return
 
-            searchText = unicode(self.tree.get_widget('cboSearchTextEntry').get_text())
-            searchDir = self.tree.get_widget('cboSearchDirectoryEntry').get_text()
-            typeListString = self.tree.get_widget('cboFileTypeEntry').get_text()
+            searchText = unicode(self.builder.get_object('cboSearchTextEntry').get_text())
+            searchDir = self.builder.get_object('cboSearchDirectoryEntry').get_text()
+            typeListString = self.builder.get_object('cboFileTypeEntry').get_text()
 
             searchDir = os.path.expanduser(searchDir)
             searchDir = os.path.normpath(searchDir) + "/"
@@ -567,8 +571,8 @@ class FileSearchWindowHelper:
             if searchText == "":
                 print "internal error: search text is empty!"
             elif not(os.path.exists(searchDir)):
-                msgDialog = gtk.MessageDialog(self._dialog, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, _("Directory does not exist"))
+                msgDialog = Gtk.MessageDialog(self._dialog, Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                    Gtk.MessageType.ERROR, Gtk.ButtonsType.OK, _("Directory does not exist"))
                 msgDialog.format_secondary_text(_("The specified directory does not exist."))
                 msgDialog.run()
                 msgDialog.destroy()
@@ -577,14 +581,14 @@ class FileSearchWindowHelper:
 
         query.text = searchText
         query.directory = searchDir
-        query.caseSensitive = self.tree.get_widget('cbCaseSensitive').get_active()
-        query.isRegExp = self.tree.get_widget('cbRegExp').get_active()
-        query.wholeWord = self.tree.get_widget('cbWholeWord').get_active()
-        query.includeSubfolders = self.tree.get_widget('cbIncludeSubfolders').get_active()
-        query.excludeHidden = self.tree.get_widget('cbExcludeHidden').get_active()
-        query.excludeBackup = self.tree.get_widget('cbExcludeBackups').get_active()
-        query.excludeVCS = self.tree.get_widget('cbExcludeVCS').get_active()
-        query.selectFileTypes = self.tree.get_widget('cbSelectFileTypes').get_active()
+        query.caseSensitive = self.builder.get_object('cbCaseSensitive').get_active()
+        query.isRegExp = self.builder.get_object('cbRegExp').get_active()
+        query.wholeWord = self.builder.get_object('cbWholeWord').get_active()
+        query.includeSubfolders = self.builder.get_object('cbIncludeSubfolders').get_active()
+        query.excludeHidden = self.builder.get_object('cbExcludeHidden').get_active()
+        query.excludeBackup = self.builder.get_object('cbExcludeBackups').get_active()
+        query.excludeVCS = self.builder.get_object('cbExcludeVCS').get_active()
+        query.selectFileTypes = self.builder.get_object('cbSelectFileTypes').get_active()
         query.fileTypeString = typeListString
 
         self._dialog.destroy()
@@ -624,7 +628,7 @@ class FileSearcher:
         self._updateSummary()
 
         #searchSummary = "<span size=\"smaller\" foreground=\"#585858\">searching for </span><span size=\"smaller\"><i>%s</i></span><span size=\"smaller\" foreground=\"#585858\"> in </span><span size=\"smaller\"><i>%s</i></span>" % (query.text, query.directory)
-        searchSummary = "<span size=\"smaller\">" + _("searching for <i>%(keywords)s</i> in <i>%(folder)s</i>") % {'keywords': escapeMarkup(query.text), 'folder': escapeMarkup(gobject.filename_display_name(query.directory))} + "</span>"
+        searchSummary = "<span size=\"smaller\">" + _("searching for <i>%(keywords)s</i> in <i>%(folder)s</i>") % {'keywords': escapeMarkup(query.text), 'folder': escapeMarkup(GObject.filename_display_name(query.directory))} + "</span>"
         self.treeStore.append(None, [searchSummary, '', 0])
 
         self.searchProcess = SearchProcess(query, self)
@@ -648,11 +652,11 @@ class FileSearcher:
 
     def handleFinished (self):
         #print "(finished)"
-        if not(self.tree):
+        if not(self.builder):
             return
 
         self.searchProcess = None
-        editBtn = self.tree.get_widget("btnModifyFileSearch")
+        editBtn = self.builder.get_object("btnModifyFileSearch")
         editBtn.hide()
         editBtn.set_label("gtk-edit")
 
@@ -673,14 +677,15 @@ class FileSearcher:
         summary += "\n" + ngettext("in %d file", "in %d files", len(self.files)) % len(self.files)
         if self.searchProcess:
             summary += u"\u2026" # ellipsis character
-        self.tree.get_widget("lblNumMatches").set_label(summary)
+        self.builder.get_object("lblNumMatches").set_label(summary)
 
 
     def _createResultPanel (self):
-        gladeFile = os.path.join(os.path.dirname(__file__), "file-search.glade")
-        self.tree = gtk.glade.XML(gladeFile, 'hbxFileSearchResult', domain = APP_NAME)
-        self.tree.signal_autoconnect(self)
-        resultContainer = self.tree.get_widget('hbxFileSearchResult')
+        gladeFile = os.path.join(os.path.dirname(__file__), "file-search.ui")
+        self.builder = Gtk.Builder()
+        self.builder.add_objects_from_file(gladeFile, ['hbxFileSearchResult'])
+        self.builder.connect_signals(self)
+        resultContainer = self.builder.get_object('hbxFileSearchResult')
 
         resultContainer.set_data("filesearcher", self)
 
@@ -688,22 +693,22 @@ class FileSearcher:
         if len(tabTitle) > 30:
             tabTitle = tabTitle[:30] + u"\u2026" # ellipsis character 
         panel = self._window.get_bottom_panel()
-        panel.add_item(resultContainer, tabTitle, "gtk-find")
+        panel.add_item(resultContainer, tabTitle, "gtk-find", None)
         panel.activate_item(resultContainer)
 
-        editBtn = self.tree.get_widget("btnModifyFileSearch")
+        editBtn = self.builder.get_object("btnModifyFileSearch")
         editBtn.set_label("gtk-stop")
 
         panel.set_property("visible", True)
 
 
-        self.treeStore = gtk.TreeStore(str, str, int)
-        self.treeView = self.tree.get_widget('tvFileSearchResult')
+        self.treeStore = Gtk.TreeStore(str, str, int)
+        self.treeView = self.builder.get_object('tvFileSearchResult')
         self.treeView.set_model(self.treeStore)
 
-        self.treeView.set_search_equal_func(resultSearchCb)
+        self.treeView.set_search_equal_func(resultSearchCb, None)
 
-        tc = gtk.TreeViewColumn("File", gtk.CellRendererText(), markup=0)
+        tc = Gtk.TreeViewColumn("File", Gtk.CellRendererText(), markup=0)
         self.treeView.append_column(tc)
 
     def _addResultFile (self, filename):
@@ -712,7 +717,7 @@ class FileSearcher:
         if dispFilename.startswith(self.query.directory):
             dispFilename = dispFilename[ len(self.query.directory): ]
             dispFilename.lstrip("/")
-        dispFilename = gobject.filename_display_name(dispFilename)
+        dispFilename = GObject.filename_display_name(dispFilename)
 
         (directory, file) = os.path.split( dispFilename )
         if directory:
@@ -755,15 +760,17 @@ class FileSearcher:
             return
 
         uri="file://%s" % urllib.quote(file)
-        gedit.commands.load_uri(window=self._window, uri=uri, line_pos=lineno)
-        if lineno > 0: # this is necessary for Gedit 2.17.4 and older (see gbo #401219)
+        location=Gio.file_new_for_uri(uri)
+        tab=self._window.get_tab_from_location(location)
+        if tab:
+            self._window.set_active_tab(tab)
             currDoc = self._window.get_active_document()
             currDoc.goto_line(lineno - 1) # -1 required to work around gbo #503665
-            currView = gedit.tab_get_from_document(currDoc).get_view()
-            currView.scroll_to_cursor()
+        else:
+            self._window.create_tab_from_location(location, None, lineno, 0, False, True)
 
         # use an Idle handler so the document has time to load:  
-        gobject.idle_add(self.onDocumentOpenedCb, (lineno > 0))
+        GObject.idle_add(self.onDocumentOpenedCb, (lineno > 0))
 
     def on_btnClose_clicked (self, button):
         self.destroy()
@@ -774,14 +781,14 @@ class FileSearcher:
             self.searchProcess = None
 
         panel = self._window.get_bottom_panel()
-        resultContainer = self.tree.get_widget('hbxFileSearchResult')
+        resultContainer = self.builder.get_object('hbxFileSearchResult')
         resultContainer.set_data("filesearcher", None)
         panel.remove_item(resultContainer)
         self.treeStore = None
         self.treeView = None
         self._window = None
         self.files = {}
-        self.tree = None
+        self.builder = None
         self.pluginHelper.unregisterSearcher(self)
 
     def on_btnModify_clicked (self, button):
@@ -800,22 +807,22 @@ class FileSearcher:
                 treeview.grab_focus()
                 treeview.set_cursor(path[0], path[1], False)
 
-                menu = gtk.Menu()
-                mi = gtk.ImageMenuItem("gtk-copy")
+                menu = Gtk.Menu()
+                mi = Gtk.ImageMenuItem("gtk-copy")
                 mi.connect_object("activate", FileSearcher.onCopyActivate, self, treeview, path[0])
                 mi.show()
                 menu.append(mi)
 
-                mi = gtk.SeparatorMenuItem()
+                mi = Gtk.SeparatorMenuItem()
                 mi.show()
                 menu.append(mi)
 
-                mi = gtk.MenuItem(_("Expand All"))
+                mi = Gtk.MenuItem(_("Expand All"))
                 mi.connect_object("activate", FileSearcher.onExpandAllActivate, self, treeview)
                 mi.show()
                 menu.append(mi)
 
-                mi = gtk.MenuItem(_("Collapse All"))
+                mi = Gtk.MenuItem(_("Collapse All"))
                 mi.connect_object("activate", FileSearcher.onCollapseAllActivate, self, treeview)
                 mi.show()
                 menu.append(mi)
@@ -830,7 +837,7 @@ class FileSearcher:
         markupText = treeview.get_model().get_value(it, 0)
         plainText = pango.parse_markup(markupText, u'\x00')[1]
 
-        clipboard = gtk.clipboard_get()
+        clipboard = Gtk.clipboard_get()
         clipboard.set_text(plainText)
         clipboard.store()
 
@@ -847,7 +854,7 @@ class FileSearcher:
 
         if doScroll:
             # workaround to scroll to cursor position when opening file into window of "Unnamed Document":
-            currView = gedit.tab_get_from_document(currDoc).get_view()
+            currView = self._window.get_active_view()
             currView.scroll_to_cursor()
 
         # highlight matches in opened document:

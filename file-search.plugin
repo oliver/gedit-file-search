@@ -1,7 +1,7 @@
-[Gedit Plugin]
+[Plugin]
 Loader=python
 Module=file-search
-IAge=2
+IAge=3
 Name=File Search
 Name[de]=Suche in Dateien
 Name[fr]=Rechercher des fichiers

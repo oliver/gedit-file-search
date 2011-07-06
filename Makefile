@@ -46,3 +46,6 @@ pot: clean-pot
 	xgettext -j -o $(LANG_FOLDER)/file-search.pot -L Glade $(PLUGIN_SUBFOLDER)/file-search.glade
 	xgettext -j -o $(LANG_FOLDER)/file-search.pot -L Python $(PLUGIN_SUBFOLDER)/ui.py
 
+install:
+	cp file-search.plugin ~/.local/share/gedit/plugins
+	cp -r file-search ~/.local/share/gedit/plugins
