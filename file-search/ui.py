@@ -28,12 +28,10 @@
 
 import os
 import urllib
-import gconf
-import pango
 import dircache
 from gettext import gettext, translation
 
-from gi.repository import Gedit, GObject, Gtk
+from gi.repository import Gedit, GObject, Gtk, GConf, Pango
 
 # translation
 APP_NAME = 'file-search'
@@ -80,9 +78,11 @@ class RecentList:
         self._maxEntries = maxEntries
         self._haveSeparator = False
 
-        entries = self.gclient.get_list(self.confKey, gconf.VALUE_STRING)
-        entries.reverse()
-        for e in entries:
+        rawValue = self.gclient.get(self.confKey)
+        valueList = rawValue.get_list()
+        valueList.reverse()
+        for gconfValue in valueList:
+            e = gconfValue.get_string()
             if e and len(e) > 0:
                 decodedName = urllib.unquote(e)
                 self.add(decodedName, False)
@@ -111,7 +111,14 @@ class RecentList:
                     continue
                 encodedName = urllib.quote(e[0])
                 entries.append(encodedName)
-            self.gclient.set_list(self.confKey, gconf.VALUE_STRING, entries)
+            self._setGconfStringList(self.confKey, entries)
+
+    def _setGconfStringList (self, path, valueList):
+        "workaround for bgo#681433: GConf.Client.set_list() is not available in Python"
+        import subprocess
+        cmd = [ "gconftool-2", "--type", "list", "--list-type", "string", "--set", path, "[%s]" % ",".join(valueList) ]
+        subprocess.call(cmd)
+
 
     def addTemp (self, entrytext):
         if not(self._haveSeparator):
@@ -226,8 +233,8 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._bus = None
         self.searchers = [] # list of existing SearchProcess instances
 
-        self.gclient = gconf.client_get_default()
-        self.gclient.add_dir(gconfBase, gconf.CLIENT_PRELOAD_NONE)
+        self.gclient = GConf.Client.get_default()
+        self.gclient.add_dir(gconfBase, GConf.ClientPreloadType.PRELOAD_NONE)
 
         self._lastSearchTerms = RecentList(self.gclient, "recent_search_terms")
         self._lastDirs = RecentList(self.gclient, "recent_dirs")
@@ -835,7 +842,7 @@ class FileSearcher:
     def onCopyActivate (self, treeview, path):
         it = treeview.get_model().get_iter(path)
         markupText = treeview.get_model().get_value(it, 0)
-        plainText = pango.parse_markup(markupText, u'\x00')[1]
+        plainText = Pango.parse_markup(markupText, u'\x00')[1]
 
         clipboard = Gtk.clipboard_get()
         clipboard.set_text(plainText)
@@ -871,7 +878,7 @@ class FileSearcher:
 def resultSearchCb (model, column, key, it):
     """Callback function for searching in result list"""
     lineText = model.get_value(it, column)
-    plainText = pango.parse_markup(lineText, u'\x00')[1] # remove Pango markup
+    plainText = Pango.parse_markup(lineText, u'\x00')[1] # remove Pango markup
 
     # for file names, add a leading slash before matching:
     parentIter = model.iter_parent(it)

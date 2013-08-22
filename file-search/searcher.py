@@ -26,11 +26,11 @@
 
 
 import os
-import gobject
 import fcntl
 import subprocess
 import re
 import errno
+from gi.repository import GObject
 
 
 class LineSplitter:
@@ -64,7 +64,7 @@ class LineSplitter:
 
 class RunCommand:
     "Run a command in background, passing all of its stdout output to a LineSplitter"
-    def __init__ (self, cmd, resultHandler, prio=gobject.PRIORITY_LOW):
+    def __init__ (self, cmd, resultHandler, prio=GObject.PRIORITY_LOW):
         self.lineSplitter = LineSplitter(resultHandler)
 
         #print "executing command: %s" % cmd
@@ -76,12 +76,12 @@ class RunCommand:
         fcntl.fcntl(self.pipe, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
         #print "(add watch)"
-        gobject.io_add_watch(self.pipe, gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
+        GObject.io_add_watch(self.pipe, GObject.IO_IN | GObject.IO_ERR | GObject.IO_HUP,
             self.onPipeReadable, priority=prio)
 
     def onPipeReadable (self, fd, cond):
         #print "condition: %s" % cond
-        if (cond & gobject.IO_IN):
+        if (cond & GObject.IO_IN):
             readText = self.pipe.read(4000)
             #print "(read %d bytes)" % len(readText)
             if self.lineSplitter:
@@ -274,7 +274,7 @@ class SearchProcess:
                 findCmd += [")"]
         findCmd += ["-xtype", "f", "-print"]
 
-        self.cmdRunner = RunCommand(findCmd, self, gobject.PRIORITY_DEFAULT_IDLE)
+        self.cmdRunner = RunCommand(findCmd, self, GObject.PRIORITY_DEFAULT_IDLE)
 
     def cancel (self):
         self.cancelled = True
