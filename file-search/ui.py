@@ -31,7 +31,7 @@ import urllib
 import dircache
 from gettext import gettext, translation
 
-from gi.repository import Gedit, GObject, Gtk, GConf, Pango
+from gi.repository import Gedit, GObject, Gtk, Gdk, GConf, Pango
 
 # translation
 APP_NAME = 'file-search'
@@ -98,7 +98,7 @@ class RecentList:
                 self.store.remove(it)
 
         treeiter = self.store.prepend()
-	self.store.set_row(treeiter, [entrytext, True, False])
+        self.store.set_row(treeiter, [entrytext, True, False])
 
         if len(self.store) > self._maxEntries:
             it = self.store.get_iter(self.store[-1].path)
@@ -300,7 +300,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
 
     def onPopulatePopup (self, menu, tab):
         # add separator:
-        sepMi = Gtk.MenuItem()
+        sepMi = Gtk.SeparatorMenuItem.new()
         sepMi.show()
         menu.prepend(sepMi)
 
@@ -446,7 +446,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
             self.builder.get_object('cboSearchDirectoryEntry').set_text(selectedDir)
         fileChooser.destroy()
 
-    def on_search_files_activate(self, action, user_data):
+    def on_search_files_activate(self, action):
         self.openSearchDialog()
 
     def openSearchDialog (self, searchText = None, searchDirectory = None):
@@ -700,7 +700,7 @@ class FileSearcher:
         if len(tabTitle) > 30:
             tabTitle = tabTitle[:30] + u"\u2026" # ellipsis character 
         panel = self._window.get_bottom_panel()
-        panel.add_item(resultContainer, tabTitle, "gtk-find", None)
+        panel.add_item_with_stock_icon(resultContainer, str(self), tabTitle, "gtk-find")
         panel.activate_item(resultContainer)
 
         editBtn = self.builder.get_object("btnModifyFileSearch")
@@ -815,12 +815,13 @@ class FileSearcher:
                 treeview.set_cursor(path[0], path[1], False)
 
                 menu = Gtk.Menu()
-                mi = Gtk.ImageMenuItem("gtk-copy")
+                self.contextMenu = menu # need to keep a reference to the menu
+                mi = Gtk.ImageMenuItem.new_from_stock("gtk-copy", None)
                 mi.connect_object("activate", FileSearcher.onCopyActivate, self, treeview, path[0])
                 mi.show()
                 menu.append(mi)
 
-                mi = Gtk.SeparatorMenuItem()
+                mi = Gtk.SeparatorMenuItem.new()
                 mi.show()
                 menu.append(mi)
 
@@ -834,7 +835,7 @@ class FileSearcher:
                 mi.show()
                 menu.append(mi)
 
-                menu.popup(None, None, None, event.button, event.time)
+                menu.popup(None, None, None, None, event.button, event.time)
                 return True
         else:
             return False
@@ -842,10 +843,10 @@ class FileSearcher:
     def onCopyActivate (self, treeview, path):
         it = treeview.get_model().get_iter(path)
         markupText = treeview.get_model().get_value(it, 0)
-        plainText = Pango.parse_markup(markupText, u'\x00')[1]
+        plainText = Pango.parse_markup(markupText, -1, u'\x00')[2]
 
-        clipboard = Gtk.clipboard_get()
-        clipboard.set_text(plainText)
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        clipboard.set_text(plainText, -1)
         clipboard.store()
 
     def onExpandAllActivate (self, treeview):
