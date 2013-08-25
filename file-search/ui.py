@@ -768,16 +768,10 @@ class FileSearcher:
 
         uri="file://%s" % urllib.quote(file)
         location=Gio.file_new_for_uri(uri)
-        tab=self._window.get_tab_from_location(location)
-        if tab:
-            self._window.set_active_tab(tab)
-            currDoc = self._window.get_active_document()
-            currDoc.goto_line(lineno - 1) # -1 required to work around gbo #503665
-        else:
-            self._window.create_tab_from_location(location, None, lineno, 0, False, True)
+        Gedit.commands_load_location(self._window, location, None, lineno, -1)
 
         # use an Idle handler so the document has time to load:  
-        GObject.idle_add(self.onDocumentOpenedCb, (lineno > 0))
+        GObject.idle_add(self.onDocumentOpenedCb)
 
     def on_btnClose_clicked (self, button):
         self.destroy()
@@ -857,13 +851,9 @@ class FileSearcher:
         self._collapseAll = True
         treeview.collapse_all()
 
-    def onDocumentOpenedCb (self, doScroll):
+    def onDocumentOpenedCb (self):
+        self._window.get_active_view().grab_focus()
         currDoc = self._window.get_active_document()
-
-        if doScroll:
-            # workaround to scroll to cursor position when opening file into window of "Unnamed Document":
-            currView = self._window.get_active_view()
-            currView.scroll_to_cursor()
 
         # highlight matches in opened document:
         flags = 0
