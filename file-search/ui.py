@@ -876,10 +876,10 @@ class FileSearcher:
         return False
 
 
-def resultSearchCb (model, column, key, it):
+def resultSearchCb (model, column, key, it, userdata):
     """Callback function for searching in result list"""
     lineText = model.get_value(it, column)
-    plainText = Pango.parse_markup(lineText, u'\x00')[1] # remove Pango markup
+    plainText = Pango.parse_markup(lineText, -1, u'\x00')[2] # remove Pango markup
 
     # for file names, add a leading slash before matching:
     parentIter = model.iter_parent(it)
