@@ -231,6 +231,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._window = self.window
         self._dialog = None
         self._bus = None
+        self._fileBrowserContacted = False
         self.searchers = [] # list of existing SearchProcess instances
 
         self.gclient = GConf.Client.get_default()
@@ -253,7 +254,6 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._lastClickIter = None # TextIter at position of last right-click or last popup menu
 
         self._insert_menu()
-        self._addFileBrowserMenuItem()
 
         self._window.connect_object("destroy", FileSearchWindowHelper.destroy, self)
         self._window.connect_object("tab-added", FileSearchWindowHelper.onTabAdded, self)
@@ -273,7 +273,9 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         # Called whenever the window has been updated (active tab
         # changed, etc.)
         #print "file-search: plugin update for", self._window
-        pass
+        if not(self._fileBrowserContacted):
+            self._fileBrowserContacted = True
+            self._addFileBrowserMenuItem()
 
     def onTabAdded (self, tab):
         handlerIds = []
@@ -346,30 +348,29 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
             fbAction = Gtk.Action('search-files-plugin', _("Search files..."), _("Search in all files in a directory"), None)
             try:
                 self._bus.send_sync('/plugins/filebrowser', 'add_context_item',
-                    {'action':fbAction, 'path':'/FilePopup/FilePopup_Opt3'})
+                    action=fbAction, path="/FilePopup/FilePopup_Opt3")
             except StandardError, e:
+                #print "failed to add file browser context menu item (%s)" % e
                 return
             fbAction.connect('activate', self.onFbMenuItemActivate)
 
     def onFbMenuItemActivate (self, action):
         responseMsg = self._bus.send_sync('/plugins/filebrowser', 'get_view')
-        fbView = responseMsg.get_value('view')
+        fbView = responseMsg.view
         (model, rowPathes) = fbView.get_selection().get_selected_rows()
 
-        selectedUri = None
+        selectedFileObj = None
         for rowPath in rowPathes:
             fileFlags = model[rowPath][3]
             isDirectory = bool(fileFlags & 1)
             if isDirectory:
-                selectedUri = model[rowPath][2]
+                selectedFileObj = model[rowPath][2]
                 break
 
-        if selectedUri is None:
+        if selectedFileObj is None:
             msg = self._bus.send_sync('/plugins/filebrowser', 'get_root')
-            selectedUri = msg.get_value('uri')
-
-        fileObj = Gio.file_new_for_uri(selectedUri)
-        selectedDir = fileObj.get_path()
+            selectedFileObj = msg.location
+        selectedDir = selectedFileObj.get_path()
 
         self.openSearchDialog(searchDirectory=selectedDir)
 
