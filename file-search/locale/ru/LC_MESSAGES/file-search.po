@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: File Search\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-06-20 23:28+0200\n"
+"POT-Creation-Date: 2013-08-27 23:44+0200\n"
 "PO-Revision-Date: 2011-05-25 01:30+0400\n"
 "Last-Translator: Andrey Sitnik <andrey@sitnik.ru>\n"
 "Language-Team: \n"
@@ -18,83 +18,83 @@ msgstr ""
 "0 :                       n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? "
 "1 : 2;\n"
 
-#: file-search/file-search.glade:8
+#: file-search/file-search.ui:6
 msgid "Find in files"
 msgstr "Поиск в файлах"
 
-#: file-search/file-search.glade:38
+#: file-search/file-search.ui:35
 msgid "Search for:"
 msgstr "Найти:"
 
-#: file-search/file-search.glade:73
+#: file-search/file-search.ui:71
 msgid "Case sensitive"
 msgstr "Учитывать регистр"
 
-#: file-search/file-search.glade:87
+#: file-search/file-search.ui:84
 msgid "Regular Expression"
 msgstr "Регулярное выражение"
 
-#: file-search/file-search.glade:101
+#: file-search/file-search.ui:97
 msgid "Whole word"
 msgstr "Только полные слова"
 
-#: file-search/file-search.glade:132
+#: file-search/file-search.ui:127
 msgid "Search in:"
 msgstr "Искать в:"
 
-#: file-search/file-search.glade:143
+#: file-search/file-search.ui:138
 msgid "folder"
 msgstr "папка"
 
-#: file-search/file-search.glade:157
+#: file-search/file-search.ui:151
 msgid "current file"
 msgstr "текущий файл"
 
-#: file-search/file-search.glade:173
+#: file-search/file-search.ui:166
 msgid "open files"
 msgstr "открытые файлы"
 
-#: file-search/file-search.glade:187
+#: file-search/file-search.ui:179
 msgid "project files"
 msgstr "файлы проекта"
 
-#: file-search/file-search.glade:232
+#: file-search/file-search.ui:224
 msgid "Browse..."
 msgstr "Выбрать…"
 
-#: file-search/file-search.glade:252
+#: file-search/file-search.ui:243
 msgid "with subfolders"
 msgstr "с подпапками"
 
-#: file-search/file-search.glade:275
+#: file-search/file-search.ui:265
 msgid "exclude:"
 msgstr "исключать:"
 
-#: file-search/file-search.glade:286
+#: file-search/file-search.ui:276
 msgid "hidden files/folders"
 msgstr "скрытые файлы и папки"
 
-#: file-search/file-search.glade:301
+#: file-search/file-search.ui:290
 msgid "VCS folders"
 msgstr "папки VCS"
 
-#: file-search/file-search.glade:315
+#: file-search/file-search.ui:303
 msgid "backup files"
 msgstr "резервные копии"
 
-#: file-search/file-search.glade:346
+#: file-search/file-search.ui:333
 msgid "Only these file types:"
 msgstr "Только следующие типы файлов:"
 
-#: file-search/file-search.glade:394 file-search/file-search.glade:497
+#: file-search/file-search.ui:381 file-search/file-search.ui:485
 msgid "gtk-close"
 msgstr "gtk-close"
 
-#: file-search/file-search.glade:408
+#: file-search/file-search.ui:394
 msgid "gtk-find"
 msgstr "gtk-find"
 
-#: file-search/file-search.glade:460
+#: file-search/file-search.ui:449
 msgid ""
 "<b>0</b> matches\n"
 "in 0 files"
@@ -102,49 +102,49 @@ msgstr ""
 "<b>0</b> совпадений\n"
 "в 0 файлах"
 
-#: file-search/file-search.glade:480
+#: file-search/file-search.ui:469
 msgid "gtk-edit"
 msgstr "gtk-edit"
 
-#: file-search/ui.py:320
+#: file-search/ui.py:338
 #, python-format
 msgid "Search files for \"%s\""
 msgstr "Поиск \"%s\" в файлах"
 
-#: file-search/ui.py:322 file-search/ui.py:335 file-search/ui.py:377
+#: file-search/ui.py:340 file-search/ui.py:353 file-search/ui.py:394
 msgid "Search files..."
 msgstr "Поиск файлов…"
 
-#: file-search/ui.py:335 file-search/ui.py:378
+#: file-search/ui.py:353 file-search/ui.py:395
 msgid "Search in all files in a directory"
 msgstr "Поиск во всех файлах в папке"
 
-#: file-search/ui.py:424
+#: file-search/ui.py:441
 msgid "Select Directory"
 msgstr ""
 
-#: file-search/ui.py:571
+#: file-search/ui.py:589
 msgid "Directory does not exist"
 msgstr "Папки не существует"
 
-#: file-search/ui.py:572
+#: file-search/ui.py:590
 msgid "The specified directory does not exist."
 msgstr "Указанная папка не существует."
 
-#: file-search/ui.py:627
+#: file-search/ui.py:645
 #, python-format
 msgid "searching for <i>%(keywords)s</i> in <i>%(folder)s</i>"
 msgstr "поиск <i>%(keywords)s</i> в <i>%(folder)s</i>"
 
-#: file-search/ui.py:662
+#: file-search/ui.py:680
 msgid "(search was cancelled)"
 msgstr "(поиск был отменён)"
 
-#: file-search/ui.py:664
+#: file-search/ui.py:682
 msgid "(no matching files found)"
 msgstr "(не найдено подходящих файлов)"
 
-#: file-search/ui.py:666
+#: file-search/ui.py:684
 #, python-format
 msgid "found %d match"
 msgid_plural "found %d matches"
@@ -152,7 +152,7 @@ msgstr[0] "найдено %d совпадение"
 msgstr[1] "найдено %d совпадения"
 msgstr[2] "найдено %d совпадений"
 
-#: file-search/ui.py:667
+#: file-search/ui.py:685
 #, python-format
 msgid " (%d line)"
 msgid_plural " (%d lines)"
@@ -160,7 +160,7 @@ msgstr[0] " (%d строка)"
 msgstr[1] " (%d строки)"
 msgstr[2] " (%d строк)"
 
-#: file-search/ui.py:668
+#: file-search/ui.py:686
 #, python-format
 msgid " in %d file"
 msgid_plural " in %d files"
@@ -168,7 +168,7 @@ msgstr[0] " в %d файле"
 msgstr[1] " в %d файлах"
 msgstr[2] " в %d файлах"
 
-#: file-search/ui.py:672
+#: file-search/ui.py:690
 #, python-format
 msgid "<b>%d</b> match"
 msgid_plural "<b>%d</b> matches"
@@ -176,7 +176,7 @@ msgstr[0] "<b>%d</b> совпадение"
 msgstr[1] "<b>%d</b> совпадения"
 msgstr[2] "<b>%d</b> совпадений"
 
-#: file-search/ui.py:673
+#: file-search/ui.py:691
 #, python-format
 msgid "in %d file"
 msgid_plural "in %d files"
@@ -184,10 +184,10 @@ msgstr[0] "в %d файле"
 msgstr[1] "в %d файлах"
 msgstr[2] "в %d файлах"
 
-#: file-search/ui.py:813
+#: file-search/ui.py:830
 msgid "Expand All"
 msgstr "Развернуть всё"
 
-#: file-search/ui.py:818
+#: file-search/ui.py:835
 msgid "Collapse All"
 msgstr "Свернуть всё"
