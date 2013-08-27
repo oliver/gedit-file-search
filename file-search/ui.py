@@ -30,6 +30,7 @@ import os
 import urllib
 import dircache
 from gettext import gettext, translation
+import locale
 
 from gi.repository import Gedit, GObject, Gtk, Gdk, GConf, Pango
 
@@ -40,8 +41,8 @@ t = translation(APP_NAME, LOCALE_PATH, fallback=True)
 _ = t.ugettext
 ngettext = t.ungettext
 
-# TODO: Is this necessary with Glade 3?
-# gtk.glade.bindtextdomain(APP_NAME, LOCALE_PATH)
+# set gettext domain for GtkBuilder
+locale.bindtextdomain(APP_NAME, LOCALE_PATH)
 
 from searcher import SearchProcess, buildQueryRE
 
@@ -453,6 +454,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
     def openSearchDialog (self, searchText = None, searchDirectory = None):
         gladeFile = os.path.join(os.path.dirname(__file__), "file-search.ui")
         self.builder = Gtk.Builder()
+        self.builder.set_translation_domain(APP_NAME)
         self.builder.add_objects_from_file(gladeFile, ['searchDialog'])
         self.builder.connect_signals(self)
 
@@ -691,6 +693,7 @@ class FileSearcher:
     def _createResultPanel (self):
         gladeFile = os.path.join(os.path.dirname(__file__), "file-search.ui")
         self.builder = Gtk.Builder()
+        self.builder.set_translation_domain(APP_NAME)
         self.builder.add_objects_from_file(gladeFile, ['hbxFileSearchResult'])
         self.builder.connect_signals(self)
         resultContainer = self.builder.get_object('hbxFileSearchResult')
