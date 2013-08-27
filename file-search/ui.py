@@ -92,6 +92,9 @@ class RecentList:
 
     def add (self, entrytext, doStore=True):
         "Add an entry that was just used."
+        if type(entrytext) == unicode:
+            entrytext = entrytext.encode("utf-8")
+        assert(type(entrytext) == str)
 
         for row in self.store:
             if row[0] == entrytext:
@@ -110,6 +113,7 @@ class RecentList:
             for e in self.store:
                 if not(e[1]):
                     continue
+                assert(type(e[0]) == str)
                 encodedName = urllib.quote(e[0])
                 entries.append(encodedName)
             self._setGconfStringList(self.confKey, entries)
@@ -328,7 +332,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
 
         # add actual menu item:
         if selText:
-            menuSelText = selText
+            menuSelText = selText.decode("utf-8")
             if len(menuSelText) > 30:
                 menuSelText = menuSelText[:30] + u"\u2026" # ellipsis character
             menuText = _('Search files for "%s"') % menuSelText
@@ -571,7 +575,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
                 self._dialog.destroy()
                 return
 
-            searchText = unicode(self.builder.get_object('cboSearchTextEntry').get_text())
+            searchText = self.builder.get_object('cboSearchTextEntry').get_text().decode("utf-8")
             searchDir = self.builder.get_object('cboSearchDirectoryEntry').get_text()
             typeListString = self.builder.get_object('cboFileTypeEntry').get_text()
 
