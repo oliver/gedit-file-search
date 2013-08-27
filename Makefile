@@ -3,11 +3,11 @@ LANG_FOLDER=$(PLUGIN_SUBFOLDER)/locale
 
 DIST_FILES= \
 	$(LANG_FOLDER) \
-	$(PLUGIN_SUBFOLDER)/file-search.glade \
+	$(PLUGIN_SUBFOLDER)/file-search.ui \
 	$(PLUGIN_SUBFOLDER)/__init__.py \
 	$(PLUGIN_SUBFOLDER)/searcher.py \
 	$(PLUGIN_SUBFOLDER)/ui.py \
-	file-search.gedit-plugin \
+	file-search.plugin \
 	README
 
 TGZ_FOLDER=gedit-file-search
@@ -43,7 +43,7 @@ po: pot
 	done
 
 pot: clean-pot
-	xgettext -j -o $(LANG_FOLDER)/file-search.pot -L Glade $(PLUGIN_SUBFOLDER)/file-search.glade
+	xgettext -j -o $(LANG_FOLDER)/file-search.pot -L Glade $(PLUGIN_SUBFOLDER)/file-search.ui
 	xgettext -j -o $(LANG_FOLDER)/file-search.pot -L Python $(PLUGIN_SUBFOLDER)/ui.py
 
 install:
