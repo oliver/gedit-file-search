@@ -228,7 +228,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         #print "file-search: plugin created for", window
         self._window = self.window
         self._dialog = None
-        self._bus = None
+        self._bus = self._window.get_message_bus()
         self._fileBrowserContacted = False
         self.searchers = [] # list of existing SearchProcess instances
 
@@ -340,17 +340,14 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self.openSearchDialog(searchText)
 
     def _addFileBrowserMenuItem (self):
-        if hasattr(self._window, 'get_message_bus'):
-            self._bus = self._window.get_message_bus()
-
-            fbAction = Gtk.Action('search-files-plugin', _("Search files..."), _("Search in all files in a directory"), None)
-            try:
-                self._bus.send_sync('/plugins/filebrowser', 'add_context_item',
-                    action=fbAction, path="/FilePopup/FilePopup_Opt3")
-            except StandardError, e:
-                #print "failed to add file browser context menu item (%s)" % e
-                return
-            fbAction.connect('activate', self.onFbMenuItemActivate)
+        fbAction = Gtk.Action('search-files-plugin', _("Search files..."), _("Search in all files in a directory"), None)
+        try:
+            self._bus.send_sync('/plugins/filebrowser', 'add_context_item',
+                action=fbAction, path="/FilePopup/FilePopup_Opt3")
+        except StandardError, e:
+            #print "failed to add file browser context menu item (%s)" % e
+            return
+        fbAction.connect('activate', self.onFbMenuItemActivate)
 
     def onFbMenuItemActivate (self, action):
         responseMsg = self._bus.send_sync('/plugins/filebrowser', 'get_view')
