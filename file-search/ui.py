@@ -32,7 +32,7 @@ import dircache
 from gettext import gettext, translation
 import locale
 
-from gi.repository import Gedit, GObject, Gtk, Gdk, GConf, Pango
+from gi.repository import Gedit, GObject, Gtk, Gdk, GConf, Gio, Pango
 
 # translation
 APP_NAME = 'file-search'
@@ -45,13 +45,6 @@ ngettext = t.ungettext
 locale.bindtextdomain(APP_NAME, LOCALE_PATH)
 
 from searcher import SearchProcess, buildQueryRE
-
-# only display remote directories in file chooser if GIO is available:
-onlyLocalPathes = False
-try:
-    from gi.repository import Gio
-except ImportError:
-    onlyLocalPathes = True
 
 
 ui_str = """<ui>
@@ -443,7 +436,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
             action=Gtk.FileChooserAction.SELECT_FOLDER,
             buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
         fileChooser.set_default_response(Gtk.ResponseType.OK)
-        fileChooser.set_local_only(onlyLocalPathes)
+        fileChooser.set_local_only(False)
         fileChooser.set_filename( self.builder.get_object('cboSearchDirectoryEntry').get_text() )
 
         response = fileChooser.run()
@@ -474,11 +467,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         if self._window.get_active_tab():
             gFilePath = self._window.get_active_tab().get_document().get_location()
             if gFilePath != None:
-                if onlyLocalPathes:
-                    if gFilePath.is_native():
-                        currentDocDir = gFilePath.get_path()
-                else:
-                    currentDocDir = gFilePath.get_parent().get_path()
+                currentDocDir = gFilePath.get_parent().get_path()
 
         # find a nice default value for the search directory:
         searchDir = os.getcwdu()
