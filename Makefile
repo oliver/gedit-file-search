@@ -7,14 +7,15 @@ DIST_FILES= \
 	$(PLUGIN_SUBFOLDER)/__init__.py \
 	$(PLUGIN_SUBFOLDER)/searcher.py \
 	$(PLUGIN_SUBFOLDER)/ui.py \
+	$(PLUGIN_SUBFOLDER)/gschemas.compiled \
 	file-search.plugin \
 	README
 
 TGZ_FOLDER=gedit-file-search
 
-all: po mo
+all: po mo $(DIST_FILES)
 
-tgz: po mo
+tgz: po mo $(DIST_FILES)
 	mkdir -p $(TGZ_FOLDER)
 	cp --parents -r $(DIST_FILES) $(TGZ_FOLDER)
 	rm -f $(TGZ_FOLDER)/$(LANG_FOLDER)/file-search.pot
@@ -45,6 +46,9 @@ po: pot
 pot: clean-pot
 	xgettext -j -o $(LANG_FOLDER)/file-search.pot -L Glade $(PLUGIN_SUBFOLDER)/file-search.ui
 	xgettext -j -o $(LANG_FOLDER)/file-search.pot -L Python $(PLUGIN_SUBFOLDER)/ui.py
+
+$(PLUGIN_SUBFOLDER)/gschemas.compiled: $(PLUGIN_SUBFOLDER)/*.gschema.xml
+	glib-compile-schemas $(PLUGIN_SUBFOLDER)
 
 install:
 	cp file-search.plugin ~/.local/share/gedit/plugins

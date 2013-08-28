@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="io.github.oliver.gedit-file-search" path="/org/gnome/gedit/plugins/file-search/">
+
+    <key type="as" name="recent-search-terms"> <default>[]</default></key>
+    <key type="as" name="recent-dirs">         <default>[]</default></key>
+    <key type="as" name="recent-types">        <default>[]</default></key>
+
+    <key type="b" name="case-sensitive">     <default>true</default></key>
+    <key type="b" name="whole-word">         <default>false</default></key>
+    <key type="b" name="is-reg-exp">         <default>false</default></key>
+    <key type="b" name="include-subfolders"> <default>true</default></key>
+    <key type="b" name="exclude-hidden">     <default>true</default></key>
+    <key type="b" name="exclude-backup">     <default>true</default></key>
+    <key type="b" name="exclude-vcs">        <default>true</default></key>
+    <key type="b" name="select-file-types">  <default>false</default></key>
+
+  </schema>
+</schemalist>

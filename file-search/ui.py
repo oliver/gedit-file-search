@@ -23,7 +23,7 @@
 #
 # Helper classes:
 # - RecentList (holds list of recently-selected search directories, for search dialog)
-# - SearchQuery (holds all parameters for a search; also, can read and write these from/to GConf)
+# - SearchQuery (holds all parameters for a search; also, can read and write these from/to GSettings)
 #
 
 import os
@@ -32,7 +32,7 @@ import dircache
 from gettext import gettext, translation
 import locale
 
-from gi.repository import Gedit, GObject, Gtk, Gdk, GConf, Gio, Pango
+from gi.repository import Gedit, GObject, Gtk, Gdk, Gio, Pango
 
 # translation
 APP_NAME = 'file-search'
@@ -58,7 +58,7 @@ ui_str = """<ui>
 </ui>
 """
 
-gconfBase = '/apps/gedit-2/plugins/file-search'
+GSETTINGS_SCHEMA_NAME = "io.github.oliver.gedit-file-search"
 
 
 class RecentList:
@@ -67,21 +67,19 @@ class RecentList:
     """
     def __init__ (self, gclient, confKey, maxEntries = 10):
         self.gclient = gclient
-        self.confKey = gconfBase + "/" + confKey
-        self.store = Gtk.ListStore(str, bool, bool) # text, save-to-gconf, is-separator
+        self.confKey = confKey
+        self.store = Gtk.ListStore(str, bool, bool) # text, save-to-gsettings, is-separator
         self._maxEntries = maxEntries
         self._haveSeparator = False
 
-        rawValue = self.gclient.get(self.confKey)
-        valueList = rawValue.get_list()
-        valueList.reverse()
-        for gconfValue in valueList:
-            e = gconfValue.get_string()
+        elementList = self.gclient.get_strv(self.confKey)
+        elementList.reverse()
+        for e in elementList:
             if e and len(e) > 0:
                 decodedName = urllib.unquote(e)
                 self.add(decodedName, False)
 
-        # TODO: also listen for gconf changes, and reload the list then
+        # TODO: also listen for gsettings changes, and reload the list then
 
     def add (self, entrytext, doStore=True):
         "Add an entry that was just used."
@@ -109,13 +107,7 @@ class RecentList:
                 assert(type(e[0]) == str)
                 encodedName = urllib.quote(e[0])
                 entries.append(encodedName)
-            self._setGconfStringList(self.confKey, entries)
-
-    def _setGconfStringList (self, path, valueList):
-        "workaround for bgo#681433: GConf.Client.set_list() is not available in Python"
-        import subprocess
-        cmd = [ "gconftool-2", "--type", "list", "--list-type", "string", "--set", path, "[%s]" % ",".join(valueList) ]
-        subprocess.call(cmd)
+            self.gclient.set_strv(self.confKey, entries)
 
 
     def addTemp (self, entrytext):
@@ -166,55 +158,24 @@ class SearchQuery:
         return self.fileTypeString.split()
 
     def loadDefaults (self, gclient):
-        try:
-            self.caseSensitive = gclient.get_without_default(gconfBase+"/case_sensitive").get_bool()
-        except:
-            self.caseSensitive = True
-
-        try:
-            self.wholeWord = gclient.get_without_default(gconfBase+"/whole_word").get_bool()
-        except:
-            self.wholeWord = False
-
-        try:
-            self.isRegExp = gclient.get_without_default(gconfBase+"/is_reg_exp").get_bool()
-        except:
-            self.isRegExp = False
-
-        try:
-            self.includeSubfolders = gclient.get_without_default(gconfBase+"/include_subfolders").get_bool()
-        except:
-            self.includeSubfolders = True
-
-        try:
-            self.excludeHidden = gclient.get_without_default(gconfBase+"/exclude_hidden").get_bool()
-        except:
-            self.excludeHidden = True
-
-        try:
-            self.excludeBackup = gclient.get_without_default(gconfBase+"/exclude_backup").get_bool()
-        except:
-            self.excludeBackup = True
-
-        try:
-            self.excludeVCS = gclient.get_without_default(gconfBase+"/exclude_vcs").get_bool()
-        except:
-            self.excludeVCS = True
-
-        try:
-            self.selectFileTypes = gclient.get_without_default(gconfBase+"/select_file_types").get_bool()
-        except:
-            self.selectFileTypes = False
+        self.caseSensitive     = gclient.get_boolean("case-sensitive")
+        self.wholeWord         = gclient.get_boolean("whole-word")
+        self.isRegExp          = gclient.get_boolean("is-reg-exp")
+        self.includeSubfolders = gclient.get_boolean("include-subfolders")
+        self.excludeHidden     = gclient.get_boolean("exclude-hidden")
+        self.excludeBackup     = gclient.get_boolean("exclude-backup")
+        self.excludeVCS        = gclient.get_boolean("exclude-vcs")
+        self.selectFileTypes   = gclient.get_boolean("select-file-types")
 
     def storeDefaults (self, gclient):
-        gclient.set_bool(gconfBase+"/case_sensitive", self.caseSensitive)
-        gclient.set_bool(gconfBase+"/whole_word", self.wholeWord)
-        gclient.set_bool(gconfBase+"/is_reg_exp", self.isRegExp)
-        gclient.set_bool(gconfBase+"/include_subfolders", self.includeSubfolders)
-        gclient.set_bool(gconfBase+"/exclude_hidden", self.excludeHidden)
-        gclient.set_bool(gconfBase+"/exclude_backup", self.excludeBackup)
-        gclient.set_bool(gconfBase+"/exclude_vcs", self.excludeVCS)
-        gclient.set_bool(gconfBase+"/select_file_types", self.selectFileTypes)
+        gclient.set_boolean("case-sensitive", self.caseSensitive)
+        gclient.set_boolean("whole-word", self.wholeWord)
+        gclient.set_boolean("is-reg-exp", self.isRegExp)
+        gclient.set_boolean("include-subfolders", self.includeSubfolders)
+        gclient.set_boolean("exclude-hidden", self.excludeHidden)
+        gclient.set_boolean("exclude-backup", self.excludeBackup)
+        gclient.set_boolean("exclude-vcs", self.excludeVCS)
+        gclient.set_boolean("select-file-types", self.selectFileTypes)
 
 
 class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
@@ -232,12 +193,11 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._fileBrowserContacted = False
         self.searchers = [] # list of existing SearchProcess instances
 
-        self.gclient = GConf.Client.get_default()
-        self.gclient.add_dir(gconfBase, GConf.ClientPreloadType.PRELOAD_NONE)
+        self.gclient = self.initGSettings()
 
-        self._lastSearchTerms = RecentList(self.gclient, "recent_search_terms")
-        self._lastDirs = RecentList(self.gclient, "recent_dirs")
-        self._lastTypes = RecentList(self.gclient, "recent_types")
+        self._lastSearchTerms = RecentList(self.gclient, "recent-search-terms")
+        self._lastDirs = RecentList(self.gclient, "recent-dirs")
+        self._lastTypes = RecentList(self.gclient, "recent-types")
 
         if self._lastTypes.isEmpty():
             # add some default file types
@@ -274,6 +234,12 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         if not(self._fileBrowserContacted):
             self._fileBrowserContacted = True
             self._addFileBrowserMenuItem()
+
+    def initGSettings(self):
+        schemaSource = Gio.SettingsSchemaSource.new_from_directory(
+            os.path.dirname(__file__), Gio.SettingsSchemaSource.get_default(), False)
+        schema = schemaSource.lookup(GSETTINGS_SCHEMA_NAME, False)
+        return Gio.Settings.new_full(schema, None, None)
 
     def onTabAdded (self, tab):
         handlerIds = []
@@ -540,7 +506,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
             self.builder.get_object('cboFileTypeEntry').set_text(typeListString)
 
 
-        # get default values for other controls from GConf:
+        # get default values for other controls from GSettings:
         query = SearchQuery()
         query.loadDefaults(self.gclient)
         self.builder.get_object('cbCaseSensitive').set_active(query.caseSensitive)
