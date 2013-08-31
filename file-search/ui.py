@@ -100,9 +100,11 @@ class RecentList:
 
         self.store.prepend([entrytext, True, False])
 
-        if len(self.store) > self._maxEntries:
-            it = self.store.get_iter(self.store[-1].path)
-            self.store.remove(it)
+        # remove excess elements from end of list
+        for i in xrange(len(self.store)-1, self._maxEntries-1, -1):
+            if self.store[i][1] and not(self.store[i][2]): # only remove entries which have do-store set and is-separator unset
+                it = self.store.get_iter(self.store[i].path)
+                self.store.remove(it)
 
         if doStore:
             entries = []
