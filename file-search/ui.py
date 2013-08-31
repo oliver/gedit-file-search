@@ -689,6 +689,9 @@ class FileSearcher:
             linetext = linetext[:1000]
             addTruncationMarker = True
 
+        assert(type(linetext) == unicode)
+        linetext = linetext.replace('\0', u'\uFFFD') # Pango can't handle NULL bytes in markup
+
         if not(self.query.isRegExp):
             (linetext, numLineMatches) = escapeAndHighlight(linetext, self.query.text, self.query.caseSensitive, self.query.wholeWord)
             self.numMatches += numLineMatches
