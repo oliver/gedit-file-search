@@ -140,24 +140,10 @@ class SearchQuery:
     """
     Contains all parameters for a single search action.
     """
-    def __init__ (self):
+    def __init__ (self, gclient):
         self.text = ''
         self.directory = ''
-        self.caseSensitive = True
-        self.wholeWord = False
-        self.isRegExp = False
-        self.includeSubfolders = True
-        self.excludeHidden = True
-        self.excludeBackup = True
-        self.excludeVCS = True
-        self.selectFileTypes = False
         self.fileTypeString = ''
-
-    def parseFileTypeString (self):
-        "Returns a list with the separate file globs from fileTypeString"
-        return self.fileTypeString.split()
-
-    def loadDefaults (self, gclient):
         self.caseSensitive     = gclient.get_boolean("case-sensitive")
         self.wholeWord         = gclient.get_boolean("whole-word")
         self.isRegExp          = gclient.get_boolean("is-reg-exp")
@@ -176,6 +162,10 @@ class SearchQuery:
         gclient.set_boolean("exclude-backup", self.excludeBackup)
         gclient.set_boolean("exclude-vcs", self.excludeVCS)
         gclient.set_boolean("select-file-types", self.selectFileTypes)
+
+    def parseFileTypeString (self):
+        "Returns a list with the separate file globs from fileTypeString"
+        return self.fileTypeString.split()
 
 
 class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
@@ -507,8 +497,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
 
 
         # get default values for other controls from GSettings:
-        query = SearchQuery()
-        query.loadDefaults(self.gclient)
+        query = SearchQuery(self.gclient)
         self.builder.get_object('cbCaseSensitive').set_active(query.caseSensitive)
         self.builder.get_object('cbRegExp').set_active(query.isRegExp)
         self.builder.get_object('cbWholeWord').set_active(query.wholeWord)
