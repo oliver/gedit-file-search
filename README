@@ -1,7 +1,21 @@
 File Search Plugin for Gedit
 =============================
-This is a search plugin for Gedit to search for a text inside a directory.
+This is a search plugin for Gedit 2 to search for a text inside a directory.
 
 The plugin should work with Gedit 2.16 and higher (that would be for example Ubuntu Edgy 6.10, or Debian Etch, or RedHat Enterprise Linux 5, or anything newer than that).
+Note that this plugin does not support Gedit 3 - **there is another plugin version available which does support Gedit 3**.
 
 Note for users of RHEL and Scientific Linux: make sure the "gnome-python2-gconf" package is installed; otherwise the plugin cannot be enabled.
+
+Installation
+-------------
+
+* [download the plugin] [1]
+* unpack the tgz file
+* copy the contents of the gedit-file-search folder to ~/.gnome2/gedit/plugins/ (create that folder if necessary)
+* start Gedit, go to Edit -> Preferences -> Plugins, and enable "File Search"
+
+  [1]: http://cloud.github.com/downloads/oliver/gedit-file-search/gedit-file-search-0.5.tgz
+
+
+Use Search -> Find in files, or right-click in a document and select Search files... to open the search dialog.
