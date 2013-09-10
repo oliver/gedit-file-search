@@ -4,6 +4,7 @@ Making a New Release
 - review which changes have been made in this cycle (eg. since last release tag)
   - based on this (among other things), decide whether a new release is in order
 - ensure all these changes are actually checked in and published to Github
+  - or stash any local changes
 
 - ensure repository is in clean state: no local changes, and at same commit as Github repo 
   - this is esp. important for creating tgz later
@@ -16,18 +17,31 @@ Making a New Release
   - list noteworthy changes (see above):
     - changes that are directly useful to the user
     - changes that the user should be aware of (risky, requires adaption etc.)
-  - include link to GH page (http://oliver.github.com/gedit-file-search/) and to new tgz
+  - any release announcement should include link to GH page (http://oliver.github.io/gedit-file-search/) and direct download link to new tgz
   - note URL that will be given to blog entry once published
 
-- create tgz: "make tgz"
-- rename tgz to correct name (eg. "gedit-file-search-0.2.tgz")
-- test that tgz basically works on all available platforms
+- create Release Candidate tgz: "make tgz"
+- rename tgz to RC name (eg. "gedit-file-search-0.2rc1.tgz")
+- set RC tag in Git
+  - eg. "git tag GEDIT_FILE_SEARCH_V0.2rc1"
+- "git push --tags origin master"
+- edit automatically-created release page on Github (at https://github.com/oliver/gedit-file-search/releases)
+  - use "Gedit File Search Plugin 0.2rc1" as title
+  - attach RC tgz file to release (wth drag/drop)
+  - mark as Pre-Release
+- publish RC release
+- download RC tgz from Github and test that it basically works on all available platforms
+  - as long as any problems are found, fix them and make another RC
 
-- set tag in Git
+- set final tag in Git
   - eg. "git tag GEDIT_FILE_SEARCH_V0.2"
 - "git push --tags origin master"
 
-- upload tgz to github.com, at https://github.com/oliver/gedit-file-search/downloads
+- rename last RC tgz to final name (eg. "gedit-file-search-0.2.tgz")
+- edit automatically-created release page on Github (for final tag)
+  - use "Gedit File Search Plugin 0.2" as title
+  - attach final tgz file to release (wth drag/drop)
+  - publish release
 
 - in gedit-search/ directory, switch to "gh-pages" branch
   - in a clean checkout: "git checkout gh-pages"
@@ -39,5 +53,5 @@ Making a New Release
 - "git commit"
 - "git push origin gh-pages"
 
-- review and publish release announcement
-
+- review release announcement, update link to final tgz, and publish
+- test that links in release announcement and on http://oliver.github.io/gedit-file-search/ are working
