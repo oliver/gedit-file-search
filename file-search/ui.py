@@ -586,7 +586,8 @@ class FileSearcher:
 
         #searchSummary = "<span size=\"smaller\" foreground=\"#585858\">searching for </span><span size=\"smaller\"><i>%s</i></span><span size=\"smaller\" foreground=\"#585858\"> in </span><span size=\"smaller\"><i>%s</i></span>" % (query.text, query.directory)
         searchSummary = "<span size=\"smaller\">" + _("searching for <i>%(keywords)s</i> in <i>%(folder)s</i>") % {'keywords': escapeMarkup(query.text), 'folder': escapeMarkup(GObject.filename_display_name(query.directory))} + "</span>"
-        self.treeStore.append(None, [searchSummary, '', 0])
+        it = self.treeStore.append(None, None)
+        self.treeStore.set(it, 0, searchSummary, 1, "", 2, 0)
 
         self.searchProcess = SearchProcess(query, self)
         self._updateSummary()
@@ -627,7 +628,8 @@ class FileSearcher:
             line = "<i>" + ngettext("found %d match", "found %d matches", self.numMatches) % self.numMatches
             line += ngettext(" (%d line)", " (%d lines)", self.numLines) % self.numLines
             line += ngettext(" in %d file", " in %d files", len(self.files)) % len(self.files) + "</i>"
-        self.treeStore.append(None, [line, '', 0])
+        it = self.treeStore.append(None, None)
+        self.treeStore.set(it, 0, line, 1, "", 2, 0)
 
     def _updateSummary (self):
         summary = ngettext("<b>%d</b> match", "<b>%d</b> matches", self.numMatches) % self.numMatches
@@ -682,7 +684,8 @@ class FileSearcher:
             directory = os.path.normpath(directory) + "/"
 
         line = "%s<b>%s</b>" % (escapeMarkup(directory), escapeMarkup(file))
-        it = self.treeStore.append(None, [line, filename, 0])
+        it = self.treeStore.append(None, None)
+        self.treeStore.set(it, 0, line, 1, filename, 2, 0)
         return it
 
     def _addResultLine (self, it, lineno, linetext):
@@ -705,7 +708,8 @@ class FileSearcher:
         if addTruncationMarker:
             linetext += "</span><span size=\"smaller\"><i> [...]</i>"
         line = "<b>%d:</b> <span foreground=\"blue\">%s</span>" % (lineno, linetext)
-        self.treeStore.append(it, [line, None, lineno])
+        newIt = self.treeStore.append(it, None)
+        self.treeStore.set(newIt, 0, line, 2, lineno)
 
     def on_row_activated (self, widget, path, col):
         selectedIter = self.treeStore.get_iter(path)
@@ -739,6 +743,7 @@ class FileSearcher:
         resultContainer = self.builder.get_object('hbxFileSearchResult')
         resultContainer.set_data("filesearcher", None)
         panel.remove_item(resultContainer)
+        self.treeStore.clear()
         self.treeStore = None
         self.treeView = None
         self._window = None
