@@ -67,13 +67,80 @@ class ResultPanel:
         self._createResultPanel()
         self._updateSummary()
 
-        #searchSummary = "<span size=\"smaller\" foreground=\"#585858\">searching for </span><span size=\"smaller\"><i>%s</i></span><span size=\"smaller\" foreground=\"#585858\"> in </span><span size=\"smaller\"><i>%s</i></span>" % (query.text, query.directory)
-        searchSummary = "<span size=\"smaller\">" + _("searching for <i>%(keywords)s</i> in <i>%(folder)s</i>") % {'keywords': escapeMarkup(query.text), 'folder': escapeMarkup(GObject.filename_display_name(query.directory))} + "</span>"
+        searchSummary = "<span size=\"smaller\">" + \
+            _("searching for <i>%(keywords)s</i> in <i>%(folder)s</i>") % \
+                {
+                    'keywords': escapeMarkup(query.text),
+                    'folder': escapeMarkup(GObject.filename_display_name(query.directory))
+                } + \
+            "</span>"
         it = self.treeStore.append(None, None)
         self.treeStore.set(it, 0, searchSummary, 1, "", 2, 0)
 
         self.searchProcess = SearchProcess(query, self)
         self._updateSummary()
+
+    def _createResultPanel (self):
+        gladeFile = os.path.join(os.path.dirname(__file__), "file-search.ui")
+        self.builder = Gtk.Builder()
+        self.builder.set_translation_domain(APP_NAME)
+        self.builder.add_objects_from_file(gladeFile, ['hbxFileSearchResult'])
+        self.builder.connect_signals(self)
+        resultContainer = self.builder.get_object('hbxFileSearchResult')
+
+        resultContainer.set_data("resultpanel", self)
+
+        tabTitle = self.query.text
+        if len(tabTitle) > 30:
+            tabTitle = tabTitle[:30] + u"\u2026" # ellipsis character 
+        panel = self._window.get_bottom_panel()
+        panel.add_item_with_stock_icon(resultContainer, str(self), tabTitle, "gtk-find")
+        panel.activate_item(resultContainer)
+
+        editBtn = self.builder.get_object("btnModifyFileSearch")
+        editBtn.set_label("gtk-stop")
+
+        panel.set_property("visible", True)
+
+
+        self.treeStore = Gtk.TreeStore(str, str, int) # markup, file name, line number
+        self.treeView = self.builder.get_object('tvFileSearchResult')
+        self.treeView.set_model(self.treeStore)
+
+        self.treeView.set_search_equal_func(resultSearchCb, None)
+
+        tc = Gtk.TreeViewColumn("File", Gtk.CellRendererText(), markup=0)
+        self.treeView.append_column(tc)
+
+    def destroy (self):
+        if self.searchProcess:
+            self.searchProcess.destroy()
+            self.searchProcess = None
+
+        panel = self._window.get_bottom_panel()
+        resultContainer = self.builder.get_object('hbxFileSearchResult')
+        resultContainer.set_data("resultpanel", None)
+        panel.remove_item(resultContainer)
+        self.treeStore.clear()
+        self.treeStore = None
+        self.treeView = None
+        self._window = None
+        self.files = {}
+        self.builder = None
+        self.pluginHelper.unregisterSearcher(self)
+
+    def on_btnClose_clicked (self, button):
+        self.destroy()
+
+    def on_btnModify_clicked (self, button):
+        if not(self.searchProcess):
+            # TODO: edit search params
+            pass
+        else:
+            # cancel search
+            self.searchProcess.cancel()
+            self.wasCancelled = True
+
 
     def handleResult (self, file, lineno, linetext):
         expandRow = False
@@ -120,39 +187,6 @@ class ResultPanel:
         if self.searchProcess:
             summary += u"\u2026" # ellipsis character
         self.builder.get_object("lblNumMatches").set_label(summary)
-
-
-    def _createResultPanel (self):
-        gladeFile = os.path.join(os.path.dirname(__file__), "file-search.ui")
-        self.builder = Gtk.Builder()
-        self.builder.set_translation_domain(APP_NAME)
-        self.builder.add_objects_from_file(gladeFile, ['hbxFileSearchResult'])
-        self.builder.connect_signals(self)
-        resultContainer = self.builder.get_object('hbxFileSearchResult')
-
-        resultContainer.set_data("resultpanel", self)
-
-        tabTitle = self.query.text
-        if len(tabTitle) > 30:
-            tabTitle = tabTitle[:30] + u"\u2026" # ellipsis character 
-        panel = self._window.get_bottom_panel()
-        panel.add_item_with_stock_icon(resultContainer, str(self), tabTitle, "gtk-find")
-        panel.activate_item(resultContainer)
-
-        editBtn = self.builder.get_object("btnModifyFileSearch")
-        editBtn.set_label("gtk-stop")
-
-        panel.set_property("visible", True)
-
-
-        self.treeStore = Gtk.TreeStore(str, str, int)
-        self.treeView = self.builder.get_object('tvFileSearchResult')
-        self.treeView.set_model(self.treeStore)
-
-        self.treeView.set_search_equal_func(resultSearchCb, None)
-
-        tc = Gtk.TreeViewColumn("File", Gtk.CellRendererText(), markup=0)
-        self.treeView.append_column(tc)
 
     def _addResultFile (self, filename):
         dispFilename = filename
@@ -214,34 +248,19 @@ class ResultPanel:
         # use an Idle handler so the document has time to load:  
         GObject.idle_add(self.onDocumentOpenedCb)
 
-    def on_btnClose_clicked (self, button):
-        self.destroy()
+    def onDocumentOpenedCb (self):
+        self._window.get_active_view().grab_focus()
+        currDoc = self._window.get_active_document()
 
-    def destroy (self):
-        if self.searchProcess:
-            self.searchProcess.destroy()
-            self.searchProcess = None
+        # highlight matches in opened document:
+        flags = 0
+        if self.query.caseSensitive:
+            flags |= 4
+        if self.query.wholeWord:
+            flags |= 2
 
-        panel = self._window.get_bottom_panel()
-        resultContainer = self.builder.get_object('hbxFileSearchResult')
-        resultContainer.set_data("resultpanel", None)
-        panel.remove_item(resultContainer)
-        self.treeStore.clear()
-        self.treeStore = None
-        self.treeView = None
-        self._window = None
-        self.files = {}
-        self.builder = None
-        self.pluginHelper.unregisterSearcher(self)
-
-    def on_btnModify_clicked (self, button):
-        if not(self.searchProcess):
-            # edit search params
-            pass
-        else:
-            # cancel search
-            self.searchProcess.cancel()
-            self.wasCancelled = True
+        currDoc.set_search_text(self.query.text, flags)
+        return False
 
     def on_tvFileSearchResult_button_press_event (self, treeview, event):
         if event.button == 3:
@@ -292,20 +311,6 @@ class ResultPanel:
     def onCollapseAllActivate (self, treeview):
         self._collapseAll = True
         treeview.collapse_all()
-
-    def onDocumentOpenedCb (self):
-        self._window.get_active_view().grab_focus()
-        currDoc = self._window.get_active_document()
-
-        # highlight matches in opened document:
-        flags = 0
-        if self.query.caseSensitive:
-            flags |= 4
-        if self.query.wholeWord:
-            flags |= 2
-
-        currDoc.set_search_text(self.query.text, flags)
-        return False
 
 
 def resultSearchCb (model, column, key, it, userdata):
