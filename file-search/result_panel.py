@@ -18,7 +18,7 @@
 
 #
 # Main classes:
-# - FileSearcher (is instantiated by FileSearchWindowHelper for every search, and holds the result tab)
+# - ResultPanel (is instantiated by FileSearchWindowHelper for every search, and holds the result tab)
 #
 
 
@@ -43,14 +43,14 @@ from searcher import SearchProcess, buildQueryRE
 
 
 
-class FileSearcher:
+class ResultPanel:
     """
     Gets a search query (and related info) and then handles everything related
     to that single file search:
     - creating a result window
     - starting grep (through SearchProcess)
     - displaying matches
-    A FileSearcher object lives until its result panel is closed.
+    A ResultPanel object lives until its result panel is closed.
     """
     def __init__ (self, window, pluginHelper, query):
         self._window = window
@@ -130,7 +130,7 @@ class FileSearcher:
         self.builder.connect_signals(self)
         resultContainer = self.builder.get_object('hbxFileSearchResult')
 
-        resultContainer.set_data("filesearcher", self)
+        resultContainer.set_data("resultpanel", self)
 
         tabTitle = self.query.text
         if len(tabTitle) > 30:
@@ -224,7 +224,7 @@ class FileSearcher:
 
         panel = self._window.get_bottom_panel()
         resultContainer = self.builder.get_object('hbxFileSearchResult')
-        resultContainer.set_data("filesearcher", None)
+        resultContainer.set_data("resultpanel", None)
         panel.remove_item(resultContainer)
         self.treeStore.clear()
         self.treeStore = None
@@ -253,7 +253,7 @@ class FileSearcher:
                 menu = Gtk.Menu()
                 self.contextMenu = menu # need to keep a reference to the menu
                 mi = Gtk.ImageMenuItem.new_from_stock("gtk-copy", None)
-                mi.connect_object("activate", FileSearcher.onCopyActivate, self, treeview, path[0])
+                mi.connect_object("activate", ResultPanel.onCopyActivate, self, treeview, path[0])
                 mi.show()
                 menu.append(mi)
 
@@ -262,12 +262,12 @@ class FileSearcher:
                 menu.append(mi)
 
                 mi = Gtk.MenuItem(_("Expand All"))
-                mi.connect_object("activate", FileSearcher.onExpandAllActivate, self, treeview)
+                mi.connect_object("activate", ResultPanel.onExpandAllActivate, self, treeview)
                 mi.show()
                 menu.append(mi)
 
                 mi = Gtk.MenuItem(_("Collapse All"))
-                mi.connect_object("activate", FileSearcher.onCollapseAllActivate, self, treeview)
+                mi.connect_object("activate", ResultPanel.onCollapseAllActivate, self, treeview)
                 mi.show()
                 menu.append(mi)
 

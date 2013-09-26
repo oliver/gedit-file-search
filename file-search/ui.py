@@ -43,7 +43,7 @@ ngettext = t.ungettext
 # set gettext domain for GtkBuilder
 locale.bindtextdomain(APP_NAME, LOCALE_PATH)
 
-from result_panel import FileSearcher
+from result_panel import ResultPanel
 
 
 ui_str = """<ui>
@@ -557,5 +557,5 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         query.storeDefaults(self.gclient)
         self._lastDir = searchDir
 
-        searcher = FileSearcher(self._window, self, query)
+        searcher = ResultPanel(self._window, self, query)
 
