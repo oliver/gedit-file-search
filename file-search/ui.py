@@ -79,7 +79,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._window.connect_object("tab-added", FileSearchWindowHelper.onTabAdded, self)
         self._window.connect_object("tab-removed", FileSearchWindowHelper.onTabRemoved, self)
 
-        self._searchDialog = SearchDialog(self, self._window)
+        self._searchDialog = None
 
     def do_deactivate(self):
         #print "file-search: plugin stopped for", self._window
@@ -161,7 +161,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         menu.prepend(mi)
 
     def onMenuItemActivate (self, searchText):
-        self._searchDialog.open(searchText)
+        self._openSearchDialog(searchText)
 
     def _addFileBrowserMenuItem (self):
         fbAction = Gtk.Action('search-files-plugin', _("Search files..."), _("Search in all files in a directory"), None)
@@ -191,7 +191,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
             selectedFileObj = msg.location
         selectedDir = selectedFileObj.get_path()
 
-        self._searchDialog.open(searchDirectory=selectedDir)
+        self._openSearchDialog(searchDirectory=selectedDir)
 
     def registerSearcher (self, searcher):
         self.searchers.append(searcher)
@@ -216,5 +216,10 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._ui_id = manager.add_ui_from_string(ui_str)
 
     def on_search_files_activate(self, action):
-        self._searchDialog.open()
+        self._openSearchDialog()
+
+    def _openSearchDialog (self, searchText = None, searchDirectory = None):
+        if not(self._searchDialog):
+            self._searchDialog = SearchDialog(self, self._window)
+        self._searchDialog.open(searchText, searchDirectory)
 
