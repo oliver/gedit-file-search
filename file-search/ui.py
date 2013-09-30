@@ -85,12 +85,6 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         #print "file-search: plugin stopped for", self._window
         self.destroy()
 
-    def destroy (self):
-        #print "have to destroy %d existing searchers" % len(self.searchers)
-        for s in self.searchers[:]:
-            s.destroy()
-        self._window = None
-
     def do_update_state(self):
         # Called whenever the window has been updated (active tab
         # changed, etc.)
@@ -98,6 +92,42 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         if not(self._fileBrowserContacted):
             self._fileBrowserContacted = True
             self._addFileBrowserMenuItem()
+
+    def registerSearcher (self, searcher):
+        self.searchers.append(searcher)
+
+    def unregisterSearcher (self, searcher):
+        self.searchers.remove(searcher)
+
+    def destroy (self):
+        #print "have to destroy %d existing searchers" % len(self.searchers)
+        for s in self.searchers[:]:
+            s.destroy()
+        self._window = None
+
+    def _insert_menu(self):
+        # Get the GtkUIManager
+        manager = self._window.get_ui_manager()
+
+        # Create a new action group
+        self._action_group = Gtk.ActionGroup("FileSearchPluginActions")
+        self._action_group.add_actions([("FileSearch", "gtk-find", _("Search files..."),
+                                         "<control><shift>F", _("Search in all files in a directory"),
+                                         self.on_search_files_activate)])
+
+        # Insert the action group
+        manager.insert_action_group(self._action_group, -1)
+
+        # Merge the UI
+        self._ui_id = manager.add_ui_from_string(ui_str)
+
+    def on_search_files_activate(self, action):
+        self._openSearchDialog()
+
+    def _openSearchDialog (self, searchText = None, searchDirectory = None):
+        if not(self._searchDialog):
+            self._searchDialog = SearchDialog(self, self._window)
+        self._searchDialog.show(searchText, searchDirectory)
 
     def onTabAdded (self, tab):
         handlerIds = []
@@ -192,34 +222,4 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         selectedDir = selectedFileObj.get_path()
 
         self._openSearchDialog(searchDirectory=selectedDir)
-
-    def registerSearcher (self, searcher):
-        self.searchers.append(searcher)
-
-    def unregisterSearcher (self, searcher):
-        self.searchers.remove(searcher)
-
-    def _insert_menu(self):
-        # Get the GtkUIManager
-        manager = self._window.get_ui_manager()
-
-        # Create a new action group
-        self._action_group = Gtk.ActionGroup("FileSearchPluginActions")
-        self._action_group.add_actions([("FileSearch", "gtk-find", _("Search files..."),
-                                         "<control><shift>F", _("Search in all files in a directory"),
-                                         self.on_search_files_activate)])
-
-        # Insert the action group
-        manager.insert_action_group(self._action_group, -1)
-
-        # Merge the UI
-        self._ui_id = manager.add_ui_from_string(ui_str)
-
-    def on_search_files_activate(self, action):
-        self._openSearchDialog()
-
-    def _openSearchDialog (self, searchText = None, searchDirectory = None):
-        if not(self._searchDialog):
-            self._searchDialog = SearchDialog(self, self._window)
-        self._searchDialog.show(searchText, searchDirectory)
 
