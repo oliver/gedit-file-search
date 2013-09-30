@@ -30,7 +30,7 @@ import urllib
 import dircache
 from gi.repository import Gtk, Gdk, Gio, Pango
 
-from plugin_common import _, ngettext, APP_NAME
+from plugin_common import _, ngettext, APP_NAME, resourceDir, gladeFile
 from result_panel import ResultPanel
 
 
@@ -169,14 +169,13 @@ class SearchDialog:
 
     def initGSettings(self):
         schemaSource = Gio.SettingsSchemaSource.new_from_directory(
-            os.path.dirname(__file__), Gio.SettingsSchemaSource.get_default(), False)
+            resourceDir, Gio.SettingsSchemaSource.get_default(), False)
         schema = schemaSource.lookup(GSETTINGS_SCHEMA_NAME, False)
         return Gio.Settings.new_full(schema, None, None)
 
     def show(self, searchText=None, searchDirectory=None):
         "Displays the search dialog"
 
-        gladeFile = os.path.join(os.path.dirname(__file__), "file-search.ui")
         self.builder = Gtk.Builder()
         self.builder.set_translation_domain(APP_NAME)
         self.builder.add_objects_from_file(gladeFile, ['searchDialog'])

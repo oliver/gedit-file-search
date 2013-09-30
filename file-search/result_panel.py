@@ -26,7 +26,7 @@ import os
 import urllib
 from gi.repository import Gedit, GObject, Gtk, Gdk, Gio, Pango
 
-from plugin_common import _, ngettext, APP_NAME
+from plugin_common import _, ngettext, APP_NAME, gladeFile
 from searcher import SearchProcess, buildQueryRE
 
 
@@ -69,7 +69,6 @@ class ResultPanel:
         self._updateSummary()
 
     def _createResultPanel (self):
-        gladeFile = os.path.join(os.path.dirname(__file__), "file-search.ui")
         self.builder = Gtk.Builder()
         self.builder.set_translation_domain(APP_NAME)
         self.builder.add_objects_from_file(gladeFile, ['hbxFileSearchResult'])

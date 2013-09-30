@@ -20,10 +20,12 @@ import os
 from gettext import gettext, translation
 import locale
 
+resourceDir = os.path.dirname(__file__)
+gladeFile = os.path.join(resourceDir, "file-search.ui")
 
 # translation
 APP_NAME = 'file-search'
-LOCALE_PATH = os.path.dirname(__file__) + '/locale'
+LOCALE_PATH = os.path.join(resourceDir, 'locale')
 t = translation(APP_NAME, LOCALE_PATH, fallback=True)
 _ = t.ugettext
 ngettext = t.ungettext
