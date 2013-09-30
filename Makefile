@@ -7,6 +7,8 @@ DIST_FILES= \
 	$(PLUGIN_SUBFOLDER)/__init__.py \
 	$(PLUGIN_SUBFOLDER)/searcher.py \
 	$(PLUGIN_SUBFOLDER)/plugin.py \
+	$(PLUGIN_SUBFOLDER)/search_dialog.py \
+	$(PLUGIN_SUBFOLDER)/result_panel.py \
 	$(PLUGIN_SUBFOLDER)/gschemas.compiled \
 	file-search.plugin \
 	README
@@ -45,7 +47,7 @@ po: pot
 
 pot: clean-pot
 	xgettext -j -o $(LANG_FOLDER)/file-search.pot -L Glade $(PLUGIN_SUBFOLDER)/file-search.ui
-	xgettext -j -o $(LANG_FOLDER)/file-search.pot -L Python $(PLUGIN_SUBFOLDER)/plugin.py
+	xgettext -j -o $(LANG_FOLDER)/file-search.pot -L Python $(PLUGIN_SUBFOLDER)/plugin.py $(PLUGIN_SUBFOLDER)/search_dialog.py $(PLUGIN_SUBFOLDER)/result_panel.py
 
 $(PLUGIN_SUBFOLDER)/gschemas.compiled: $(PLUGIN_SUBFOLDER)/*.gschema.xml
 	glib-compile-schemas $(PLUGIN_SUBFOLDER)
