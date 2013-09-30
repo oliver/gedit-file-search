@@ -24,21 +24,9 @@
 
 import os
 import urllib
-from gettext import gettext, translation
-import locale
-
 from gi.repository import Gedit, GObject, Gtk, Gdk, Gio, Pango
 
-# translation
-APP_NAME = 'file-search'
-LOCALE_PATH = os.path.dirname(__file__) + '/locale'
-t = translation(APP_NAME, LOCALE_PATH, fallback=True)
-_ = t.ugettext
-ngettext = t.ungettext
-
-# set gettext domain for GtkBuilder
-locale.bindtextdomain(APP_NAME, LOCALE_PATH)
-
+from plugin_common import _, ngettext, APP_NAME
 from searcher import SearchProcess, buildQueryRE
 
 
