@@ -185,7 +185,9 @@ class SearchDialog:
         schema = schemaSource.lookup(GSETTINGS_SCHEMA_NAME, False)
         return Gio.Settings.new_full(schema, None, None)
 
-    def open (self, searchText = None, searchDirectory = None):
+    def show(self, searchText=None, searchDirectory=None):
+        "Displays the search dialog"
+
         gladeFile = os.path.join(os.path.dirname(__file__), "file-search.ui")
         self.builder = Gtk.Builder()
         self.builder.set_translation_domain(APP_NAME)
@@ -292,6 +294,10 @@ class SearchDialog:
         self.builder.get_object('cbSelectFileTypes').set_active(query.selectFileTypes)
         self.builder.get_object('cboFileTypeList').set_sensitive( query.selectFileTypes )
 
+        #
+        # actually display search dialog
+        #
+
         inputValid = False
         while not(inputValid):
             # display and run the search dialog (in a loop until all fields are correctly entered)
@@ -318,6 +324,10 @@ class SearchDialog:
             else:
                 inputValid = True
 
+        #
+        # handle dialog input
+        #
+
         query.text = searchText
         query.directory = searchDir
         query.caseSensitive = self.builder.get_object('cbCaseSensitive').get_active()
@@ -340,7 +350,8 @@ class SearchDialog:
         query.storeDefaults(self.gclient)
         self._lastDir = searchDir
 
-        searcher = ResultPanel(self._window, self._pluginHelper, query)
+        # the ResultPanel object will also start the actual search:
+        ResultPanel(self._window, self._pluginHelper, query)
 
     def on_cboSearchTextEntry_changed (self, textEntry):
         """

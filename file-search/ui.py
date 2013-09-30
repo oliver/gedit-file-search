@@ -221,5 +221,5 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
     def _openSearchDialog (self, searchText = None, searchDirectory = None):
         if not(self._searchDialog):
             self._searchDialog = SearchDialog(self, self._window)
-        self._searchDialog.open(searchText, searchDirectory)
+        self._searchDialog.show(searchText, searchDirectory)
 
