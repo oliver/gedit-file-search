@@ -29,7 +29,7 @@ except:
     from urllib import quote
 from gi.repository import Gedit, GObject, Gtk, Gdk, Gio, Pango
 
-from .plugin_common import _, ngettext, APP_NAME, gladeFile
+from .plugin_common import _, ngettext, APP_NAME, gladeFile, isUnicode
 from .searcher import SearchProcess, buildQueryRE
 
 
@@ -201,7 +201,7 @@ class ResultPanel:
             linetext = linetext[:1000]
             addTruncationMarker = True
 
-        assert(type(linetext) == unicode)
+        assert(isUnicode(linetext))
         linetext = linetext.replace('\0', u'\uFFFD') # Pango can't handle NULL bytes in markup
 
         if not(self.query.isRegExp):

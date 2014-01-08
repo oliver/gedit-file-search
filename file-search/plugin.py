@@ -28,7 +28,7 @@
 import os
 from gi.repository import Gedit, GObject, Gtk
 
-from .plugin_common import _, ngettext
+from .plugin_common import _, ngettext, gtkToUnicode
 from .search_dialog import SearchDialog
 
 
@@ -166,7 +166,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
 
         # add actual menu item:
         if selText:
-            menuSelText = selText.decode("utf-8")
+            menuSelText = gtkToUnicode(selText)
             if len(menuSelText) > 30:
                 menuSelText = menuSelText[:30] + u"\u2026" # ellipsis character
             menuText = _('Search files for "%s"') % menuSelText

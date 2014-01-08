@@ -32,7 +32,7 @@ except:
     from urllib import quote, unquote
 from gi.repository import Gtk, Gdk, Gio, Pango
 
-from .plugin_common import _, ngettext, APP_NAME, resourceDir, gladeFile
+from .plugin_common import _, ngettext, APP_NAME, resourceDir, gladeFile, isUnicode, gtkToUnicode
 from .result_panel import ResultPanel
 
 
@@ -54,16 +54,14 @@ class RecentList:
         elementList.reverse()
         for e in elementList:
             if e and len(e) > 0:
-                decodedName = unquote(e)
+                decodedName = unquote(gtkToUnicode(e))
                 self.add(decodedName, False)
 
         # TODO: also listen for gsettings changes, and reload the list then
 
     def add (self, entrytext, doStore=True):
         "Add an entry that was just used."
-        if type(entrytext) == unicode:
-            entrytext = entrytext.encode("utf-8")
-        assert(type(entrytext) == str)
+        assert(isUnicode(entrytext))
 
         for row in self.store:
             if row[0] == entrytext:
@@ -210,7 +208,7 @@ class SearchDialog:
                 if currentDocDir is not None:
                     searchDir = currentDocDir
                 else:
-                    searchDir = os.getcwdu() # fall back to Gedit's current working dir
+                    searchDir = os.getcwd() # fall back to Gedit's current working dir
 
         searchDir = os.path.normpath(searchDir) + "/"
 
@@ -285,9 +283,9 @@ class SearchDialog:
                 self._dialog.destroy()
                 return
 
-            searchText = self.builder.get_object('cboSearchTextEntry').get_text().decode("utf-8")
-            searchDir = self.builder.get_object('cboSearchDirectoryEntry').get_text()
-            typeListString = self.builder.get_object('cboFileTypeEntry').get_text()
+            searchText = gtkToUnicode(self.builder.get_object('cboSearchTextEntry').get_text())
+            searchDir = gtkToUnicode(self.builder.get_object('cboSearchDirectoryEntry').get_text())
+            typeListString = gtkToUnicode(self.builder.get_object('cboFileTypeEntry').get_text())
 
             searchDir = os.path.expanduser(searchDir)
             searchDir = os.path.normpath(searchDir) + "/"

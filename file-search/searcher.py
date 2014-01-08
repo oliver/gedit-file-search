@@ -32,6 +32,8 @@ import re
 import errno
 from gi.repository import GObject
 
+from .plugin_common import isUnicode
+
 
 class LineSplitter:
     "Split incoming text into lines which are passed to the resultHandler object"
@@ -82,7 +84,7 @@ class RunCommand:
     def onPipeReadable (self, fd, cond):
         #print "condition: %s" % cond
         if (cond & GObject.IO_IN):
-            readText = self.pipe.read(4000)
+            readText = self.pipe.read(4000).decode("utf-8", "replace") # TODO: this is probably incorrect for handling "find" results with invalid UTF8
             #print "(read %d bytes)" % len(readText)
             if self.lineSplitter:
                 self.lineSplitter.parseFragment(readText)
@@ -90,7 +92,7 @@ class RunCommand:
         else:
             # read all remaining data from pipe
             while True:
-                readText = self.pipe.read(4000)
+                readText = self.pipe.read(4000).decode("utf-8", "replace") # TODO: see above
                 #print "(read %d bytes before finish)" % len(readText)
                 if len(readText) <= 0:
                     break
@@ -121,7 +123,7 @@ def buildQueryRE (queryText, caseSensitive, wholeWord):
     "returns a RegEx pattern for searching for the given queryText"
 
     # word detection etc. cannot be done on an encoding-less string:
-    assert(type(queryText) == unicode)
+    assert(isUnicode(queryText))
 
     pattern = re.escape(queryText)
     if wholeWord:
@@ -224,7 +226,7 @@ class GrepProcess:
             # Assume that grep output is in UTF8 encoding, and convert it to
             # a Unicode string. Also, sanitize non-UTF8 characters.
             # TODO: what's the actual encoding of grep's output?
-            linetext = unicode(linetext, 'utf8', 'replace')
+            #linetext = unicode(linetext, 'utf8', 'replace')
             #print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
             linetext = linetext.rstrip("\n\r")
 
