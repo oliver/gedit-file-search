@@ -360,8 +360,8 @@ def escapeAndHighlight (origText, searchText, caseSensitive, wholeWord):
     numMatches = (len(fragments) - 1) / 2
 
     if len(fragments) < 3:
-        print "too few fragments (got only %d)" % len(fragments)
-        print "text: '%s'" % origText.encode("utf8", "replace")
+        print("too few fragments (got only %d)" % len(fragments))
+        print("text: '%s'" % origText.encode("utf8", "replace"))
         numMatches += 1
     #assert(len(fragments) > 2)
 

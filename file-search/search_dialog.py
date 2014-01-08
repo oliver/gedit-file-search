@@ -301,7 +301,7 @@ class SearchDialog:
             searchDir = os.path.normpath(searchDir) + "/"
 
             if searchText == "":
-                print "internal error: search text is empty!"
+                print("internal error: search text is empty!")
             elif not(os.path.exists(searchDir)):
                 msgDialog = Gtk.MessageDialog(self._dialog, Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
                     Gtk.MessageType.ERROR, Gtk.ButtonsType.OK, _("Directory does not exist"))
