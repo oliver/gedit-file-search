@@ -26,7 +26,10 @@
 #
 
 import os
-import urllib
+try:
+    from urllib.parse import quote, unquote
+except:
+    from urllib import quote, unquote
 from gi.repository import Gtk, Gdk, Gio, Pango
 
 from plugin_common import _, ngettext, APP_NAME, resourceDir, gladeFile
@@ -51,7 +54,7 @@ class RecentList:
         elementList.reverse()
         for e in elementList:
             if e and len(e) > 0:
-                decodedName = urllib.unquote(e)
+                decodedName = unquote(e)
                 self.add(decodedName, False)
 
         # TODO: also listen for gsettings changes, and reload the list then
@@ -82,7 +85,7 @@ class RecentList:
                 if not(e[1]):
                     continue
                 assert(type(e[0]) == str)
-                encodedName = urllib.quote(e[0])
+                encodedName = quote(e[0])
                 entries.append(encodedName)
             self.gclient.set_strv(self.confKey, entries)
 

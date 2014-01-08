@@ -23,7 +23,10 @@
 
 
 import os
-import urllib
+try:
+    from urllib.parse import quote
+except:
+    from urllib import quote
 from gi.repository import Gedit, GObject, Gtk, Gdk, Gio, Pango
 
 from plugin_common import _, ngettext, APP_NAME, gladeFile
@@ -228,7 +231,7 @@ class ResultPanel:
         if not(file):
             return
 
-        uri="file://%s" % urllib.quote(file)
+        uri="file://%s" % quote(file)
         location=Gio.file_new_for_uri(uri)
         Gedit.commands_load_location(self._window, location, None, lineno, -1)
 
