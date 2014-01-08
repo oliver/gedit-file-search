@@ -304,7 +304,7 @@ class SearchProcess:
             self.files = []
             return
 
-        self.files.sort(pathCompare)
+        self.files.sort(key=os.path.split) # sort files before directories, then alphabetically
 
         for f in self.files:
             self.grepProcess.addFilename(f)
@@ -317,9 +317,3 @@ class SearchProcess:
     def handleGrepFinished (self):
         self.resultHandler.handleFinished()
         self.grepProcess = None
-
-def pathCompare (p1, p2):
-    "Sort path names (files before directories; alphabetically)"
-    s1 = os.path.split(p1)
-    s2 = os.path.split(p2)
-    return cmp(s1, s2)
