@@ -203,16 +203,9 @@ class SearchDialog:
         else:
             # this is the first search since opening this Gedit window...
             if self._window.get_active_tab():
-                # if ProjectMarker plugin has set a valid project root for the current file, use that:
-                projectMarkerRootDir = self._window.get_active_tab().get_view().get_data("root_dir")
-                if projectMarkerRootDir:
-                    if projectMarkerRootDir.endswith("\n"):
-                        projectMarkerRootDir = projectMarkerRootDir[:-1]
-                    searchDir = projectMarkerRootDir
-                else:
-                    # otherwise, try to use directory of that file
-                    if currentDocDir is not None:
-                        searchDir = currentDocDir
+                # try to use directory of displayed file
+                if currentDocDir is not None:
+                    searchDir = currentDocDir
             else:
                 # there's no file open => fall back to Gedit's current working dir
                 pass
