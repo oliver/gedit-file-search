@@ -75,7 +75,7 @@ class ResultPanel:
         self.builder.connect_signals(self)
         resultContainer = self.builder.get_object('hbxFileSearchResult')
 
-        resultContainer.set_data("resultpanel", self)
+        resultContainer.resultpanel = self # keep a reference to avoid destruction of panel
 
         tabTitle = self.query.text
         if len(tabTitle) > 30:
@@ -106,7 +106,7 @@ class ResultPanel:
 
         panel = self._window.get_bottom_panel()
         resultContainer = self.builder.get_object('hbxFileSearchResult')
-        resultContainer.set_data("resultpanel", None)
+        resultContainer.resultpanel = None
         panel.remove_item(resultContainer)
         self.treeStore.clear()
         self.treeStore = None
