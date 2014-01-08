@@ -195,20 +195,20 @@ class SearchDialog:
             if gFilePath != None:
                 currentDocDir = gFilePath.get_parent().get_path()
 
-        # find a nice default value for the search directory:
-        if self._lastDir != None:
-            # if possible, use same directory as in last search:
-            searchDir = self._lastDir
-        else:
-            # this is the first search since opening this Gedit window;
-            # try to use directory of displayed file
-            if currentDocDir is not None:
-                searchDir = currentDocDir
-            else:
-                searchDir = os.getcwdu() # fall back to Gedit's current working dir
-
         if searchDirectory is not None:
             searchDir = searchDirectory
+        else:
+            # find a nice default value for the search directory:
+            if self._lastDir != None:
+                # if possible, use same directory as in last search:
+                searchDir = self._lastDir
+            else:
+                # this is the first search since opening this Gedit window;
+                # try to use directory of displayed file
+                if currentDocDir is not None:
+                    searchDir = currentDocDir
+                else:
+                    searchDir = os.getcwdu() # fall back to Gedit's current working dir
 
         searchDir = os.path.normpath(searchDir) + "/"
 
