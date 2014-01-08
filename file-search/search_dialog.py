@@ -32,8 +32,8 @@ except:
     from urllib import quote, unquote
 from gi.repository import Gtk, Gdk, Gio, Pango
 
-from plugin_common import _, ngettext, APP_NAME, resourceDir, gladeFile
-from result_panel import ResultPanel
+from .plugin_common import _, ngettext, APP_NAME, resourceDir, gladeFile
+from .result_panel import ResultPanel
 
 
 GSETTINGS_SCHEMA_NAME = "io.github.oliver.gedit-file-search"

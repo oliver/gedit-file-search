@@ -28,8 +28,8 @@
 import os
 from gi.repository import Gedit, GObject, Gtk
 
-from plugin_common import _, ngettext
-from search_dialog import SearchDialog
+from .plugin_common import _, ngettext
+from .search_dialog import SearchDialog
 
 
 ui_str = """<ui>

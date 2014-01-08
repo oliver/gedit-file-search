@@ -29,8 +29,8 @@ except:
     from urllib import quote
 from gi.repository import Gedit, GObject, Gtk, Gdk, Gio, Pango
 
-from plugin_common import _, ngettext, APP_NAME, gladeFile
-from searcher import SearchProcess, buildQueryRE
+from .plugin_common import _, ngettext, APP_NAME, gladeFile
+from .searcher import SearchProcess, buildQueryRE
 
 
 
