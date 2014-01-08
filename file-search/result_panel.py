@@ -131,7 +131,7 @@ class ResultPanel:
 
     def handleResult (self, file, lineno, linetext):
         expandRow = False
-        if not(self.files.has_key(file)):
+        if not(file in self.files):
             it = self._addResultFile(file)
             self.files[file] = it
             expandRow = True

@@ -111,7 +111,7 @@ class RunCommand:
         #print "pid: %d" % pid
         try:
             os.kill(pid, 15)
-        except OSError, e:
+        except OSError as e:
             if e.errno != errno.ESRCH:
                 print("error killing PID %d: %s" % (pid, e))
         self.lineSplitter.cancel()

@@ -186,7 +186,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         try:
             self._bus.send_sync('/plugins/filebrowser', 'add_context_item',
                 action=fbAction, path="/FilePopup/FilePopup_Opt3")
-        except StandardError, e:
+        except Exception as e:
             #print "failed to add file browser context menu item (%s)" % e
             return
         fbAction.connect('activate', self.onFbMenuItemActivate)
