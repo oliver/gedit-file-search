@@ -27,7 +27,6 @@
 
 import os
 import urllib
-import dircache
 from gi.repository import Gtk, Gdk, Gio, Pango
 
 from plugin_common import _, ngettext, APP_NAME, resourceDir, gladeFile
@@ -351,19 +350,20 @@ class SearchDialog:
 
             self._autoCompleteList.clear()
             try:
-                files = dircache.listdir(path)[:]
+                files = os.listdir(path)
             except OSError:
                 return
-            dircache.annotate(path, files)
             for f in files:
+                if not(os.path.isdir(path + os.sep + f)):
+                    continue
                 if f.startswith(".") and not(start.startswith(".")):
                     # show hidden dirs only if explicitly requested by user
                     continue
-                if f.startswith(start) and f.endswith("/"):
+                if f.startswith(start):
                     if path == "/":
-                        match = path + f
+                        match = path + f + os.sep
                     else:
-                        match = path + os.sep + f
+                        match = path + os.sep + f + os.sep
                     self._autoCompleteList.append([match])
 
     def on_btnBrowse_clicked (self, button):
