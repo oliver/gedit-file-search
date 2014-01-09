@@ -14,7 +14,7 @@ Installation
 * copy the contents of the gedit-file-search folder to ~/.local/share/gedit/plugins/ (create that folder if necessary)
 * start Gedit, go to Edit -> Preferences -> Plugins, and enable "File Search"
 
-  [1]: http://cloud.github.com/downloads/oliver/gedit-file-search/gedit-file-search-0.5.tgz
+  [1]: https://github.com/oliver/gedit-file-search/releases/download/GEDIT_FILE_SEARCH_V1.0/gedit-file-search-1.0.tgz
 
 
 Use Search -> Find in files, or right-click in a document and select Search files... to open the search dialog.
