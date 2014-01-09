@@ -1,11 +1,11 @@
 [Plugin]
-Loader=python3
-Module=file-search
+Loader=python
+Module=file-search-before-gedit38
 IAge=3
-Name=File Search
-Name[de]=Suche in Dateien
-Name[fr]=Rechercher des fichiers
-Name[ru]=Поиск в файлах
+Name=File Search (for Gedit < 3.8)
+Name[de]=Suche in Dateien (für Gedit < 3.8)
+Name[fr]=Rechercher des fichiers (Gedit < 3.8)
+Name[ru]=Поиск в файлах (Gedit < 3.8)
 Description=Search in multiple files
 Description[de]=In mehreren Dateien suchen
 Description[fr]=Recherche dans plusieurs fichiers

@@ -11,6 +11,8 @@ DIST_FILES= \
 	$(PLUGIN_SUBFOLDER)/result_panel.py \
 	$(PLUGIN_SUBFOLDER)/gschemas.compiled \
 	file-search.plugin \
+	file-search-before-gedit38 \
+	file-search-before-gedit38.plugin \
 	README
 
 TGZ_FOLDER=gedit-file-search
