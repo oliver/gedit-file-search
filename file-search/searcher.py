@@ -38,7 +38,7 @@ from .plugin_common import isUnicode
 class LineSplitter:
     "Split incoming text into lines which are passed to the resultHandler object"
     def __init__ (self, resultHandler):
-        self.buf = ""
+        self.buf = b""
         self.cancelled = False
         self.resultHandler = resultHandler
 
@@ -51,15 +51,15 @@ class LineSplitter:
 
         self.buf = self.buf + text
 
-        while '\n' in self.buf:
-            pos = self.buf.index('\n')
+        while b"\n" in self.buf:
+            pos = self.buf.index(b"\n")
             line = self.buf[:pos]
             self.buf = self.buf[pos + 1:]
             self.resultHandler.handleLine(line)
 
     def finish (self):
-        self.parseFragment("")
-        if self.buf != "":
+        self.parseFragment(b"")
+        if self.buf:
             self.resultHandler.handleLine(self.buf)
         self.resultHandler.handleFinished()
 
@@ -69,7 +69,7 @@ class RunCommand:
     def __init__ (self, cmd, resultHandler, prio=GObject.PRIORITY_LOW):
         self.lineSplitter = LineSplitter(resultHandler)
 
-        #print "executing command: %s" % cmd
+        #print("executing command: %s" % cmd)
         self.proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, close_fds=True)
         self.pipe = self.proc.stdout
 
@@ -84,7 +84,7 @@ class RunCommand:
     def onPipeReadable (self, fd, cond):
         #print "condition: %s" % cond
         if (cond & GObject.IO_IN):
-            readText = self.pipe.read(4000).decode("utf-8", "replace") # TODO: this is probably incorrect for handling "find" results with invalid UTF8
+            readText = self.pipe.read(4000)
             #print "(read %d bytes)" % len(readText)
             if self.lineSplitter:
                 self.lineSplitter.parseFragment(readText)
@@ -92,7 +92,7 @@ class RunCommand:
         else:
             # read all remaining data from pipe
             while True:
-                readText = self.pipe.read(4000).decode("utf-8", "replace") # TODO: see above
+                readText = self.pipe.read(4000)
                 #print "(read %d bytes before finish)" % len(readText)
                 if len(readText) <= 0:
                     break
@@ -212,11 +212,11 @@ class GrepProcess:
     def handleLine (self, line):
         filename = None
         lineno = None
-        linetext = ""
-        if '\0' in line:
-            [filename, end] = line.split('\0', 1)
-            if ':' in end:
-                [lineno, linetext] = end.split(':', 1)
+        linetext = b""
+        if b"\0" in line:
+            [filename, end] = line.split(b"\0", 1)
+            if b":" in end:
+                [lineno, linetext] = end.split(b":", 1)
                 lineno = int(lineno)
 
         if lineno == None:
@@ -226,7 +226,7 @@ class GrepProcess:
             # Assume that grep output is in UTF8 encoding, and convert it to
             # a Unicode string. Also, sanitize non-UTF8 characters.
             # TODO: what's the actual encoding of grep's output?
-            #linetext = unicode(linetext, 'utf8', 'replace')
+            linetext = linetext.decode("utf8", "replace")
             #print "file: '%s'; line: %d; text: '%s'" % (filename, lineno, linetext)
             linetext = linetext.rstrip("\n\r")
 

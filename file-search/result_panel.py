@@ -93,7 +93,7 @@ class ResultPanel:
         panel.set_property("visible", True)
 
 
-        self.treeStore = Gtk.TreeStore(str, str, int) # markup, file name, line number
+        self.treeStore = Gtk.TreeStore(str, object, int) # markup, file name, line number
         self.treeView = self.builder.get_object('tvFileSearchResult')
         self.treeView.set_model(self.treeStore)
 
@@ -133,6 +133,8 @@ class ResultPanel:
 
 
     def handleResult (self, file, lineno, linetext):
+        assert not(isUnicode(file)) # for opening files, raw file names are needed
+        assert isUnicode(linetext)
         expandRow = False
         if not(file in self.files):
             it = self._addResultFile(file)
@@ -180,11 +182,12 @@ class ResultPanel:
 
     def _addResultFile (self, filename):
         dispFilename = filename
+
         # remove leading search directory part if present:
+        dispFilename = dispFilename.decode("utf-8", "replace")
         if dispFilename.startswith(self.query.directory):
             dispFilename = dispFilename[ len(self.query.directory): ]
             dispFilename.lstrip("/")
-        dispFilename = GObject.filename_display_name(dispFilename)
 
         (directory, file) = os.path.split( dispFilename )
         if directory:
