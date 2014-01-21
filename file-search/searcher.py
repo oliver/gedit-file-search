@@ -164,8 +164,8 @@ class GrepProcess:
             self.cmdRunner = None
         pass
 
-    def addFilename (self, filename):
-        self.fileNames.append(filename)
+    def addFilenames (self, filenames):
+        self.fileNames += filenames
         self.runGrep()
 
     def handleInputFinished (self):
@@ -308,8 +308,7 @@ class SearchProcess:
 
         self.files.sort(key=os.path.split) # sort files before directories, then alphabetically
 
-        for f in self.files:
-            self.grepProcess.addFilename(f)
+        self.grepProcess.addFilenames(self.files)
         self.files = []
         self.grepProcess.handleInputFinished()
 
