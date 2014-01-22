@@ -306,7 +306,8 @@ class SearchProcess:
         self.grepProcess.handleInputFinished()
 
     def handleGrepResult (self, filename, lineno, linetext):
-        self.resultHandler.handleResult(filename, lineno, linetext)
+        if not(self.cancelled):
+            self.resultHandler.handleResult(filename, lineno, linetext)
 
     def handleGrepFinished (self):
         self.resultHandler.handleFinished()
