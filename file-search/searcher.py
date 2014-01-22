@@ -93,7 +93,7 @@ class RunCommand:
             while True:
                 readText = self.pipe.read(4000)
                 #print "(read %d bytes before finish)" % len(readText)
-                if len(readText) <= 0:
+                if not(readText):
                     break
                 self.lineSplitter.parseFragment(readText)
 
@@ -159,7 +159,6 @@ class GrepProcess:
         if self.cmdRunner:
             self.cmdRunner.cancel()
             self.cmdRunner = None
-        pass
 
     def addFilenames (self, filenames):
         self.fileNames += filenames
@@ -173,7 +172,7 @@ class GrepProcess:
             self.finishedCb()
 
     def runGrep (self):
-        if self.cmdRunner or len(self.fileNames) == 0 or self.cancelled:
+        if self.cmdRunner or not(self.fileNames) or self.cancelled:
             return
 
         # run Grep on many files at once:
@@ -211,15 +210,12 @@ class GrepProcess:
         lineno = None
         linetext = b""
         if b"\0" in line:
-            [filename, end] = line.split(b"\0", 1)
+            (filename, end) = line.split(b"\0", 1)
             if b":" in end:
-                [lineno, linetext] = end.split(b":", 1)
+                (lineno, linetext) = end.split(b":", 1)
                 lineno = int(lineno)
 
-        if lineno == None:
-            #print "(ignoring invalid line)"
-            pass
-        else:
+        if lineno is not None: # ignore invalid lines
             # Assume that grep output is in UTF8 encoding, and convert it to
             # a Unicode string. Also, sanitize non-UTF8 characters.
             # TODO: what's the actual encoding of grep's output?
