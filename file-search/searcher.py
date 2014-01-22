@@ -86,8 +86,7 @@ class RunCommand:
         if (cond & GObject.IO_IN):
             readText = self.pipe.read(4000)
             #print "(read %d bytes)" % len(readText)
-            if self.lineSplitter:
-                self.lineSplitter.parseFragment(readText)
+            self.lineSplitter.parseFragment(readText)
             return True
         else:
             # read all remaining data from pipe
@@ -96,15 +95,13 @@ class RunCommand:
                 #print "(read %d bytes before finish)" % len(readText)
                 if len(readText) <= 0:
                     break
-                if self.lineSplitter:
-                    self.lineSplitter.parseFragment(readText)
+                self.lineSplitter.parseFragment(readText)
 
             #print "(closing pipe)"
             self.pipe.close()
             self.proc.wait()
-            if self.lineSplitter:
-                self.lineSplitter.finish()
-                self.lineSplitter = None
+            self.lineSplitter.finish()
+            self.lineSplitter = None
             return False
 
     def cancel (self):
