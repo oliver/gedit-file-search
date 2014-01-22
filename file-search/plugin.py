@@ -63,14 +63,21 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
 
         self._insert_menu()
 
-        self._window.connect_object("destroy", FileSearchWindowHelper.destroy, self)
-        self._window.connect_object("tab-added", FileSearchWindowHelper.onTabAdded, self)
-        self._window.connect_object("tab-removed", FileSearchWindowHelper.onTabRemoved, self)
+        self.handlerIds = []
+        self.handlerIds.append( self._window.connect_object("destroy", FileSearchWindowHelper.destroy, self) )
+        self.handlerIds.append( self._window.connect_object("tab-added", FileSearchWindowHelper.onTabAdded, self) )
+        self.handlerIds.append( self._window.connect_object("tab-removed", FileSearchWindowHelper.onTabRemoved, self) )
 
         self._searchDialog = None
 
     def do_deactivate(self):
         #print "file-search: plugin stopped for", self._window
+
+        for h in self.handlerIds:
+            self._window.handler_disconnect(h)
+        self.handlerIds = None
+
+        self._remove_menu()
         self.destroy()
 
     def do_update_state(self):
@@ -108,6 +115,11 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
 
         # Merge the UI
         self._ui_id = manager.add_ui_from_string(ui_str)
+
+    def _remove_menu (self):
+        manager = self._window.get_ui_manager()
+        manager.remove_ui(self._ui_id)
+        manager.remove_action_group(self._action_group)
 
     def on_search_files_activate(self, action):
         self._openSearchDialog()
