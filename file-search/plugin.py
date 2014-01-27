@@ -57,6 +57,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._window = self.window
         self._bus = self._window.get_message_bus()
         self._fileBrowserContacted = False
+        self._filebrowserItemId = None
         self.searchers = [] # list of existing SearchProcess instances
 
         self._lastClickIter = None # TextIter at position of last right-click or last popup menu
@@ -77,6 +78,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
             self._window.handler_disconnect(h)
         self.handlerIds = None
 
+        self._removeFileBrowserMenuItem()
         self._remove_menu()
         self.destroy()
 
@@ -195,12 +197,21 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
     def _addFileBrowserMenuItem (self):
         fbAction = Gtk.Action('search-files-plugin', _("Search files..."), _("Search in all files in a directory"), None)
         try:
-            self._bus.send_sync('/plugins/filebrowser', 'add_context_item',
+            replyMsg = self._bus.send_sync("/plugins/filebrowser", "add_context_item",
                 action=fbAction, path="/FilePopup/FilePopup_Opt3")
         except Exception as e:
             #print "failed to add file browser context menu item (%s)" % e
             return
+        self._filebrowserItemId = replyMsg.id
         fbAction.connect('activate', self.onFbMenuItemActivate)
+
+    def _removeFileBrowserMenuItem (self):
+        if self._filebrowserItemId is not None:
+            try:
+                self._bus.send_sync("/plugins/filebrowser", "remove_context_item",
+                    id=self._filebrowserItemId)
+            except:
+                pass
 
     def onFbMenuItemActivate (self, action):
         responseMsg = self._bus.send_sync('/plugins/filebrowser', 'get_view')
