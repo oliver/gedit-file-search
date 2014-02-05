@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: File Search\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-27 23:44+0200\n"
+"POT-Creation-Date: 2014-02-05 23:16+0100\n"
 "PO-Revision-Date: 2011-05-25 01:30+0400\n"
 "Last-Translator: Andrey Sitnik <andrey@sitnik.ru>\n"
 "Language-Team: \n"
@@ -106,45 +106,46 @@ msgstr ""
 msgid "gtk-edit"
 msgstr "gtk-edit"
 
-#: file-search/ui.py:338
+#: file-search/plugin.py:111 file-search/plugin.py:188
+#: file-search/plugin.py:198
+msgid "Search files..."
+msgstr "Поиск файлов…"
+
+#: file-search/plugin.py:112 file-search/plugin.py:198
+msgid "Search in all files in a directory"
+msgstr "Поиск во всех файлах в папке"
+
+#: file-search/plugin.py:186
 #, python-format
 msgid "Search files for \"%s\""
 msgstr "Поиск \"%s\" в файлах"
 
-#: file-search/ui.py:340 file-search/ui.py:353 file-search/ui.py:394
-msgid "Search files..."
-msgstr "Поиск файлов…"
-
-#: file-search/ui.py:353 file-search/ui.py:395
-msgid "Search in all files in a directory"
-msgstr "Поиск во всех файлах в папке"
-
-#: file-search/ui.py:441
-msgid "Select Directory"
-msgstr ""
-
-#: file-search/ui.py:589
+#: file-search/search_dialog.py:297
 msgid "Directory does not exist"
 msgstr "Папки не существует"
 
-#: file-search/ui.py:590
+#: file-search/search_dialog.py:298
 msgid "The specified directory does not exist."
 msgstr "Указанная папка не существует."
 
-#: file-search/ui.py:645
+#: file-search/search_dialog.py:371
+msgid "Select Directory"
+msgstr ""
+
+#: file-search/result_panel.py:62
 #, python-format
 msgid "searching for <i>%(keywords)s</i> in <i>%(folder)s</i>"
 msgstr "поиск <i>%(keywords)s</i> в <i>%(folder)s</i>"
 
-#: file-search/ui.py:680
+#: file-search/result_panel.py:166
 msgid "(search was cancelled)"
 msgstr "(поиск был отменён)"
 
-#: file-search/ui.py:682
+#: file-search/result_panel.py:168
 msgid "(no matching files found)"
 msgstr "(не найдено подходящих файлов)"
 
-#: file-search/ui.py:684
+#: file-search/result_panel.py:170
 #, python-format
 msgid "found %d match"
 msgid_plural "found %d matches"
@@ -152,7 +153,7 @@ msgstr[0] "найдено %d совпадение"
 msgstr[1] "найдено %d совпадения"
 msgstr[2] "найдено %d совпадений"
 
-#: file-search/ui.py:685
+#: file-search/result_panel.py:171
 #, python-format
 msgid " (%d line)"
 msgid_plural " (%d lines)"
@@ -160,7 +161,7 @@ msgstr[0] " (%d строка)"
 msgstr[1] " (%d строки)"
 msgstr[2] " (%d строк)"
 
-#: file-search/ui.py:686
+#: file-search/result_panel.py:172
 #, python-format
 msgid " in %d file"
 msgid_plural " in %d files"
@@ -168,7 +169,7 @@ msgstr[0] " в %d файле"
 msgstr[1] " в %d файлах"
 msgstr[2] " в %d файлах"
 
-#: file-search/ui.py:690
+#: file-search/result_panel.py:177
 #, python-format
 msgid "<b>%d</b> match"
 msgid_plural "<b>%d</b> matches"
@@ -176,7 +177,7 @@ msgstr[0] "<b>%d</b> совпадение"
 msgstr[1] "<b>%d</b> совпадения"
 msgstr[2] "<b>%d</b> совпадений"
 
-#: file-search/ui.py:691
+#: file-search/result_panel.py:178
 #, python-format
 msgid "in %d file"
 msgid_plural "in %d files"
@@ -184,10 +185,10 @@ msgstr[0] "в %d файле"
 msgstr[1] "в %d файлах"
 msgstr[2] "в %d файлах"
 
-#: file-search/ui.py:830
+#: file-search/result_panel.py:276
 msgid "Expand All"
 msgstr "Развернуть всё"
 
-#: file-search/ui.py:835
+#: file-search/result_panel.py:281
 msgid "Collapse All"
 msgstr "Свернуть всё"
