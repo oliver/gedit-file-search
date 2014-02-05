@@ -2,7 +2,7 @@ File Search Plugin for Gedit
 =============================
 This is a search plugin for Gedit to search for a text inside a directory.
 
-The plugin was tested with Gedit 3.4.1 under Ubuntu 12.04. It might also work under other versions of Gedit 3.
+The plugin was tested with Gedit 3.4.1 under Ubuntu 12.04, and with Gedit 3.8.3 under Fedora 19. It should also work under other versions of Gedit 3.
 
 Note that Gedit 2 and older are not supported by this plugin any more (there is an old version of this plugin available, though, which supports Gedit 2).
 
