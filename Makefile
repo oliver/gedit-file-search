@@ -7,6 +7,7 @@ DIST_FILES= \
 	$(PLUGIN_SUBFOLDER)/__init__.py \
 	$(PLUGIN_SUBFOLDER)/searcher.py \
 	$(PLUGIN_SUBFOLDER)/plugin.py \
+	$(PLUGIN_SUBFOLDER)/plugin_common.py \
 	$(PLUGIN_SUBFOLDER)/search_dialog.py \
 	$(PLUGIN_SUBFOLDER)/result_panel.py \
 	$(PLUGIN_SUBFOLDER)/gschemas.compiled \
