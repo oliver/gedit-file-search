@@ -257,34 +257,39 @@ class ResultPanel:
 
     def on_tvFileSearchResult_button_press_event (self, treeview, event):
         if event.button == 3:
+            treeview.grab_focus()
+
             path = treeview.get_path_at_pos(int(event.x), int(event.y))
-            if path != None:
-                treeview.grab_focus()
+            if path is not None:
                 treeview.set_cursor(path[0], path[1], False)
 
-                menu = Gtk.Menu()
-                self.contextMenu = menu # need to keep a reference to the menu
-                mi = Gtk.ImageMenuItem.new_from_stock("gtk-copy", None)
+            menu = Gtk.Menu()
+            self.contextMenu = menu # need to keep a reference to the menu
+
+            mi = Gtk.ImageMenuItem.new_from_stock("gtk-copy", None)
+            if path is not None:
                 mi.connect_object("activate", ResultPanel.onCopyActivate, self, treeview, path[0])
-                mi.show()
-                menu.append(mi)
+            else:
+                mi.set_sensitive(False)
+            mi.show()
+            menu.append(mi)
 
-                mi = Gtk.SeparatorMenuItem.new()
-                mi.show()
-                menu.append(mi)
+            mi = Gtk.SeparatorMenuItem.new()
+            mi.show()
+            menu.append(mi)
 
-                mi = Gtk.MenuItem(_("Expand All"))
-                mi.connect_object("activate", ResultPanel.onExpandAllActivate, self, treeview)
-                mi.show()
-                menu.append(mi)
+            mi = Gtk.MenuItem(_("Expand All"))
+            mi.connect_object("activate", ResultPanel.onExpandAllActivate, self, treeview)
+            mi.show()
+            menu.append(mi)
 
-                mi = Gtk.MenuItem(_("Collapse All"))
-                mi.connect_object("activate", ResultPanel.onCollapseAllActivate, self, treeview)
-                mi.show()
-                menu.append(mi)
+            mi = Gtk.MenuItem(_("Collapse All"))
+            mi.connect_object("activate", ResultPanel.onCollapseAllActivate, self, treeview)
+            mi.show()
+            menu.append(mi)
 
-                menu.popup(None, None, None, None, event.button, event.time)
-                return True
+            menu.popup(None, None, None, None, event.button, event.time)
+            return True
         else:
             return False
 
