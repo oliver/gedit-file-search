@@ -30,7 +30,7 @@ import fcntl
 import subprocess
 import re
 import errno
-from gi.repository import GObject
+from gi.repository import GLib, GObject
 
 from .plugin_common import isUnicode
 
@@ -78,8 +78,13 @@ class RunCommand:
         fcntl.fcntl(self.pipe, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
         #print "(add watch)"
-        GObject.io_add_watch(self.pipe, GObject.IO_IN | GObject.IO_ERR | GObject.IO_HUP,
-            self.onPipeReadable, priority=prio)
+        if GObject.pygobject_version < (3,7,2):
+            GObject.io_add_watch(self.pipe, GObject.IO_IN | GObject.IO_ERR | GObject.IO_HUP,
+                self.onPipeReadable, priority=prio)
+        else:
+            # avoid deprecation warning in newer versions of PyGObject:
+            GLib.io_add_watch(self.pipe, prio, GLib.IO_IN | GLib.IO_ERR | GLib.IO_HUP,
+                self.onPipeReadable)
 
     def onPipeReadable (self, fd, cond):
         #print "condition: %s" % cond

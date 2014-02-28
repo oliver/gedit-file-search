@@ -27,7 +27,7 @@ try:
     from urllib.parse import quote
 except:
     from urllib import quote
-from gi.repository import Gedit, GObject, Gtk, Gdk, Gio, Pango
+from gi.repository import Gedit, GLib, Gtk, Gdk, Gio, Pango
 
 from .plugin_common import _, ngettext, APP_NAME, gladeFile, isUnicode
 from .searcher import SearchProcess, buildQueryRE
@@ -62,7 +62,7 @@ class ResultPanel:
             _("searching for <i>%(keywords)s</i> in <i>%(folder)s</i>") % \
                 {
                     'keywords': escapeMarkup(query.text),
-                    'folder': escapeMarkup(GObject.filename_display_name(query.directory))
+                    'folder': escapeMarkup(GLib.filename_display_name(query.directory))
                 } + \
             "</span>"
         it = self.treeStore.append(None, None)
@@ -239,7 +239,7 @@ class ResultPanel:
         Gedit.commands_load_location(self._window, location, None, lineno, -1)
 
         # use an Idle handler so the document has time to load:  
-        GObject.idle_add(self.onDocumentOpenedCb)
+        GLib.idle_add(self.onDocumentOpenedCb)
 
     def onDocumentOpenedCb (self):
         self._window.get_active_view().grab_focus()
@@ -278,12 +278,12 @@ class ResultPanel:
             mi.show()
             menu.append(mi)
 
-            mi = Gtk.MenuItem(_("Expand All"))
+            mi = Gtk.MenuItem(label=_("Expand All"))
             mi.connect_object("activate", ResultPanel.onExpandAllActivate, self, treeview)
             mi.show()
             menu.append(mi)
 
-            mi = Gtk.MenuItem(_("Collapse All"))
+            mi = Gtk.MenuItem(label=_("Collapse All"))
             mi.connect_object("activate", ResultPanel.onCollapseAllActivate, self, treeview)
             mi.show()
             menu.append(mi)

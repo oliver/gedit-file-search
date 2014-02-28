@@ -107,7 +107,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         manager = self._window.get_ui_manager()
 
         # Create a new action group
-        self._action_group = Gtk.ActionGroup("FileSearchPluginActions")
+        self._action_group = Gtk.ActionGroup(name="FileSearchPluginActions")
         self._action_group.add_actions([("FileSearch", "gtk-find", _("Search files..."),
                                          "<control><shift>F", _("Search in all files in a directory"),
                                          self.on_search_files_activate)])
@@ -195,7 +195,8 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._openSearchDialog(searchText)
 
     def _addFileBrowserMenuItem (self):
-        fbAction = Gtk.Action('search-files-plugin', _("Search files..."), _("Search in all files in a directory"), None)
+        fbAction = Gtk.Action(name="search-files-plugin", label=_("Search files..."),
+            tooltip=_("Search in all files in a directory"), stock_id=None)
         try:
             replyMsg = self._bus.send_sync("/plugins/filebrowser", "add_context_item",
                 action=fbAction, path="/FilePopup/FilePopup_Opt3")
