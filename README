@@ -18,3 +18,5 @@ Installation
 
 
 Use Search -> Find in files, or right-click in a document and select Search files... to open the search dialog.
+
+Note: if the plugin cannot be enabled, you might need to install support for Python-based plugins. For Ubuntu-like systems, run "sudo apt-get install gir1.2-gtksource-3.0" in terminal. For other systems, look for a software package like "gedit-plugins" - installing it should fix the problem.
