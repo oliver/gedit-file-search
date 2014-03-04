@@ -369,9 +369,10 @@ class SearchDialog:
 
     def on_btnBrowse_clicked (self, button):
         fileChooser = Gtk.FileChooserDialog(title=_("Select Directory"),
-            parent=self._dialog,
-            action=Gtk.FileChooserAction.SELECT_FOLDER,
-            buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+            transient_for=self._dialog,
+            action=Gtk.FileChooserAction.SELECT_FOLDER)
+        fileChooser.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        fileChooser.add_button(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
         fileChooser.set_default_response(Gtk.ResponseType.OK)
         fileChooser.set_local_only(False)
         fileChooser.set_filename( self.builder.get_object('cboSearchDirectoryEntry').get_text() )
