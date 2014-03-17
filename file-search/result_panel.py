@@ -27,7 +27,7 @@ try:
     from urllib.parse import quote
 except:
     from urllib import quote
-from gi.repository import Gedit, GLib, Gtk, Gdk, Gio, Pango
+from gi.repository import Gedit, GLib, Gtk, Gdk, Gio, Pango, GtkSource
 
 from .plugin_common import _, ngettext, APP_NAME, gladeFile, isUnicode
 from .searcher import SearchProcess, buildQueryRE
@@ -246,13 +246,24 @@ class ResultPanel:
         currDoc = self._window.get_active_document()
 
         # highlight matches in opened document:
-        flags = 0
-        if self.query.caseSensitive:
-            flags |= 4
-        if self.query.wholeWord:
-            flags |= 2
+        if hasattr(GtkSource, "SearchSettings"):
+            # set_search_context() is necessary to integrate with existing Gedit search
+            # (but is not universally available - see bgo#726408)
+            if hasattr(currDoc, "set_search_context"):
+                settings = GtkSource.SearchSettings()
+                settings.set_search_text(self.query.text)
+                settings.set_case_sensitive(self.query.caseSensitive)
+                settings.set_at_word_boundaries(self.query.wholeWord)
+                context = GtkSource.SearchContext.new(currDoc, settings)
+                currDoc.set_search_context(context)
+        else:
+            flags = 0
+            if self.query.caseSensitive:
+                flags |= 4
+            if self.query.wholeWord:
+                flags |= 2
+            currDoc.set_search_text(self.query.text, flags)
 
-        currDoc.set_search_text(self.query.text, flags)
         return False
 
     def on_tvFileSearchResult_button_press_event (self, treeview, event):
