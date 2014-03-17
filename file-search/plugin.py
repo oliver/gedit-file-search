@@ -109,27 +109,35 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._window = None
 
     def _insert_menu(self):
-        # Get the GtkUIManager
-        manager = self._window.get_ui_manager()
+        if hasattr(self._window, "get_ui_manager"):
+            # Get the GtkUIManager
+            manager = self._window.get_ui_manager()
 
-        # Create a new action group
-        self._action_group = Gtk.ActionGroup(name="FileSearchPluginActions")
-        self._action_group.add_actions([("FileSearch", "gtk-find", _("Search files..."),
-                                         "<control><shift>F", _("Search in all files in a directory"),
-                                         self.on_search_files_activate)])
+            # Create a new action group
+            self._action_group = Gtk.ActionGroup(name="FileSearchPluginActions")
+            self._action_group.add_actions([("FileSearch", "gtk-find", _("Search files..."),
+                                             "<control><shift>F", _("Search in all files in a directory"),
+                                             self.on_search_files_activate)])
 
-        # Insert the action group
-        manager.insert_action_group(self._action_group, -1)
+            # Insert the action group
+            manager.insert_action_group(self._action_group, -1)
 
-        # Merge the UI
-        self._ui_id = manager.add_ui_from_string(ui_str)
+            # Merge the UI
+            self._ui_id = manager.add_ui_from_string(ui_str)
+        else:
+            action = Gio.SimpleAction(name="gedit-file-search-plugin")
+            action.connect("activate", self.on_search_files_activate)
+            self._window.add_action(action)
 
     def _remove_menu (self):
-        manager = self._window.get_ui_manager()
-        manager.remove_ui(self._ui_id)
-        manager.remove_action_group(self._action_group)
+        if hasattr(self._window, "get_ui_manager"):
+            manager = self._window.get_ui_manager()
+            manager.remove_ui(self._ui_id)
+            manager.remove_action_group(self._action_group)
+        else:
+            self._window.remove_action("gedit-file-search-plugin")
 
-    def on_search_files_activate(self, action):
+    def on_search_files_activate(self, action, parameter=None):
         self._openSearchDialog()
 
     def _openSearchDialog (self, searchText = None, searchDirectory = None):
@@ -251,4 +259,25 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         selectedDir = selectedFileObj.get_path()
 
         self._openSearchDialog(searchDirectory=selectedDir)
+
+
+class FileSearchAppHelper(GObject.Object, Gedit.AppActivatable):
+    __gtype_name__ = "FileSearchAppHelper"
+    app = GObject.property(type=Gedit.App)
+
+    def __init__(self):
+        GObject.Object.__init__(self)
+
+    def do_activate(self):
+        if hasattr(self, "extend_menu"):
+            self.app.add_accelerator("<control><shift>F", "win.gedit-file-search-plugin", None)
+
+            self.menu_ext = self.extend_menu("search-section")
+            item = Gio.MenuItem.new(_("Search files..."), "win.gedit-file-search-plugin")
+            self.menu_ext.append_menu_item(item)
+
+    def do_deactivate(self):
+        if hasattr(self, "extend_menu"):
+            self.app.remove_accelerator("win.gedit-file-search-plugin", None)
+            self.menu_ext = None
 

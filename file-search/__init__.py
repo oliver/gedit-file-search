@@ -19,5 +19,5 @@
 # FileSearchPlugin is the main plugin class.
 #
 
-from .plugin import FileSearchWindowHelper
+from .plugin import FileSearchAppHelper, FileSearchWindowHelper
 
