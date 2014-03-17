@@ -84,8 +84,12 @@ class ResultPanel:
         if len(tabTitle) > 30:
             tabTitle = tabTitle[:30] + u"\u2026" # ellipsis character 
         panel = self._window.get_bottom_panel()
-        panel.add_item_with_stock_icon(resultContainer, str(self), tabTitle, "gtk-find")
-        panel.activate_item(resultContainer)
+        if hasattr(panel, "add_titled"):
+            panel.add_titled(resultContainer, str(self), tabTitle)
+            panel.set_visible_child(resultContainer)
+        else:
+            panel.add_item_with_stock_icon(resultContainer, str(self), tabTitle, "gtk-find")
+            panel.activate_item(resultContainer)
 
         editBtn = self.builder.get_object("btnModifyFileSearch")
         editBtn.set_label("gtk-stop")
@@ -110,7 +114,10 @@ class ResultPanel:
         panel = self._window.get_bottom_panel()
         resultContainer = self.builder.get_object('hbxFileSearchResult')
         resultContainer.resultpanel = None
-        panel.remove_item(resultContainer)
+        if hasattr(panel, "add_titled"):
+            panel.remove(resultContainer)
+        else:
+            panel.remove_item(resultContainer)
         self.treeStore.clear()
         self.treeStore = None
         self.treeView = None
