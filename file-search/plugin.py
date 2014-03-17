@@ -26,7 +26,7 @@
 #
 
 import os
-from gi.repository import Gedit, GObject, Gtk
+from gi.repository import Gedit, GObject, Gtk, Gio
 
 from .plugin_common import _, ngettext, gtkToUnicode
 from .search_dialog import SearchDialog
@@ -57,6 +57,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._window = self.window
         self._bus = self._window.get_message_bus()
         self._fileBrowserContacted = False
+        self._filebrowserMenuExt = None
         self._filebrowserItemId = None
         self.searchers = [] # list of existing SearchProcess instances
 
@@ -195,19 +196,31 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self._openSearchDialog(searchText)
 
     def _addFileBrowserMenuItem (self):
-        fbAction = Gtk.Action(name="search-files-plugin", label=_("Search files..."),
-            tooltip=_("Search in all files in a directory"), stock_id=None)
-        try:
+        if self._bus.is_registered("/plugins/filebrowser", "extend_context_menu"):
+            # use new-style filebrowser context menu API
+            action = Gio.SimpleAction(name="gedit-file-search-filebrowser")
+            action.connect("activate", lambda action, parameter: self.onFbMenuItemActivate(action))
+            self.window.add_action(action)
+
+            msg = self._bus.send_sync("/plugins/filebrowser", "extend_context_menu")
+            self._filebrowserMenuExt = msg.props.extension
+            item = Gio.MenuItem.new(_("Search files..."), "win.gedit-file-search-filebrowser")
+            self._filebrowserMenuExt.append_menu_item(item)
+
+        elif self._bus.is_registered("/plugins/filebrowser", "add_context_item"):
+            # use old-style filebrowser context menu API
+            fbAction = Gtk.Action(name="search-files-plugin", label=_("Search files..."),
+                tooltip=_("Search in all files in a directory"), stock_id=None)
             replyMsg = self._bus.send_sync("/plugins/filebrowser", "add_context_item",
                 action=fbAction, path="/FilePopup/FilePopup_Opt3")
-        except Exception as e:
-            #print "failed to add file browser context menu item (%s)" % e
-            return
-        self._filebrowserItemId = replyMsg.id
-        fbAction.connect('activate', self.onFbMenuItemActivate)
+            self._filebrowserItemId = replyMsg.id
+            fbAction.connect('activate', self.onFbMenuItemActivate)
 
     def _removeFileBrowserMenuItem (self):
-        if self._filebrowserItemId is not None:
+        if self._filebrowserMenuExt:
+            self.window.remove_action("gedit-file-search-filebrowser")
+            self.menu_ext = None
+        elif self._filebrowserItemId:
             try:
                 self._bus.send_sync("/plugins/filebrowser", "remove_context_item",
                     id=self._filebrowserItemId)
