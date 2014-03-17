@@ -26,7 +26,7 @@
 #
 
 import os
-from gi.repository import Gedit, GObject, Gtk, Gio
+from gi.repository import Gedit, GLib, GObject, Gtk, Gio
 
 from .plugin_common import _, ngettext, gtkToUnicode
 from .search_dialog import SearchDialog
@@ -56,7 +56,6 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         #print "file-search: plugin created for", window
         self._window = self.window
         self._bus = self._window.get_message_bus()
-        self._fileBrowserContacted = False
         self._filebrowserMenuExt = None
         self._filebrowserItemId = None
         self.searchers = [] # list of existing SearchProcess instances
@@ -71,6 +70,14 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         self.handlerIds.append( self._window.connect_object("tab-removed", FileSearchWindowHelper.onTabRemoved, self) )
 
         self._searchDialog = None
+
+        self._busHandlerId = self._bus.connect_object("registered", FileSearchWindowHelper.onMessageBusRegister, self)
+        self._addFileBrowserMenuItem() # try adding menu items right away
+
+    def onMessageBusRegister (self, obj, method):
+        if obj == "/plugins/filebrowser" and (
+            method == "extend_context_menu" or method == "add_context_item"):
+            GLib.idle_add(lambda: self._addFileBrowserMenuItem())
 
     def do_deactivate(self):
         #print "file-search: plugin stopped for", self._window
@@ -87,9 +94,7 @@ class FileSearchWindowHelper(GObject.Object, Gedit.WindowActivatable):
         # Called whenever the window has been updated (active tab
         # changed, etc.)
         #print "file-search: plugin update for", self._window
-        if not(self._fileBrowserContacted):
-            self._fileBrowserContacted = True
-            self._addFileBrowserMenuItem()
+        pass
 
     def registerSearcher (self, searcher):
         self.searchers.append(searcher)
