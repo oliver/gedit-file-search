@@ -114,6 +114,8 @@ class ResultPanel:
         panel = self._window.get_bottom_panel()
         resultContainer = self.builder.get_object('hbxFileSearchResult')
         resultContainer.resultpanel = None
+        if not(hasattr(panel, "add_titled")):
+            panel.remove_item(resultContainer)
         resultContainer.destroy()
         resultContainer = None
         self.treeStore.clear()
