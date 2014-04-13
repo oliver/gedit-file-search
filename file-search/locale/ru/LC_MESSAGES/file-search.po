@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: File Search\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-05 23:16+0100\n"
+"POT-Creation-Date: 2014-04-13 19:03+0200\n"
 "PO-Revision-Date: 2011-05-25 01:30+0400\n"
 "Last-Translator: Andrey Sitnik <andrey@sitnik.ru>\n"
 "Language-Team: \n"
@@ -106,16 +106,17 @@ msgstr ""
 msgid "gtk-edit"
 msgstr "gtk-edit"
 
-#: file-search/plugin.py:111 file-search/plugin.py:188
-#: file-search/plugin.py:198
+#: file-search/plugin.py:118 file-search/plugin.py:202
+#: file-search/plugin.py:220 file-search/plugin.py:225
+#: file-search/plugin.py:276
 msgid "Search files..."
 msgstr "Поиск файлов…"
 
-#: file-search/plugin.py:112 file-search/plugin.py:198
+#: file-search/plugin.py:119 file-search/plugin.py:226
 msgid "Search in all files in a directory"
 msgstr "Поиск во всех файлах в папке"
 
-#: file-search/plugin.py:186
+#: file-search/plugin.py:200
 #, python-format
 msgid "Search files for \"%s\""
 msgstr "Поиск \"%s\" в файлах"
@@ -137,15 +138,15 @@ msgstr ""
 msgid "searching for <i>%(keywords)s</i> in <i>%(folder)s</i>"
 msgstr "поиск <i>%(keywords)s</i> в <i>%(folder)s</i>"
 
-#: file-search/result_panel.py:166
+#: file-search/result_panel.py:173
 msgid "(search was cancelled)"
 msgstr "(поиск был отменён)"
 
-#: file-search/result_panel.py:168
+#: file-search/result_panel.py:175
 msgid "(no matching files found)"
 msgstr "(не найдено подходящих файлов)"
 
-#: file-search/result_panel.py:170
+#: file-search/result_panel.py:177
 #, python-format
 msgid "found %d match"
 msgid_plural "found %d matches"
@@ -153,7 +154,7 @@ msgstr[0] "найдено %d совпадение"
 msgstr[1] "найдено %d совпадения"
 msgstr[2] "найдено %d совпадений"
 
-#: file-search/result_panel.py:171
+#: file-search/result_panel.py:178
 #, python-format
 msgid " (%d line)"
 msgid_plural " (%d lines)"
@@ -161,7 +162,7 @@ msgstr[0] " (%d строка)"
 msgstr[1] " (%d строки)"
 msgstr[2] " (%d строк)"
 
-#: file-search/result_panel.py:172
+#: file-search/result_panel.py:179
 #, python-format
 msgid " in %d file"
 msgid_plural " in %d files"
@@ -169,7 +170,7 @@ msgstr[0] " в %d файле"
 msgstr[1] " в %d файлах"
 msgstr[2] " в %d файлах"
 
-#: file-search/result_panel.py:177
+#: file-search/result_panel.py:184
 #, python-format
 msgid "<b>%d</b> match"
 msgid_plural "<b>%d</b> matches"
@@ -177,7 +178,7 @@ msgstr[0] "<b>%d</b> совпадение"
 msgstr[1] "<b>%d</b> совпадения"
 msgstr[2] "<b>%d</b> совпадений"
 
-#: file-search/result_panel.py:178
+#: file-search/result_panel.py:185
 #, python-format
 msgid "in %d file"
 msgid_plural "in %d files"
@@ -185,10 +186,10 @@ msgstr[0] "в %d файле"
 msgstr[1] "в %d файлах"
 msgstr[2] "в %d файлах"
 
-#: file-search/result_panel.py:276
+#: file-search/result_panel.py:299
 msgid "Expand All"
 msgstr "Развернуть всё"
 
-#: file-search/result_panel.py:281
+#: file-search/result_panel.py:304
 msgid "Collapse All"
 msgstr "Свернуть всё"
