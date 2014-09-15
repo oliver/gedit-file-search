@@ -159,10 +159,10 @@ class SearchDialog:
 
         if self._lastTypes.isEmpty():
             # add some default file types
-            self._lastTypes.add('*.C *.cpp *.cxx *.h *.hpp')
-            self._lastTypes.add('*.c *.h')
-            self._lastTypes.add('*.py')
-            self._lastTypes.add('*')
+            self._lastTypes.add(u'*.C *.cpp *.cxx *.h *.hpp')
+            self._lastTypes.add(u'*.c *.h')
+            self._lastTypes.add(u'*.py')
+            self._lastTypes.add(u'*')
 
         self._lastDir = None
         self._autoCompleteList = None
