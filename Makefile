@@ -14,7 +14,7 @@ DIST_FILES= \
 	file-search.plugin \
 	file-search-before-gedit38 \
 	file-search-before-gedit38.plugin \
-	README
+	README.md
 
 TGZ_FOLDER=gedit-file-search
 

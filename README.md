@@ -9,12 +9,10 @@ Note that Gedit 2 and older are not supported by this plugin any more (there is 
 
 Installation (from TGZ file)
 ----------------------------
-* download the plugin [1]
+* download the plugin from https://github.com/oliver/gedit-file-search/releases
 * unpack the tgz file
 * copy the contents of the gedit-file-search folder to ~/.local/share/gedit/plugins/ (create that folder if necessary)
 * start Gedit, go to Edit -> Preferences -> Plugins, and enable "File Search"
-
-  [1]: https://github.com/oliver/gedit-file-search/releases
 
 
 Use Search -> Find in files, or right-click in a document and select Search files... to open the search dialog.
